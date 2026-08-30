@@ -1,0 +1,232 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String           @id @default(cuid())
+  email           String           @unique
+  name            String
+  role            String           // ADMIN, SALES, CS, TEACHER, MANAGER
+  facilityId      String?
+  facility        Facility?        @relation(fields: [facilityId], references: [id])
+  
+  classes         Class[]          // Lớp học giáo viên phụ trách
+  supportRequests SupportRequest[] // Yêu cầu hỗ trợ CS phụ trách
+  logs            ActivityLog[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model Facility {
+  id        String   @id @default(cuid())
+  name      String   // e.g., Cơ sở Cầu Giấy
+  address   String
+  rooms     Room[]
+  classes   Class[]
+  users     User[]
+  leads     Lead[]
+  students  Student[]
+  orders    Order[]
+}
+
+model Room {
+  id        String   @id @default(cuid())
+  name      String
+  capacity  Int
+  facilityId String
+  facility  Facility @relation(fields: [facilityId], references: [id])
+  schedules Schedule[]
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  type        String   // e.g., Tiếng Anh giao tiếp, Toán tư duy
+  targetAge   String?
+  level       String?
+  duration    Int      // Số buổi
+  fee         Float?
+  description String?
+  status      String   @default("ACTIVE") // ACTIVE, PAUSED
+  classes     Class[]
+  leads       Lead[]   // Interests
+  orders      Order[]
+}
+
+model Class {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id])
+  teacherId   String?
+  teacher     User?    @relation(fields: [teacherId], references: [id])
+  facilityId  String
+  facility    Facility @relation(fields: [facilityId], references: [id])
+  capacity    Int
+  status      String   @default("ONGOING") // ONGOING, COMPLETED, PAUSED
+  students    Student[]
+  schedules   Schedule[]
+  attendances Attendance[]
+}
+
+model Parent {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String   @unique
+  email     String?
+  students  Student[]
+  notes     String?
+}
+
+model Student {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  dob         DateTime?
+  phone       String?
+  parentId    String?
+  parent      Parent?  @relation(fields: [parentId], references: [id])
+  facilityId  String
+  facility    Facility @relation(fields: [facilityId], references: [id])
+  
+  classes     Class[]
+  attendances Attendance[]
+  assignments Assignment[]
+  supportRequests SupportRequest[]
+  makeUpRequests  MakeUpRequest[]
+  transferRequests TransferRequest[]
+  orders          Order[]
+  status      String   @default("ACTIVE") // ACTIVE, INACTIVE
+  createdAt   DateTime @default(now())
+}
+
+model Schedule {
+  id          String   @id @default(cuid())
+  classId     String
+  class       Class    @relation(fields: [classId], references: [id])
+  roomId      String
+  room        Room     @relation(fields: [roomId], references: [id])
+  date        DateTime // Date and time
+  duration    Int      // in minutes
+  status      String   @default("SCHEDULED") // SCHEDULED, COMPLETED, CANCELLED
+  attendances Attendance[]
+}
+
+model Attendance {
+  id          String   @id @default(cuid())
+  scheduleId  String
+  schedule    Schedule @relation(fields: [scheduleId], references: [id])
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id])
+  classId     String
+  class       Class    @relation(fields: [classId], references: [id])
+  status      String   // PRESENT, ABSENT, EXCUSED, LATE
+  note        String?
+  updatedBy   String?
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([scheduleId, studentId])
+}
+
+model Assignment {
+  id          String   @id @default(cuid())
+  title       String
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id])
+  score       Float?
+  maxScore    Float?
+  status      String   // COMPLETED, PENDING, LATE
+  teacherNote String?
+  date        DateTime @default(now())
+}
+
+model Lead {
+  id          String   @id @default(cuid())
+  name        String
+  phone       String
+  courseId    String?
+  course      Course?  @relation(fields: [courseId], references: [id])
+  facilityId  String?
+  facility    Facility? @relation(fields: [facilityId], references: [id])
+  age         Int?
+  source      String?
+  status      String   @default("NEW") // NEW, CONTACTED, CONSULTING, TRIAL_BOOKED, TRIAL_DONE, ENROLLED, UNSUITABLE, UNREACHABLE
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SupportRequest {
+  id          String   @id @default(cuid())
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id])
+  type        String   // LEAVE, INFO, SUPPORT, COMPLAINT, CALL_BACK
+  content     String
+  status      String   @default("NEW") // NEW, IN_PROGRESS, PENDING, RESOLVED, REJECTED, CLOSED
+  assigneeId  String?
+  assignee    User?    @relation(fields: [assigneeId], references: [id])
+  priority    String   @default("NORMAL") // LOW, NORMAL, HIGH
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model MakeUpRequest {
+  id              String   @id @default(cuid())
+  studentId       String
+  student         Student  @relation(fields: [studentId], references: [id])
+  missedScheduleId String
+  targetScheduleId String
+  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  notes           String?
+  createdAt       DateTime @default(now())
+}
+
+model TransferRequest {
+  id              String   @id @default(cuid())
+  studentId       String
+  student         Student  @relation(fields: [studentId], references: [id])
+  fromClassId     String
+  toClassId       String
+  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  notes           String?
+  createdAt       DateTime @default(now())
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  role        String?
+  action      String
+  entityType  String
+  entityId    String
+  details     String?  // JSON string
+  source      String   @default("SYSTEM") // UI, API, AI_AGENT
+  createdAt   DateTime @default(now())
+}
+
+model Order {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  studentId   String?
+  student     Student? @relation(fields: [studentId], references: [id])
+  parentName  String
+  parentPhone String
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id])
+  facilityId  String
+  facility    Facility @relation(fields: [facilityId], references: [id])
+  amount      Float
+  status      String   @default("PENDING") // PENDING, PAID, CANCELLED
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
