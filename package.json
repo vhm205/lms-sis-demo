@@ -4,17 +4,20 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "DATABASE_URL=file:./dev.db prisma db push --accept-data-loss && DATABASE_URL=file:./dev.db tsx seed.ts && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
     "mcp": "tsx src/mcp.ts",
     "seed": "tsx seed.ts",
+    "sync:turso": "tsx scripts/sync-turso.ts",
     "smoke:orchexa": "tsx scripts/orchexa-smoke.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
+    "@libsql/client": "^0.17.4",
     "@modelcontextprotocol/sdk": "^1.30.0",
+    "@prisma/adapter-libsql": "^7.10.0",
     "@prisma/client": "^6.19.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

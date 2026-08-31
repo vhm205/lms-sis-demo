@@ -125,14 +125,29 @@ export async function POST(req: Request) {
       }
     }
 
+    const url = new URL(req.url)
+    let requestedStudentId = url.searchParams.get('studentId')
+    try {
+      const body = await req.clone().json().catch(() => ({}))
+      if (body && body.studentId) requestedStudentId = body.studentId
+    } catch {
+      // noop
+    }
+
     const referer = req.headers.get('referer') || undefined
+    const isPwa = referer?.includes('/parent') || false
+
     const initialContext: Record<string, unknown> = {
       locale: 'vi',
       page: {
         url: referer,
-        title: 'EduCenter VN - Hệ thống quản lý trung tâm đào tạo',
-        type: 'lms_sis_portal',
+        title: isPwa ? 'EduCenter Parent - Cổng Phụ huynh & Sổ liên lạc' : 'EduCenter VN - Hệ thống quản lý trung tâm đào tạo',
+        type: isPwa ? 'parent_pwa_portal' : 'lms_sis_portal',
       },
+    }
+
+    if (requestedStudentId && customerProfile) {
+      initialContext.active_student_id = requestedStudentId
     }
 
     if (customerProfile) {

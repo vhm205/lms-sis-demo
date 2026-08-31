@@ -1,0 +1,31 @@
+{
+  "name": "EduCenter Parent - Sổ Liên Lạc & AI Trợ Lý",
+  "short_name": "EduCenter",
+  "description": "Ứng dụng Sổ liên lạc điện tử và Trợ lý AI Orchexa dành cho Phụ huynh và Học sinh",
+  "start_url": "/parent",
+  "scope": "/parent",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAF6F0",
+  "theme_color": "#F2994A",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -117,6 +118,8 @@ model Schedule {
   duration    Int      // in minutes
   status      String   @default("SCHEDULED") // SCHEDULED, COMPLETED, CANCELLED
   attendances Attendance[]
+  missedMakeUps MakeUpRequest[] @relation("MissedSchedule")
+  targetMakeUps MakeUpRequest[] @relation("TargetSchedule")
 }
 
 model Attendance {
@@ -179,14 +182,16 @@ model SupportRequest {
 }
 
 model MakeUpRequest {
-  id              String   @id @default(cuid())
-  studentId       String
-  student         Student  @relation(fields: [studentId], references: [id])
+  id               String    @id @default(cuid())
+  studentId        String
+  student          Student   @relation(fields: [studentId], references: [id])
   missedScheduleId String
+  missedSchedule   Schedule? @relation("MissedSchedule", fields: [missedScheduleId], references: [id])
   targetScheduleId String
-  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
-  notes           String?
-  createdAt       DateTime @default(now())
+  targetSchedule   Schedule? @relation("TargetSchedule", fields: [targetScheduleId], references: [id])
+  status           String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  notes            String?
+  createdAt        DateTime  @default(now())
 }
 
 model TransferRequest {

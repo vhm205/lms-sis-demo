@@ -10,6 +10,13 @@ function extractItems(node: React.ReactNode): Array<{ value: any; label: React.R
   const items: Array<{ value: any; label: React.ReactNode }> = []
 
   React.Children.forEach(node, (child) => {
+    if (!child) return
+
+    if (Array.isArray(child)) {
+      items.push(...extractItems(child))
+      return
+    }
+
     if (!React.isValidElement(child)) return
 
     if (child.props && typeof child.props === "object" && "value" in child.props && (child.props as any).value !== undefined) {
@@ -55,14 +62,16 @@ function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   )
 }
 
-function SelectValue({ className, placeholder, ...props }: SelectPrimitive.Value.Props) {
+function SelectValue({ className, placeholder, children, ...props }: SelectPrimitive.Value.Props & { children?: React.ReactNode }) {
   return (
     <SelectPrimitive.Value
       data-slot="select-value"
       className={cn("flex-1 truncate text-left", className)}
       placeholder={placeholder}
       {...props}
-    />
+    >
+      {children}
+    </SelectPrimitive.Value>
   )
 }
 
@@ -79,7 +88,7 @@ function SelectTrigger({
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "flex h-9 w-full min-w-0 items-center justify-between gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs transition-colors outline-none cursor-pointer select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-placeholder:text-muted-foreground data-[size=sm]:h-7 data-[size=sm]:py-1 data-[size=sm]:px-2.5 data-[size=sm]:text-xs *:data-[slot=select-value]:truncate *:data-[slot=select-value]:text-left *:data-[slot=select-value]:flex-1 dark:bg-input/30 dark:hover:bg-input/50 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "flex h-9 w-full min-w-0 items-center justify-between gap-2 rounded-2xl border-2 border-border/80 bg-card px-3.5 py-1.5 text-sm font-medium shadow-xs transition-all outline-none cursor-pointer select-none focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive data-placeholder:text-muted-foreground data-[size=sm]:h-8 data-[size=sm]:py-1 data-[size=sm]:px-2.5 data-[size=sm]:text-xs *:data-[slot=select-value]:truncate *:data-[slot=select-value]:text-left *:data-[slot=select-value]:flex-1 dark:bg-input/20 dark:hover:bg-input/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
       {...props}
@@ -122,7 +131,7 @@ function SelectContent({
           data-slot="select-content"
           data-align-trigger={alignItemWithTrigger}
           className={cn(
-            "relative isolate z-50 max-h-[var(--available-height)] min-w-[var(--anchor-width)] max-w-md origin-[var(--transform-origin)] overflow-x-hidden overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-md duration-100 p-1 data-[align-trigger=true]:animate-none data-[side=bottom]:slide-in-from-top-2 data-[side=inline-end]:slide-in-from-left-2 data-[side=inline-start]:slide-in-from-right-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+            "relative isolate z-50 max-h-[var(--available-height)] min-w-[var(--anchor-width)] max-w-md origin-[var(--transform-origin)] overflow-x-hidden overflow-y-auto rounded-2xl border-2 border-border/80 bg-popover text-popover-foreground shadow-xl duration-100 p-1.5 data-[align-trigger=true]:animate-none data-[side=bottom]:slide-in-from-top-2 data-[side=inline-end]:slide-in-from-left-2 data-[side=inline-start]:slide-in-from-right-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
             className
           )}
           {...props}
@@ -143,7 +152,7 @@ function SelectLabel({
   return (
     <SelectPrimitive.GroupLabel
       data-slot="select-label"
-      className={cn("px-2 py-1.5 text-xs font-semibold text-muted-foreground", className)}
+      className={cn("px-2.5 py-1.5 text-xs font-bold text-muted-foreground uppercase tracking-wider", className)}
       {...props}
     />
   )
@@ -158,7 +167,7 @@ function SelectItem({
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        "relative flex w-full cursor-pointer items-center justify-between gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-none select-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "relative flex w-full cursor-pointer items-center justify-between gap-2 rounded-xl py-2 pr-8 pl-2.5 text-xs font-semibold outline-none select-none hover:bg-primary/10 hover:text-primary data-[highlighted]:bg-primary/10 data-[highlighted]:text-primary data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 transition-colors",
         className
       )}
       {...props}
@@ -168,7 +177,7 @@ function SelectItem({
       </SelectPrimitive.ItemText>
       <SelectPrimitive.ItemIndicator
         render={
-          <span className="pointer-events-none absolute right-2 flex size-4 items-center justify-center" />
+          <span className="pointer-events-none absolute right-2 flex size-4 items-center justify-center text-primary" />
         }
       >
         <CheckIcon className="pointer-events-none size-4" />

@@ -1,9 +1,21 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getParentFromRequest } from "@/lib/auth";
+import { getAuthContext } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
+    const auth = await getAuthContext(request);
+
+    if (auth.role === "ANONYMOUS") {
+      return NextResponse.json(
+        {
+          error: "Unauthorized: Yêu cầu quyền Quản trị viên (Admin API Key) hoặc Phụ huynh đã xác thực để đăng ký học bù.",
+          code: "UNAUTHORIZED",
+        },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { studentId, missedScheduleId, targetScheduleId, notes } = body;
 
@@ -11,10 +23,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const authenticatedParent = await getParentFromRequest(request);
-    if (authenticatedParent) {
+    if (auth.isParent && auth.parent) {
       const student = await prisma.student.findUnique({ where: { id: studentId } });
-      if (!student || student.parentId !== authenticatedParent.id) {
+      if (!student || student.parentId !== auth.parent.id) {
         return NextResponse.json({
           error: "Forbidden: Bạn không có quyền gửi yêu cầu cho học sinh này.",
           code: "FORBIDDEN_PARENT_ACCESS"

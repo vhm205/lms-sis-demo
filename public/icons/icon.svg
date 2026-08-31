@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F2994A"/>
+      <stop offset="50%" stop-color="#E08E58"/>
+      <stop offset="100%" stop-color="#EA580C"/>
+    </linearGradient>
+    <linearGradient id="capGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#FFF0E6"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+  
+  <!-- App Icon Background -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)"/>
+  
+  <!-- Subtle Glow / Inner border -->
+  <rect x="8" y="8" width="496" height="496" rx="120" fill="none" stroke="#FFFFFF" stroke-opacity="0.3" stroke-width="8"/>
+  
+  <!-- Graduation Cap Icon & Heart / Child connection -->
+  <g filter="url(#shadow)" fill="url(#capGrad)">
+    <!-- Graduation Cap Top Diamond -->
+    <polygon points="256,120 420,195 256,270 92,195"/>
+    
+    <!-- Cap Underneath -->
+    <path d="M152,240 L152,320 C152,370 360,370 360,320 L360,240 C330,265 290,280 256,280 C222,280 182,265 152,240 Z"/>
+    
+    <!-- Tassel -->
+    <path d="M400,205 L400,340 C395,355 410,355 410,340 L410,205 Z" fill="#FFF0E6"/>
+    <circle cx="405" cy="345" r="10" fill="#FFF0E6"/>
+  </g>
+
+  <!-- AI Pulse Badge / Dot -->
+  <g transform="translate(350, 100)">
+    <circle cx="30" cy="30" r="36" fill="#0284C7" stroke="#FFFFFF" stroke-width="6" filter="url(#shadow)"/>
+    <path d="M22,30 L28,30 L31,20 L35,40 L38,27 L40,30 L46,30" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

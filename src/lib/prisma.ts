@@ -1,8 +1,32 @@
 import { PrismaClient } from "@prisma/client";
+import { PrismaLibSql } from "@prisma/adapter-libsql";
+import { createClient } from "@libsql/client";
 import fs from "fs";
 import path from "path";
 
-function getDatabaseUrl(): string | undefined {
+function getTursoClient(): PrismaClient | null {
+  const tursoUrl =
+    process.env.TURSO_DATABASE_URL ||
+    process.env.DATABASE_TURSO_DATABASE_URL;
+  const tursoAuthToken =
+    process.env.TURSO_AUTH_TOKEN ||
+    process.env.DATABASE_TURSO_AUTH_TOKEN;
+
+  if (tursoUrl) {
+    try {
+      const adapter = new PrismaLibSql({
+        url: tursoUrl,
+        authToken: tursoAuthToken,
+      });
+      return new PrismaClient({ adapter });
+    } catch (e) {
+      console.error("Failed to initialize Turso libSQL client:", e);
+    }
+  }
+  return null;
+}
+
+function getLocalDatabaseUrl(): string {
   if (process.env.DATABASE_URL && !process.env.DATABASE_URL.startsWith("file:")) {
     return process.env.DATABASE_URL;
   }
@@ -10,8 +34,8 @@ function getDatabaseUrl(): string | undefined {
   if (process.env.VERCEL) {
     const tmpDbPath = "/tmp/dev.db";
     const srcDb = path.join(process.cwd(), "prisma", "dev.db");
-    if (!fs.existsSync(/*turbopackIgnore: true*/ tmpDbPath)) {
-      if (fs.existsSync(/*turbopackIgnore: true*/ srcDb)) {
+    if (!fs.existsSync(tmpDbPath)) {
+      if (fs.existsSync(srcDb)) {
         try {
           fs.copyFileSync(srcDb, tmpDbPath);
         } catch (e) {
@@ -22,13 +46,26 @@ function getDatabaseUrl(): string | undefined {
     return "file:/tmp/dev.db";
   }
 
-  return process.env.DATABASE_URL || "file:./dev.db";
+  // Ensure absolute path so SQLite doesn't resolve to relative chunk dirs with read-only locks
+  const localDb = path.join(process.cwd(), "prisma", "dev.db");
+  return `file:${localDb}`;
 }
 
 const prismaClientSingleton = () => {
-  const dbUrl = getDatabaseUrl();
+  // 1. Prioritize Turso cloud database if configured
+  const tursoPrisma = getTursoClient();
+  if (tursoPrisma) {
+    return tursoPrisma;
+  }
+
+  // 2. Fallback to SQLite (local / /tmp)
+  const dbUrl = getLocalDatabaseUrl();
   return new PrismaClient({
-    datasources: dbUrl ? { db: { url: dbUrl } } : undefined,
+    datasources: {
+      db: {
+        url: dbUrl,
+      },
+    },
   });
 };
 
@@ -39,4 +76,3 @@ const globalForPrisma = globalThis as unknown as {
 export const prisma = globalForPrisma.prisma ?? prismaClientSingleton();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
-
