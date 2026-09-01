@@ -13,6 +13,7 @@ export interface CreateOrchexaSessionOptions {
    *  before their first message. */
   customerProfile?: Record<string, unknown>
   initialContext?: Record<string, unknown>
+  channel?: string
 }
 
 export async function createOrchexaSession(
@@ -35,7 +36,7 @@ export async function createOrchexaSession(
     agent_id: agentId,
     external_user_id: externalUserId,
     external_tenant_id: externalTenantId,
-    channel: 'crm_web',
+    channel: opts.channel || 'crm_web',
     resume_last: opts.resumeLast !== false,
   }
   if (opts.conversationId) bodyObj.conversation_id = opts.conversationId

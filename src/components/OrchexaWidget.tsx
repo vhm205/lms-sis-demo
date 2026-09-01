@@ -40,7 +40,16 @@ export function OrchexaWidget() {
 
     let isMounted = true
 
-    fetch('/api/ai/bootstrap', { method: 'POST', credentials: 'include' })
+    fetch('/api/ai/bootstrap?portal=admin&channel=crm_web', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-portal': 'admin',
+        'x-channel': 'crm_web',
+      },
+      body: JSON.stringify({ portal: 'admin', channel: 'crm_web' }),
+      credentials: 'include',
+    })
       .then((r) => {
         if (!r.ok) {
           throw new Error(`Bootstrap failed with status ${r.status}`)

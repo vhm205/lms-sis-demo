@@ -75,6 +75,9 @@ Một scenario được xem là PASS khi Agent:
 | SS-CHAT-018 | Retention | Học viên trưởng thành | Muốn nghỉ/bảo lưu vì lịch không phù hợp | P0 |
 | SS-CHAT-019 | Completion | Học viên/Phụ huynh | Tình trạng hoàn thành chương trình | P1 |
 | SS-CHAT-020 | Continuation | Phụ huynh/Học viên | Đề xuất khóa tiếp theo / khóa bổ trợ | P0 |
+| SS-CHAT-021 | Finance | Phụ huynh/Học viên | Tra cứu học phí & Xác nhận thanh toán | P0 |
+| SS-CHAT-022 | Support | Phụ huynh | Khiếu nại dịch vụ & Yêu cầu gặp người thật (Handoff) | P0 |
+| SS-CHAT-023 | Transfer | Phụ huynh/Học viên | Chuyển cơ sở / Đổi lớp dài hạn | P1 |
 
 ---
 
@@ -543,6 +546,72 @@ Một scenario được xem là PASS khi Agent:
 - Recommendation grounded vào profile/progress/goal.
 - Không recommend course inactive hoặc không đạt prerequisite.
 - Không dùng sales pressure.
+
+---
+
+## SS-CHAT-021 - Tra cứu Học phí & Xác nhận thanh toán (Finance / Payment)
+
+**Persona:** Phụ huynh hoặc học viên trưởng thành  
+**Priority:** P0
+
+### Customer Messages
+1. `Tháng này bé Minh đóng bao nhiêu tiền học phí vậy em? Còn nợ buổi nào không?`
+2. `Chị vừa chuyển khoản 5 triệu rồi đó, sao trên app vẫn báo chưa đóng tiền?`
+
+### Expected Agent Behavior
+- Kiểm tra module Billing/Finance để báo chính xác số tiền cần đóng hoặc số dư/nợ.
+- Phân biệt rõ tình trạng "chưa thanh toán" và "đang chờ kế toán đối soát".
+- Trả lời tin nhắn 2: **Không được phép tự nhận diện "Đã nhận được tiền"** khi trạng thái chưa cập nhật. Yêu cầu khách gửi biên lai/ảnh chụp và giải thích về độ trễ đồng bộ hệ thống.
+
+### PASS Criteria
+- Không tự ảo giác (hallucinate) trạng thái thanh toán thành công nếu API chưa xác nhận.
+- Giải thích hợp lý quy trình đối soát để trấn an khách hàng.
+
+---
+
+## SS-CHAT-022 - Khiếu nại dịch vụ & Yêu cầu gặp người thật (Complaint & Human Handoff)
+
+**Persona:** Phụ huynh  
+**Priority:** P0
+
+### Customer Messages
+1. `Hôm nay bé đi học về kêu phòng nóng không có điều hòa. Báo mấy lần rồi sao trung tâm không sửa?`
+2. `Chị không muốn nói chuyện với máy, nối máy cho chị gặp quản lý trung tâm ngay!`
+
+### Expected Agent Behavior
+- Nhận diện sentiment tức giận/tiêu cực. Xoa dịu và ghi nhận phàn nàn ở tin nhắn 1.
+- Khi nhận yêu cầu gặp người thật ở tin nhắn 2, Agent phải **dừng luồng tự động trả lời**.
+- Tự động tạo ticket/Service Request với mức độ ưu tiên cao (`High Priority`) và thực hiện thao tác **Handoff** cho Human Agent kèm toàn bộ lịch sử đoạn chat.
+
+### Expected Data/Tools
+- `support.create_ticket`
+- `chat.handoff_to_human`
+
+### PASS Criteria
+- Handoff thành công ngay khi có yêu cầu.
+- Ticket được tạo đầy đủ context (người gọi, lý do, mức độ ưu tiên), đảm bảo human agent không cần hỏi lại.
+
+---
+
+## SS-CHAT-023 - Yêu cầu chuyển cơ sở / Đổi lớp dài hạn (Transfer Request)
+
+**Persona:** Phụ huynh / Học viên  
+**Priority:** P1
+
+### Customer Messages
+1. `Tháng sau nhà chị chuyển sang Quận 7, chị muốn chuyển cơ sở cho bé Minh qua đó học luôn.`
+2. `Bên đó có lớp nào cùng trình độ và học tối 3-5 không em?`
+3. `Chị đăng ký chuyển nhé, em làm thủ tục giúp chị.`
+
+### Expected Agent Behavior
+- Xác định level và khóa học hiện tại của bé Minh từ hệ thống.
+- Tìm kiếm các lớp phù hợp ở cơ sở Quận 7 (cùng level, lịch tối thứ 3-5) và báo tình trạng chỗ trống.
+- Nêu rõ policy chuyển cơ sở (ví dụ: cần thanh toán phí chuyển, hoặc ký form xác nhận bảo lưu).
+- Tạo request chuyển cơ sở ở trạng thái pending, yêu cầu phụ huynh xác nhận qua form/app.
+
+### PASS Criteria
+- Lớp đề xuất khớp level hiện hành và nằm đúng ở cơ sở mới.
+- Không update dữ liệu chuyển lớp thẳng vào SIS khi chưa đủ form xác nhận / phê duyệt.
 
 ---
 

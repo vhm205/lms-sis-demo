@@ -61,13 +61,20 @@ export function OrchexaParentWidget() {
     const SDK_URL = process.env.NEXT_PUBLIC_ORCHEXA_SDK_URL || 'https://app.orchexa.io/sdk/voice-agent.js?v=v2.7.4-bug076-vvh'
     const API_URL = process.env.NEXT_PUBLIC_ORCHEXA_API_BASE || 'https://api.orchexa.io'
 
-    fetch(`/api/ai/bootstrap?studentId=${selectedStudent?.id || ''}`, {
+    fetch(`/api/ai/bootstrap?studentId=${selectedStudent?.id || ''}&portal=pwa&channel=mobile_app`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'x-portal': 'pwa',
+        'x-channel': 'mobile_app',
         'x-parent-id': parent.id,
         'x-parent-phone': parent.phone
       },
+      body: JSON.stringify({
+        portal: 'pwa',
+        channel: 'mobile_app',
+        studentId: selectedStudent?.id
+      }),
       credentials: 'include'
     })
       .then(async (r) => {
