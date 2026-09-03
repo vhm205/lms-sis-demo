@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { ScheduleClient } from "./schedule-client";
 import { CalendarDays } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function SchedulePage() {
   const [schedules, classes, rooms, teachers] = await Promise.all([
     prisma.schedule.findMany({

@@ -19,6 +19,7 @@ export async function createLead(formData: FormData) {
       data: { name, phone, courseId, facilityId, notes, status: "NEW" }
     });
     revalidatePath("/leads");
+    revalidatePath("/");
     return { success: true };
   } catch (error: any) {
     return { error: error.message };
@@ -32,6 +33,7 @@ export async function updateLeadStatus(id: string, status: string) {
       data: { status }
     });
     revalidatePath("/leads");
+    revalidatePath("/");
     return { success: true };
   } catch (error: any) {
     return { error: error.message || "Failed to update lead" };
@@ -56,6 +58,7 @@ export async function updateLead(id: string, formData: FormData) {
       data: { name, phone, courseId, facilityId, notes, status }
     });
     revalidatePath("/leads");
+    revalidatePath("/");
     return { success: true };
   } catch (error: any) {
     return { error: error.message || "Failed to update lead" };
@@ -66,6 +69,7 @@ export async function deleteLead(id: string) {
   try {
     await prisma.lead.delete({ where: { id } });
     revalidatePath("/leads");
+    revalidatePath("/");
     return { success: true };
   } catch (error: any) {
     return { error: error.message || "Failed to delete lead" };

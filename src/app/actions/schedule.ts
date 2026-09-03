@@ -18,6 +18,7 @@ export async function createSchedule(formData: FormData) {
       data: { classId, roomId, date: new Date(dateStr), duration, status: "SCHEDULED" }
     });
     revalidatePath("/schedule");
+    revalidatePath("/");
     return { success: true };
   } catch (error: any) {
     return { error: error.message };
@@ -41,6 +42,7 @@ export async function updateSchedule(id: string, formData: FormData) {
       data: { classId, roomId, date: new Date(dateStr), duration, status }
     });
     revalidatePath("/schedule");
+    revalidatePath("/");
     return { success: true };
   } catch (error: any) {
     return { error: error.message };
@@ -51,6 +53,7 @@ export async function deleteSchedule(id: string) {
   try {
     await prisma.schedule.delete({ where: { id } });
     revalidatePath("/schedule");
+    revalidatePath("/");
     return { success: true };
   } catch (error: any) {
     return { error: error.message };

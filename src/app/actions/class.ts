@@ -20,6 +20,7 @@ export async function createClass(formData: FormData) {
       data: { code, name, courseId, facilityId, teacherId, capacity, status: "UPCOMING" }
     });
     revalidatePath("/classes");
+    revalidatePath("/");
     return { success: true };
   } catch (error: any) {
     return { error: error.message };
@@ -45,6 +46,7 @@ export async function updateClass(id: string, formData: FormData) {
       data: { code, name, courseId, facilityId, teacherId, capacity, status }
     });
     revalidatePath("/classes");
+    revalidatePath("/");
     return { success: true };
   } catch (error: any) {
     return { error: error.message };
@@ -55,6 +57,7 @@ export async function deleteClass(id: string) {
   try {
     await prisma.class.delete({ where: { id } });
     revalidatePath("/classes");
+    revalidatePath("/");
     return { success: true };
   } catch (error: any) {
     return { error: error.message };

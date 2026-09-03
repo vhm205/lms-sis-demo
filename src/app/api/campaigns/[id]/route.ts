@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 
 const CORS_HEADERS = {
@@ -128,6 +129,13 @@ export async function PUT(
       },
     });
 
+    try {
+      revalidatePath("/campaigns");
+      revalidatePath("/");
+    } catch {
+      // ignore
+    }
+
     return NextResponse.json(
       {
         success: true,
@@ -170,6 +178,13 @@ export async function PATCH(
       },
     });
 
+    try {
+      revalidatePath("/campaigns");
+      revalidatePath("/");
+    } catch {
+      // ignore
+    }
+
     return NextResponse.json(
       {
         success: true,
@@ -205,6 +220,13 @@ export async function DELETE(
     // Cascade delete items first (if foreign key constraint requires)
     await prisma.campaignItem.deleteMany({ where: { campaignId: id } });
     await prisma.campaign.delete({ where: { id } });
+
+    try {
+      revalidatePath("/campaigns");
+      revalidatePath("/");
+    } catch {
+      // ignore
+    }
 
     return NextResponse.json(
       {

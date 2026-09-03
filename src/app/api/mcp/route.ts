@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { handleMcpJsonRpc, listMcpTools } from "@/lib/mcp-core";
 
 const CORS_HEADERS = {
@@ -94,6 +95,28 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const result = await handleMcpJsonRpc(body, request.headers);
+
+    if (result.status === 200 && body?.method === "tools/call") {
+      const toolName = body?.params?.name;
+      if (
+        toolName === "create_support_request" ||
+        toolName === "create_makeup_request" ||
+        toolName === "update_attendance" ||
+        toolName === "create_lead" ||
+        toolName === "create_order"
+      ) {
+        try {
+          revalidatePath("/requests");
+          revalidatePath("/schedule");
+          revalidatePath("/leads");
+          revalidatePath("/orders");
+          revalidatePath("/parent/tuition-requests");
+          revalidatePath("/");
+        } catch {
+          // ignore outside next context
+        }
+      }
+    }
 
     return NextResponse.json(result.body, {
       status: result.status,

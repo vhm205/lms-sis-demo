@@ -24,6 +24,7 @@ import {
   getRequestStatusLabel, 
   REQUEST_STATUS_MAP 
 } from "@/lib/constants";
+import { refreshRequestsAction } from "@/app/actions/requests";
 
 export function RequestsClient({
   supportRequests,
@@ -96,6 +97,7 @@ export function RequestsClient({
           size="default" 
           showLabel 
           label="Làm mới dữ liệu" 
+          onRefresh={refreshRequestsAction}
           className="h-10 px-4 bg-card hover:bg-muted/80 shadow-2xs text-xs font-extrabold gap-2 shrink-0 self-start sm:self-auto" 
         />
       </div>
@@ -159,8 +161,8 @@ export function RequestsClient({
                     <TableRow key={req.id} className="hover:bg-[#FAF6F0]/60 dark:hover:bg-[#28221D]/60 transition-colors">
                       <TableCell>
                         <div className="space-y-1 py-1">
-                          <div className="font-bold text-sm text-foreground font-heading">{req.student.name}</div>
-                          <div className="text-[11px] text-muted-foreground font-mono font-semibold">{req.student.code}</div>
+                          <div className="font-bold text-sm text-foreground font-heading">{req.student?.name || "Học viên"}</div>
+                          <div className="text-[11px] text-muted-foreground font-mono font-semibold">{req.student?.code || "N/A"}</div>
                         </div>
                       </TableCell>
                       <TableCell className="space-y-2 py-1">
@@ -240,8 +242,8 @@ export function RequestsClient({
                     <TableRow key={req.id} className="hover:bg-[#FAF6F0]/80 dark:hover:bg-[#28221D]/80 transition-colors">
                       <TableCell>
                         <div className="space-y-1 py-1">
-                          <div className="font-bold text-sm text-foreground font-heading">{req.student.name}</div>
-                          <div className="text-[11px] text-muted-foreground font-mono font-semibold">{req.student.code}</div>
+                          <div className="font-bold text-sm text-foreground font-heading">{req.student?.name || "Học viên"}</div>
+                          <div className="text-[11px] text-muted-foreground font-mono font-semibold">{req.student?.code || "N/A"}</div>
                         </div>
                       </TableCell>
                       <TableCell className="space-y-1.5 py-1.5">

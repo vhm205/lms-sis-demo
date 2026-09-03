@@ -14,7 +14,9 @@ const EXCLUDE_DIRS = new Set([
   '.devin',
   '.gemini',
   '.vercel',
-  'scripts'
+  'scripts',
+  'docs',
+  'voice-agent-deck'
 ]);
 
 const EXCLUDE_FILES = new Set([
@@ -52,6 +54,12 @@ function scanDir(dir: string, baseDir: string = ROOT): FileItem[] {
       if (entry.name.endsWith('.tsbuildinfo') || entry.name.endsWith('.log')) continue;
       // Skip dev.db in root, but allow prisma/dev.db
       if (relPath === 'dev.db') continue;
+
+      const stat = fs.statSync(fullPath);
+      if (stat.size > 2.5 * 1024 * 1024) {
+        console.warn(`Skipping large file (${(stat.size / 1024 / 1024).toFixed(2)} MB): ${relPath}`);
+        continue;
+      }
 
       const isBinary = /\.(png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot|db)$/i.test(entry.name);
       if (isBinary) {

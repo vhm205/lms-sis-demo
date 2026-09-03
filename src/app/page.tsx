@@ -2,6 +2,9 @@ import { AppLayout } from "@/components/layout";
 import { prisma } from "@/lib/prisma";
 import { DashboardClient } from "./dashboard-client";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function Home() {
   const [
     students,

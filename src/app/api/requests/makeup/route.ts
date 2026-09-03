@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getAuthContext } from "@/lib/auth";
 
@@ -78,6 +79,13 @@ export async function POST(request: Request) {
         source: "API"
       }
     });
+
+    try {
+      revalidatePath("/requests");
+      revalidatePath("/");
+    } catch {
+      // ignore
+    }
 
     return NextResponse.json({ data: req });
   } catch (error: any) {

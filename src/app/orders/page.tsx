@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { OrdersClient } from "./orders-client";
 import { Receipt } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function OrdersPage() {
   const [orders, courses, facilities] = await Promise.all([
     prisma.order.findMany({

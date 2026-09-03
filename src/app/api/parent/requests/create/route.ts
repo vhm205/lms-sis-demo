@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { getParentFromRequest } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
@@ -64,6 +65,14 @@ export async function POST(request: Request) {
         })
       }
     })
+
+    try {
+      revalidatePath('/requests')
+      revalidatePath('/parent/tuition-requests')
+      revalidatePath('/')
+    } catch {
+      // ignore
+    }
 
     return NextResponse.json({
       success: true,

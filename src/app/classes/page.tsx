@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { ClassesClient } from "./classes-client";
 import { GraduationCap } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function ClassesPage() {
   const [classes, courses, facilities, teachers] = await Promise.all([
     prisma.class.findMany({

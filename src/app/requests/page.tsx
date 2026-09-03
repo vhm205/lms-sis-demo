@@ -2,6 +2,9 @@ import { AppLayout } from "@/components/layout";
 import { prisma } from "@/lib/prisma";
 import { RequestsClient } from "./requests-client";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function RequestsPage() {
   const [supportRequests, makeUpRequests] = await Promise.all([
     prisma.supportRequest.findMany({

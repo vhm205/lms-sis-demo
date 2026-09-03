@@ -39,6 +39,7 @@ export async function createStudent(formData: FormData) {
     });
 
     revalidatePath("/students");
+    revalidatePath("/");
     return { success: true, student };
   } catch (error: any) {
     console.error("Error creating student:", error);
@@ -90,6 +91,7 @@ export async function updateStudent(id: string, formData: FormData) {
     });
 
     revalidatePath("/students");
+    revalidatePath("/");
     return { success: true, student };
   } catch (error: any) {
     console.error("Error updating student:", error);
@@ -101,6 +103,7 @@ export async function deleteStudent(id: string) {
   try {
     await prisma.student.delete({ where: { id } });
     revalidatePath("/students");
+    revalidatePath("/");
     return { success: true };
   } catch (error: any) {
     return { error: error.message || "Failed to delete student" };

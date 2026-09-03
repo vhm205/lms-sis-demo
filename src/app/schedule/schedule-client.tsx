@@ -329,8 +329,8 @@ export function ScheduleClient({ schedules, classes, rooms, teachers }: { schedu
         <Table>
           <TableHeader className="bg-muted/50 border-b-2 border-border/70">
             <TableRow className="hover:bg-transparent">
-              <TableHead className="w-[230px]">Thời Gian Ca Học</TableHead>
               <TableHead>Lớp Học</TableHead>
+              <TableHead className="w-[220px]">Thời Gian Ca Học</TableHead>
               <TableHead>Phòng Học</TableHead>
               <TableHead>Giáo Viên</TableHead>
               <TableHead>Tình Trạng Điểm Danh</TableHead>

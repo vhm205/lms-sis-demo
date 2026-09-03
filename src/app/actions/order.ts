@@ -33,6 +33,7 @@ export async function createOrder(formData: FormData) {
     });
 
     revalidatePath("/orders");
+    revalidatePath("/");
     return { success: true, order };
   } catch (error: any) {
     return { error: error.message || "Failed to create order" };
@@ -68,6 +69,7 @@ export async function updateOrder(id: string, formData: FormData) {
     });
 
     revalidatePath("/orders");
+    revalidatePath("/");
     return { success: true, order };
   } catch (error: any) {
     return { error: error.message || "Failed to update order" };
@@ -81,6 +83,7 @@ export async function updateOrderStatus(id: string, status: string) {
       data: { status }
     });
     revalidatePath("/orders");
+    revalidatePath("/");
     return { success: true };
   } catch (error: any) {
     return { error: error.message || "Failed to update order" };
@@ -91,6 +94,7 @@ export async function deleteOrder(id: string) {
   try {
     await prisma.order.delete({ where: { id } });
     revalidatePath("/orders");
+    revalidatePath("/");
     return { success: true };
   } catch (error: any) {
     return { error: error.message || "Failed to delete order" };

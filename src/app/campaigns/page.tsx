@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { CampaignsClient } from "./campaigns-client";
 import { Sparkles } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function CampaignsPage() {
   const [campaigns, courses, facilities] = await Promise.all([
     prisma.campaign.findMany({

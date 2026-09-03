@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 export interface OrchexaLeadWebhookPayload {
   customer_name?: string;
@@ -138,6 +139,13 @@ export async function handleOrchexaLeadCreated(payload: OrchexaLeadWebhookPayloa
     },
   });
 
+  try {
+    revalidatePath("/leads");
+    revalidatePath("/");
+  } catch {
+    // ignore
+  }
+
   return {
     success: true,
     message: "Đã tiếp nhận và tạo khách hàng tiềm năng (Lead) thành công từ Orchexa Webhook.",
@@ -275,6 +283,13 @@ export async function handleOrchexaOrderCreated(payload: OrchexaOrderWebhookPayl
       source: "AI_AGENT",
     },
   });
+
+  try {
+    revalidatePath("/orders");
+    revalidatePath("/");
+  } catch {
+    // ignore
+  }
 
   return {
     success: true,

@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { CoursesClient } from "./courses-client";
 import { BookOpen } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function CoursesPage() {
   const courses = await prisma.course.findMany({
     orderBy: { id: 'desc' }

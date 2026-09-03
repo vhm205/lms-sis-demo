@@ -126,6 +126,7 @@ export async function GET(request: NextRequest) {
           badge: primaryCampaign.badge,
         },
         count: products.length,
+        data: products,
         products,
       },
       { headers: CORS_HEADERS }

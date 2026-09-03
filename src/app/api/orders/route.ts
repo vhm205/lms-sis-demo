@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getAuthContext } from "@/lib/auth";
 
@@ -88,6 +89,13 @@ export async function POST(request: Request) {
         source: auth.role === "ADMIN" ? "API_ADMIN" : auth.isParent ? "API_PARENT" : "API_PUBLIC",
       },
     });
+
+    try {
+      revalidatePath("/orders");
+      revalidatePath("/");
+    } catch {
+      // ignore
+    }
 
     return NextResponse.json({ data: order });
   } catch (error: any) {

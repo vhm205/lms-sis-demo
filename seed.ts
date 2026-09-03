@@ -413,14 +413,28 @@ async function main() {
 
   // 9. Schedules & Attendances
   console.log('Generating deterministic schedules and attendance records...')
-  const now = new Date()
+
+  // Helper to get deterministic date/time matching target day-of-week and time slot
+  // targetDayOfWeek: 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
+  // weekOffset: 0 = current week, -1 = last week, 1 = next week, etc.
+  function getSpecificDate(targetDayOfWeek: number, weekOffset: number, hours: number, minutes: number = 0): Date {
+    const d = new Date()
+    d.setHours(12, 0, 0, 0)
+    const currentDay = d.getDay()
+    const mondayDiff = currentDay === 0 ? -6 : 1 - currentDay
+    const targetDiffFromMon = targetDayOfWeek === 0 ? 6 : targetDayOfWeek - 1
+    const totalDayShift = mondayDiff + (weekOffset * 7) + targetDiffFromMon
+    d.setDate(d.getDate() + totalDayShift)
+    d.setHours(hours, minutes, 0, 0)
+    return d
+  }
 
   // --- Schedules for Movers Bình Thạnh (Tối 3-5: 18h00 - 19h30) ---
   const schedMoversPast1 = await prisma.schedule.create({
     data: {
       classId: classMoversBT01.id,
       roomId: roomBT101.id,
-      date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
+      date: getSpecificDate(4, -1, 18, 0), // Tối Thứ 5 tuần trước (18:00)
       duration: 90,
       status: 'COMPLETED'
     }
@@ -430,7 +444,7 @@ async function main() {
     data: {
       classId: classMoversBT01.id,
       roomId: roomBT101.id,
-      date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+      date: getSpecificDate(2, 0, 18, 0), // Tối Thứ 3 tuần này (18:00)
       duration: 90,
       status: 'COMPLETED'
     }
@@ -440,7 +454,7 @@ async function main() {
     data: {
       classId: classMoversBT01.id,
       roomId: roomBT101.id,
-      date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // Next Thursday 18h00
+      date: getSpecificDate(2, 1, 18, 0), // Tối Thứ 3 tuần tới (18:00)
       duration: 90,
       status: 'SCHEDULED'
     }
@@ -469,12 +483,12 @@ async function main() {
     })
   }
 
-  // --- Schedules for Weekend Make-up Class (HCM-MOV-BT-WK) ---
+  // --- Schedules for Weekend Make-up Class (HCM-MOV-BT-WK - Sáng T7-CN: 08h30 - 10h00) ---
   const schedWeekendSat = await prisma.schedule.create({
     data: {
       classId: classMoversBTWeekend.id,
       roomId: roomBT101.id,
-      date: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000), // Thứ 7 tuần này lúc 09h00
+      date: getSpecificDate(6, 0, 8, 30), // Sáng Thứ 7 tuần này lúc 08h30
       duration: 90,
       status: 'SCHEDULED'
     }
@@ -484,18 +498,18 @@ async function main() {
     data: {
       classId: classMoversBTWeekend.id,
       roomId: roomBT101.id,
-      date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // Chủ Nhật tuần này lúc 09h00
+      date: getSpecificDate(0, 0, 8, 30), // Sáng Chủ Nhật tuần này lúc 08h30
       duration: 90,
       status: 'SCHEDULED'
     }
   })
 
-  // --- Schedules for Target Class in Quận 7 (HCM-MOV-Q701) ---
+  // --- Schedules for Target Class in Quận 7 (HCM-MOV-Q701 - Tối 3-5: 18h30 - 20h00) ---
   const schedQ7Tue = await prisma.schedule.create({
     data: {
       classId: classMoversQ701.id,
       roomId: roomQ7101.id,
-      date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // Tối Thứ 3 tuần tới 18h00
+      date: getSpecificDate(2, 1, 18, 30), // Tối Thứ 3 tuần tới lúc 18h30
       duration: 90,
       status: 'SCHEDULED'
     }
@@ -505,18 +519,18 @@ async function main() {
     data: {
       classId: classMoversQ701.id,
       roomId: roomQ7101.id,
-      date: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000), // Tối Thứ 5 tuần tới 18h00
+      date: getSpecificDate(4, 1, 18, 30), // Tối Thứ 5 tuần tới lúc 18h30
       duration: 90,
       status: 'SCHEDULED'
     }
   })
 
-  // --- Schedules & 3 consecutive absences for MBA Student Nam (Risk Intervention test) ---
+  // --- Schedules & 3 consecutive absences for MBA Student Nam (Risk Intervention test - Tối Thứ 4 & Thứ 7: 19h00 - 21h00) ---
   const schedMBAPast1 = await prisma.schedule.create({
     data: {
       classId: classMBABT01.id,
       roomId: roomBT201.id,
-      date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
+      date: getSpecificDate(3, -2, 19, 0), // Tối Thứ 4 cách 2 tuần (19:00)
       duration: 120,
       status: 'COMPLETED'
     }
@@ -526,7 +540,7 @@ async function main() {
     data: {
       classId: classMBABT01.id,
       roomId: roomBT201.id,
-      date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      date: getSpecificDate(6, -2, 19, 0), // Tối Thứ 7 cách 2 tuần (19:00)
       duration: 120,
       status: 'COMPLETED'
     }
@@ -536,7 +550,7 @@ async function main() {
     data: {
       classId: classMBABT01.id,
       roomId: roomBT201.id,
-      date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      date: getSpecificDate(3, -1, 19, 0), // Tối Thứ 4 tuần trước (19:00)
       duration: 120,
       status: 'COMPLETED'
     }
@@ -546,7 +560,7 @@ async function main() {
     data: {
       classId: classMBABT01.id,
       roomId: roomBT201.id,
-      date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days later
+      date: getSpecificDate(6, 0, 19, 0), // Tối Thứ 7 tuần này (19:00)
       duration: 120,
       status: 'SCHEDULED'
     }
@@ -556,7 +570,7 @@ async function main() {
     data: {
       classId: classMBABT01.id,
       roomId: roomBT201.id,
-      date: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000), // 12 days later
+      date: getSpecificDate(6, 1, 19, 0), // Tối Thứ 7 tuần tới (19:00)
       duration: 180,
       status: 'SCHEDULED'
     }

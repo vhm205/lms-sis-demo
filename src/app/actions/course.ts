@@ -17,6 +17,7 @@ export async function createCourse(formData: FormData) {
       data: { code, name, type, duration, fee }
     });
     revalidatePath("/courses");
+    revalidatePath("/");
     return { success: true };
   } catch (error: any) {
     return { error: error.message };
@@ -38,6 +39,7 @@ export async function updateCourse(id: string, formData: FormData) {
       data: { code, name, type, duration, fee }
     });
     revalidatePath("/courses");
+    revalidatePath("/");
     return { success: true };
   } catch (error: any) {
     return { error: error.message };
@@ -48,6 +50,7 @@ export async function deleteCourse(id: string) {
   try {
     await prisma.course.delete({ where: { id } });
     revalidatePath("/courses");
+    revalidatePath("/");
     return { success: true };
   } catch (error: any) {
     return { error: error.message };

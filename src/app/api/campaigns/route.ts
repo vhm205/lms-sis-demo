@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 
 const CORS_HEADERS = {
@@ -113,6 +114,13 @@ export async function POST(request: NextRequest) {
         items: true,
       },
     });
+
+    try {
+      revalidatePath("/campaigns");
+      revalidatePath("/");
+    } catch {
+      // ignore
+    }
 
     return NextResponse.json(
       {

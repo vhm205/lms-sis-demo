@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { LeadsClient } from "./leads-client";
 import { UserPlus } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function LeadsPage() {
   const [leads, courses, facilities] = await Promise.all([
     prisma.lead.findMany({

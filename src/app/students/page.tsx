@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { StudentsClient } from "./students-client";
 import { Users } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function StudentsPage() {
   const students = await prisma.student.findMany({
     include: {

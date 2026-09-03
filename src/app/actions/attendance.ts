@@ -61,6 +61,7 @@ export async function submitAttendance(scheduleId: string, attendances: { studen
     }
 
     revalidatePath("/schedule");
+    revalidatePath("/");
     return { success: true };
   } catch (error: any) {
     return { error: error.message };
