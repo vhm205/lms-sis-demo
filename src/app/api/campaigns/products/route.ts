@@ -19,7 +19,12 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const campaignCode = searchParams.get("campaignCode");
     const targetAudience = searchParams.get("targetAudience");
-    const facilityId = searchParams.get("facilityId");
+    const facilityIdent =
+      searchParams.get("facilityName") ||
+      searchParams.get("facilityCode") ||
+      searchParams.get("facilityId") ||
+      searchParams.get("facility");
+    const courseCode = searchParams.get("courseCode") || searchParams.get("code") || searchParams.get("courseId");
     const limit = parseInt(searchParams.get("limit") || "6", 10);
 
     const whereCondition: any = { status: "ACTIVE" };
@@ -27,9 +32,9 @@ export async function GET(request: NextRequest) {
       whereCondition.code = campaignCode;
     }
 
-    if (facilityId && facilityId !== "all") {
+    if (facilityIdent && facilityIdent !== "all") {
       const facility = await prisma.facility.findFirst({
-        where: { OR: [{ id: facilityId }, { name: { contains: facilityId } }] },
+        where: { OR: [{ id: facilityIdent }, { name: { contains: facilityIdent } }] },
       });
       if (facility) {
         whereCondition.OR = [{ facilityId: facility.id }, { facilityId: null }];
@@ -70,6 +75,15 @@ export async function GET(request: NextRequest) {
           if (item.targetAudience && item.targetAudience !== targetAudience && item.targetAudience !== "ALL") {
             continue;
           }
+        }
+        if (courseCode) {
+          const matchCourse =
+            item.productCode === courseCode ||
+            item.course?.code === courseCode ||
+            item.courseId === courseCode ||
+            item.course?.name?.toLowerCase().includes(courseCode.toLowerCase()) ||
+            item.name.toLowerCase().includes(courseCode.toLowerCase());
+          if (!matchCourse) continue;
         }
         allItems.push({
           campaignCode: camp.code,

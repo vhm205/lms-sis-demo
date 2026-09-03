@@ -14,7 +14,10 @@ export async function GET(request: Request) {
     }
 
     const { searchParams } = new URL(request.url)
-    const requestedStudentId = searchParams.get('studentId')
+    const requestedStudentId =
+      searchParams.get('studentId') ||
+      searchParams.get('studentCode') ||
+      searchParams.get('code')
 
     // Find all students for this parent
     const students = await prisma.student.findMany({
@@ -48,7 +51,7 @@ export async function GET(request: Request) {
 
     // Determine target student
     const activeStudent = requestedStudentId
-      ? students.find((s) => s.id === requestedStudentId) || students[0]
+      ? students.find((s) => s.id === requestedStudentId || s.code === requestedStudentId) || students[0]
       : students[0]
 
     // Fetch attendances for active student

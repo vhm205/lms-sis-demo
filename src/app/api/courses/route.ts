@@ -19,10 +19,30 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status") || "ACTIVE";
     const limit = parseInt(searchParams.get("limit") || "100", 10);
+    const code = searchParams.get("courseCode") || searchParams.get("code");
+    const id = searchParams.get("courseId") || searchParams.get("id");
+    const query = searchParams.get("q") || searchParams.get("query") || searchParams.get("search");
+    const type = searchParams.get("type");
 
     const whereCondition: any = {};
     if (status !== "ALL") {
       whereCondition.status = status;
+    }
+    if (code) {
+      whereCondition.code = code;
+    }
+    if (id) {
+      whereCondition.id = id;
+    }
+    if (type) {
+      whereCondition.type = type;
+    }
+    if (query) {
+      whereCondition.OR = [
+        { name: { contains: query } },
+        { code: { contains: query } },
+        { description: { contains: query } },
+      ];
     }
 
     const courses = await prisma.course.findMany({

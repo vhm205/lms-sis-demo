@@ -17,8 +17,8 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
       );
     }
 
-    const student = await prisma.student.findUnique({
-      where: { id },
+    const student = await prisma.student.findFirst({
+      where: { OR: [{ id }, { code: id }] },
       include: {
         parent: true,
         facility: true,

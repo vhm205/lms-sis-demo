@@ -48,7 +48,7 @@ Orchexa Widget giới hạn tối đa 2 nút trên mỗi Card để tối ưu tr
   - *Action:* `Chat message`
   - *Message template:* `Tư vấn chi tiết cho tôi về khóa {name}`
 - **Quy trình xử lý của Agent khi nhận tin nhắn:**
-  1. **Bước 1:** Gọi MCP Tool: `find_available_classes` với `courseId` để tra cứu các lớp đang mở.
+  1. **Bước 1:** Gọi MCP Tool: `find_available_classes` với `courseCode` (hoặc `courseId`) để tra cứu các lớp đang mở.
   2. **Bước 2:** Phản hồi súc tích 3 điểm trọng tâm:
      - Thời lượng & Số buổi: 32 buổi, lộ trình toàn diện 4 kỹ năng.
      - Mục tiêu đầu ra: Đạt chứng chỉ chuẩn quốc tế, tự tin giao tiếp phản xạ.

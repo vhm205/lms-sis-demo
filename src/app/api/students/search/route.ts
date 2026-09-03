@@ -4,10 +4,19 @@ import { getAuthContext } from "@/lib/auth";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const query = searchParams.get("query") || "";
+  const query = (
+    searchParams.get("query") ||
+    searchParams.get("q") ||
+    searchParams.get("keyword") ||
+    searchParams.get("search") ||
+    ""
+  ).trim();
 
   if (!query) {
-    return NextResponse.json({ error: "Missing query parameter" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Vui lòng cung cấp tham số tìm kiếm (query hoặc q)", code: "MISSING_QUERY" },
+      { status: 400 }
+    );
   }
 
   try {

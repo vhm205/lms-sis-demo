@@ -4,7 +4,13 @@ import { getAuthContext } from "@/lib/auth";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const query = searchParams.get("q")?.trim() || "";
+  const query = (
+    searchParams.get("q") ||
+    searchParams.get("query") ||
+    searchParams.get("keyword") ||
+    searchParams.get("search") ||
+    ""
+  ).trim();
 
   if (!query) {
     return NextResponse.json({

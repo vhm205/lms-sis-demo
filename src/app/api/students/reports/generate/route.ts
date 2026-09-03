@@ -28,11 +28,12 @@ export async function POST(request: Request) {
   try {
     const auth = await getAuthContext(request);
     const body = await request.json().catch(() => ({}));
-    const { studentId, type = "ACADEMIC_RESULTS" } = body;
+    const studentId = body.studentCode || body.studentId || body.code || body.id;
+    const { type = "ACADEMIC_RESULTS" } = body;
 
     if (!studentId) {
       return NextResponse.json(
-        { error: "Vui lòng cung cấp 'studentId' (ID hoặc Mã học viên như HV0001)", code: "MISSING_STUDENT_ID" },
+        { error: "Vui lòng cung cấp 'studentCode' hoặc 'studentId' (Mã học viên như HV0001)", code: "MISSING_STUDENT_ID" },
         { status: 400, headers: CORS_HEADERS }
       );
     }
@@ -78,12 +79,16 @@ export async function GET(request: Request) {
   try {
     const auth = await getAuthContext(request);
     const { searchParams } = new URL(request.url);
-    const studentId = searchParams.get("studentId") || searchParams.get("id") || searchParams.get("code");
+    const studentId =
+      searchParams.get("studentCode") ||
+      searchParams.get("studentId") ||
+      searchParams.get("code") ||
+      searchParams.get("id");
     const type = searchParams.get("type") || "ACADEMIC_RESULTS";
 
     if (!studentId) {
       return NextResponse.json(
-        { error: "Vui lòng cung cấp query parameter 'studentId' hoặc 'code' (VD: ?studentId=HV0001)", code: "MISSING_STUDENT_ID" },
+        { error: "Vui lòng cung cấp query parameter 'studentCode' hoặc 'studentId' (VD: ?studentCode=HV0001)", code: "MISSING_STUDENT_ID" },
         { status: 400, headers: CORS_HEADERS }
       );
     }

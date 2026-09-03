@@ -18,55 +18,78 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { studentId, missedScheduleId, targetScheduleId, notes } = body;
+    const studentIdent = body.studentCode || body.studentId || body.code;
+    const { missedScheduleId, targetScheduleId, notes } = body;
 
-    if (!studentId || !missedScheduleId || !targetScheduleId) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    if (!studentIdent || !missedScheduleId || !targetScheduleId) {
+      return NextResponse.json(
+        { error: "Missing required fields (studentCode/studentId, missedScheduleId, targetScheduleId)" },
+        { status: 400 }
+      );
+    }
+
+    const student = await prisma.student.findFirst({
+      where: { OR: [{ code: studentIdent }, { id: studentIdent }] },
+    });
+
+    if (!student) {
+      return NextResponse.json(
+        { error: `Không tìm thấy học viên với mã/ID: ${studentIdent}`, code: "STUDENT_NOT_FOUND" },
+        { status: 404 }
+      );
     }
 
     if (auth.isParent && auth.parent) {
-      const student = await prisma.student.findUnique({ where: { id: studentId } });
-      if (!student || student.parentId !== auth.parent.id) {
-        return NextResponse.json({
-          error: "Forbidden: Bạn không có quyền gửi yêu cầu cho học sinh này.",
-          code: "FORBIDDEN_PARENT_ACCESS"
-        }, { status: 403 });
+      if (student.parentId !== auth.parent.id) {
+        return NextResponse.json(
+          {
+            error: "Forbidden: Bạn không có quyền gửi yêu cầu cho học sinh này.",
+            code: "FORBIDDEN_PARENT_ACCESS",
+          },
+          { status: 403 }
+        );
       }
     }
 
     // Check attendance status
     const attendance = await prisma.attendance.findUnique({
-      where: { scheduleId_studentId: { scheduleId: missedScheduleId, studentId } }
+      where: { scheduleId_studentId: { scheduleId: missedScheduleId, studentId: student.id } },
     });
 
-    if (!attendance || (attendance.status !== 'ABSENT' && attendance.status !== 'EXCUSED')) {
-      return NextResponse.json({ 
-        error: "Không đủ điều kiện học bù. Học viên không vắng mặt buổi này.",
-        code: "INVALID_ATTENDANCE_STATUS"
-      }, { status: 400 });
+    if (!attendance || (attendance.status !== "ABSENT" && attendance.status !== "EXCUSED")) {
+      return NextResponse.json(
+        {
+          error: "Không đủ điều kiện học bù. Học viên không vắng mặt buổi này.",
+          code: "INVALID_ATTENDANCE_STATUS",
+        },
+        { status: 400 }
+      );
     }
 
     // Check for duplicate request
     const existing = await prisma.makeUpRequest.findFirst({
-      where: { studentId, missedScheduleId }
+      where: { studentId: student.id, missedScheduleId },
     });
 
     if (existing) {
-      return NextResponse.json({ 
-        error: "Đã có yêu cầu học bù cho buổi nghỉ này.",
-        code: "DUPLICATE_REQUEST"
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: "Đã có yêu cầu học bù cho buổi nghỉ này.",
+          code: "DUPLICATE_REQUEST",
+        },
+        { status: 400 }
+      );
     }
 
     // Create request
     const req = await prisma.makeUpRequest.create({
       data: {
-        studentId,
+        studentId: student.id,
         missedScheduleId,
         targetScheduleId,
         notes: notes || "",
-        status: "PENDING"
-      }
+        status: "PENDING",
+      },
     });
 
     // Create activity log

@@ -41,7 +41,7 @@ B. NÚT PHỤ (SECONDARY BUTTON): "Xem chi tiết" (hoặc "Lộ trình học")
         - Message template: "Tư vấn chi tiết cho tôi về khóa {name}"
     • Nhận diện Intent: Khách hàng muốn tìm hiểu kỹ đề cương, số buổi, ngày học và giảng viên trước khi quyết định.
     • Quy trình xử lý của Agent khi nhận tin nhắn:
-        Bước 1: Gọi MCP Tool: find_available_classes với courseId để tra cứu các lớp đang mở.
+        Bước 1: Gọi MCP Tool: find_available_classes với courseCode (hoặc courseId) để tra cứu các lớp đang mở.
         Bước 2: Phản hồi súc tích 3 điểm trọng tâm:
             - Thời lượng & Số buổi: 32 buổi, lộ trình toàn diện 4 kỹ năng.
             - Mục tiêu đầu ra: Đạt chứng chỉ chuẩn quốc tế, tự tin giao tiếp phản xạ.

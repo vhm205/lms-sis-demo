@@ -86,7 +86,14 @@ export async function handleOrchexaLeadCreated(payload: OrchexaLeadWebhookPayloa
   }
 
   // 2. Resolve default or specified course & facility
-  let targetCourseId = course_id;
+  let targetCourseId: string | undefined = undefined;
+  const courseIdent = (payload as any).course_code || (payload as any).courseCode || course_id;
+  if (courseIdent) {
+    const course = await prisma.course.findFirst({
+      where: { OR: [{ code: courseIdent }, { id: courseIdent }, { name: { contains: courseIdent } }] },
+    });
+    targetCourseId = course?.id;
+  }
   if (!targetCourseId) {
     const defaultCourse = await prisma.course.findFirst({
       where: { status: "ACTIVE" },
@@ -94,7 +101,14 @@ export async function handleOrchexaLeadCreated(payload: OrchexaLeadWebhookPayloa
     targetCourseId = defaultCourse?.id;
   }
 
-  let targetFacilityId = facility_id;
+  let targetFacilityId: string | undefined = undefined;
+  const facilityIdent = (payload as any).facility_code || (payload as any).facility_name || (payload as any).facilityName || facility_id;
+  if (facilityIdent) {
+    const facility = await prisma.facility.findFirst({
+      where: { OR: [{ id: facilityIdent }, { name: { contains: facilityIdent } }] },
+    });
+    targetFacilityId = facility?.id;
+  }
   if (!targetFacilityId) {
     const defaultFacility = await prisma.facility.findFirst();
     targetFacilityId = defaultFacility?.id;
@@ -205,7 +219,14 @@ export async function handleOrchexaOrderCreated(payload: OrchexaOrderWebhookPayl
   }
 
   // 2. Resolve default or specified course & facility
-  let targetCourseId = course_id;
+  let targetCourseId: string | undefined = undefined;
+  const courseIdent = (payload as any).course_code || (payload as any).courseCode || course_id;
+  if (courseIdent) {
+    const course = await prisma.course.findFirst({
+      where: { OR: [{ code: courseIdent }, { id: courseIdent }, { name: { contains: courseIdent } }] },
+    });
+    targetCourseId = course?.id;
+  }
   if (!targetCourseId) {
     const defaultCourse = await prisma.course.findFirst({
       where: { status: "ACTIVE" },
@@ -213,7 +234,14 @@ export async function handleOrchexaOrderCreated(payload: OrchexaOrderWebhookPayl
     targetCourseId = defaultCourse?.id;
   }
 
-  let targetFacilityId = facility_id;
+  let targetFacilityId: string | undefined = undefined;
+  const facilityIdent = (payload as any).facility_code || (payload as any).facility_name || (payload as any).facilityName || facility_id;
+  if (facilityIdent) {
+    const facility = await prisma.facility.findFirst({
+      where: { OR: [{ id: facilityIdent }, { name: { contains: facilityIdent } }] },
+    });
+    targetFacilityId = facility?.id;
+  }
   if (!targetFacilityId) {
     const defaultFacility = await prisma.facility.findFirst();
     targetFacilityId = defaultFacility?.id;

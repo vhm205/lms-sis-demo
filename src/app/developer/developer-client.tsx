@@ -189,7 +189,7 @@ const APIS: ApiDefinition[] = [
       { name: "x-parent-phone", value: "0901234567", required: false, desc: "Header nhận diện phụ huynh (User Context mode)" }
     ],
     params: [
-      { name: "id", type: "string", required: true, desc: "CUID của học viên", defaultVal: "cmtgpg6vo000up6z8a3fnbb5n" }
+      { name: "id", type: "string", required: true, desc: "Mã học viên hoặc CUID (VD: HV0001)", defaultVal: "HV0001" }
     ],
     sampleResponse: {
       data: {
@@ -258,13 +258,13 @@ const APIS: ApiDefinition[] = [
     method: "POST",
     path: "/api/requests/makeup",
     title: "Đăng ký xếp lịch học bù",
-    desc: "Tạo yêu cầu học bù có tự động kiểm tra buổi học nghỉ trước đó (trạng thái ABSENT hoặc EXCUSED).",
+    desc: "Tạo yêu cầu học bù có tự động kiểm tra buổi học nghỉ trước đó (trạng thái ABSENT hoặc EXCUSED). Hỗ trợ studentCode (HV0001) hoặc studentId.",
     headers: [
       { name: "Content-Type", value: "application/json", required: true, desc: "Định dạng payload JSON" },
       { name: "Authorization", value: "Bearer 0901234567", required: false, desc: "Xác thực phụ huynh để chống gửi yêu cầu trái phép" }
     ],
     bodyTemplate: {
-      studentId: "cmtgpg6vo000up6z8a3fnbb5n",
+      studentCode: "HV0001",
       missedScheduleId: "cmtgpg6vr0012p6z8r16vxfuu",
       targetScheduleId: "cmtgpg6vr0014p6z8ig04sa86",
       notes: "Xin học bù buổi ngày 03/10 do bận thi ở trường"
@@ -285,13 +285,13 @@ const APIS: ApiDefinition[] = [
     method: "POST",
     path: "/api/requests/support",
     title: "Tạo ticket hỗ trợ & Xin nghỉ phép",
-    desc: "Tiếp nhận yêu cầu xin nghỉ phép, bảo lưu, thắc mắc học phí từ AI Voice Agent hoặc Website.",
+    desc: "Tiếp nhận yêu cầu xin nghỉ phép, bảo lưu, thắc mắc học phí từ AI Voice Agent hoặc Website. Hỗ trợ studentCode (HV0001) hoặc studentId.",
     headers: [
       { name: "Content-Type", value: "application/json", required: true, desc: "Định dạng payload JSON" },
       { name: "Authorization", value: "Bearer 0901234567", required: false, desc: "Xác thực phụ huynh (tuỳ chọn)" }
     ],
     bodyTemplate: {
-      studentId: "cmtgpg6vo000up6z8a3fnbb5n",
+      studentCode: "HV0001",
       type: "LEAVE",
       content: "Xin nghỉ phép buổi ngày 08/10 do gia đình đi du lịch.",
       priority: "NORMAL"
@@ -312,15 +312,15 @@ const APIS: ApiDefinition[] = [
     method: "POST",
     path: "/api/orders",
     title: "Tạo đơn đăng ký khóa học (Direct API)",
-    desc: "Tạo đơn hàng đăng ký khóa học mới khi AI Agent hoặc tư vấn viên chốt ghi danh học viên thành công.",
+    desc: "Tạo đơn hàng đăng ký khóa học mới khi AI Agent hoặc tư vấn viên chốt ghi danh học viên thành công. Hỗ trợ courseCode và facilityName.",
     headers: [
       { name: "Content-Type", value: "application/json", required: true, desc: "Định dạng payload JSON" }
     ],
     bodyTemplate: {
       parentName: "Trần Thị Mai",
       parentPhone: "0912345678",
-      courseId: "cmtgpg6vk000lp6z8ejz2m2im",
-      facilityId: "cmtgpg6v60000p6z8hre4o21p",
+      courseCode: "IELTS-INT",
+      facilityName: "Cơ sở Cầu Giấy",
       amount: 8000000,
       notes: "Đăng ký khóa IELTS qua AI Voice Assistant"
     },
@@ -340,13 +340,13 @@ const APIS: ApiDefinition[] = [
     method: "POST",
     path: "/api/students/reports/generate",
     title: "Xuất báo cáo học tập học viên (Preview Link & PDF)",
-    desc: "Tạo báo cáo kết quả học tập (Academic Results) hoặc tổng quan quá trình/tình hình hiện tại (Progress Overview) kèm liên kết xem trước (preview link) và bản PDF cho Orchexa Agent / Phụ huynh / Admin.",
+    desc: "Tạo báo cáo kết quả học tập (Academic Results) hoặc tổng quan quá trình/tình hình hiện tại (Progress Overview) kèm liên kết xem trước (preview link) và bản PDF cho Orchexa Agent / Phụ huynh / Admin. Hỗ trợ studentCode (HV0001) hoặc studentId.",
     headers: [
       { name: "Content-Type", value: "application/json", required: true, desc: "Định dạng payload JSON" },
       { name: "Authorization", value: "Bearer <token>", required: false, desc: "Admin Key hoặc Parent Token" }
     ],
     bodyTemplate: {
-      studentId: "HV0001",
+      studentCode: "HV0001",
       type: "ACADEMIC_RESULTS"
     },
     sampleResponse: {
@@ -464,11 +464,11 @@ const MCP_TOOLS_CATALOG: McpTool[] = [
     inputSchema: {
       type: "object",
       properties: {
-        studentId: { type: "string", description: "ID học viên hoặc Mã HV (VD: HV0001)" }
-      },
-      required: ["studentId"]
+        studentCode: { type: "string", description: "Mã học viên (VD: HV0001, HV0002)" },
+        studentId: { type: "string", description: "ID học viên trong CSDL (cuid, tùy chọn thay thế)" }
+      }
     },
-    defaultArgs: { studentId: "HV0001" }
+    defaultArgs: { studentCode: "HV0001" }
   },
   {
     name: "get_parent_children",
@@ -488,11 +488,11 @@ const MCP_TOOLS_CATALOG: McpTool[] = [
     inputSchema: {
       type: "object",
       properties: {
-        courseId: { type: "string", description: "ID hoặc Mã khóa học (VD: ENG-KID-01, IELTS-INT)" }
-      },
-      required: ["courseId"]
+        courseCode: { type: "string", description: "Mã khóa học (VD: ENG-CAM-MOVERS, ENG-KID-01, IELTS-INT)" },
+        courseId: { type: "string", description: "ID khóa học trong CSDL (cuid, tùy chọn thay thế cho courseCode)" }
+      }
     },
-    defaultArgs: { courseId: "ENG-KID-01" }
+    defaultArgs: { courseCode: "ENG-CAM-MOVERS" }
   },
   {
     name: "create_makeup_request",
@@ -501,15 +501,16 @@ const MCP_TOOLS_CATALOG: McpTool[] = [
     inputSchema: {
       type: "object",
       properties: {
-        studentId: { type: "string", description: "ID hoặc Mã học viên (VD: HV0001)" },
+        studentCode: { type: "string", description: "Mã học viên (VD: HV0001)" },
+        studentId: { type: "string", description: "ID học viên trong CSDL (tùy chọn thay thế cho studentCode)" },
         missedScheduleId: { type: "string", description: "ID buổi học đã nghỉ (trạng thái ABSENT)" },
         targetScheduleId: { type: "string", description: "ID buổi học mục tiêu muốn học bù" },
         notes: { type: "string", description: "Lý do học bù" }
       },
-      required: ["studentId", "missedScheduleId", "targetScheduleId"]
+      required: ["missedScheduleId", "targetScheduleId"]
     },
     defaultArgs: {
-      studentId: "HV0001",
+      studentCode: "HV0001",
       missedScheduleId: "cmtgpg6vr0012p6z8r16vxfuu",
       targetScheduleId: "cmtgpg6vr0014p6z8ig04sa86",
       notes: "Xin học bù buổi ngày 03/10"
@@ -524,18 +525,20 @@ const MCP_TOOLS_CATALOG: McpTool[] = [
       properties: {
         parentName: { type: "string", description: "Họ tên phụ huynh" },
         parentPhone: { type: "string", description: "Số điện thoại phụ huynh" },
-        courseId: { type: "string", description: "Mã hoặc ID khóa học (VD: IELTS-INT, ENG-KID-01)" },
-        facilityId: { type: "string", description: "Tên hoặc ID cơ sở (VD: Cơ sở Cầu Giấy)" },
+        courseCode: { type: "string", description: "Mã khóa học (VD: IELTS-INT, ENG-CAM-MOVERS, ENG-KID-01)" },
+        courseId: { type: "string", description: "ID khóa học trong CSDL (tùy chọn thay thế cho courseCode)" },
+        facilityName: { type: "string", description: "Tên cơ sở học (VD: Cơ sở Cầu Giấy, Bình Thạnh)" },
+        facilityCode: { type: "string", description: "Mã cơ sở học (VD: CS-CG, CS-BT)" },
+        facilityId: { type: "string", description: "ID hoặc mã cơ sở (tùy chọn)" },
         amount: { type: "number", description: "Học phí (VND)" },
         notes: { type: "string", description: "Ghi chú đơn hàng" }
-      },
-      required: ["parentName", "parentPhone", "courseId", "facilityId"]
+      }
     },
     defaultArgs: {
       parentName: "Trần Thị Mai",
       parentPhone: "0912345678",
-      courseId: "IELTS-INT",
-      facilityId: "Cơ sở Cầu Giấy",
+      courseCode: "IELTS-INT",
+      facilityName: "Cơ sở Cầu Giấy",
       amount: 8000000,
       notes: "Đăng ký qua Orchexa AI Agent"
     }
@@ -546,15 +549,16 @@ const MCP_TOOLS_CATALOG: McpTool[] = [
     inputSchema: {
       type: "object",
       properties: {
-        studentId: { type: "string", description: "ID hoặc Mã học viên (VD: HV0001)" },
+        studentCode: { type: "string", description: "Mã học viên (VD: HV0001)" },
+        studentId: { type: "string", description: "ID học viên trong CSDL (tùy chọn thay thế cho studentCode)" },
         type: { type: "string", enum: ["LEAVE", "INFO", "SUPPORT", "COMPLAINT", "CALL_BACK"], description: "Loại yêu cầu" },
         content: { type: "string", description: "Nội dung chi tiết" },
         priority: { type: "string", enum: ["LOW", "NORMAL", "HIGH", "URGENT"], description: "Mức độ ưu tiên" }
       },
-      required: ["studentId", "type", "content"]
+      required: ["content"]
     },
     defaultArgs: {
-      studentId: "HV0001",
+      studentCode: "HV0001",
       type: "LEAVE",
       content: "Xin nghỉ phép buổi ngày 08/10 do bận việc gia đình",
       priority: "NORMAL"
@@ -567,13 +571,13 @@ const MCP_TOOLS_CATALOG: McpTool[] = [
     inputSchema: {
       type: "object",
       properties: {
-        studentId: { type: "string", description: "Mã học viên (VD: HV0001), ID hoặc tên học viên" },
+        studentCode: { type: "string", description: "Mã học viên (VD: HV0001), ID hoặc tên học viên" },
+        studentId: { type: "string", description: "ID học viên trong CSDL hoặc tên học viên (tùy chọn)" },
         type: { type: "string", enum: ["ACADEMIC_RESULTS", "PROGRESS_OVERVIEW"], description: "Loại báo cáo: ACADEMIC_RESULTS hoặc PROGRESS_OVERVIEW" }
-      },
-      required: ["studentId"]
+      }
     },
     defaultArgs: {
-      studentId: "HV0001",
+      studentCode: "HV0001",
       type: "ACADEMIC_RESULTS"
     }
   },
@@ -586,7 +590,9 @@ const MCP_TOOLS_CATALOG: McpTool[] = [
       properties: {
         campaignCode: { type: "string", description: "Mã chiến dịch cụ thể (VD: CAMP-BACK2SCHOOL-2025, CAMP-RETENTION-MBA)" },
         targetAudience: { type: "string", enum: ["KIDS", "TEEN", "ADULT_MBA", "ALL"], description: "Đối tượng học viên cần tư vấn ưu đãi (KIDS, TEEN, ADULT_MBA, ALL)" },
-        facilityId: { type: "string", description: "ID hoặc tên cơ sở (VD: Cầu Giấy, Bình Thạnh, Quận 7)" },
+        facilityName: { type: "string", description: "Tên cơ sở học (VD: Cầu Giấy, Bình Thạnh, Quận 7)" },
+        facilityCode: { type: "string", description: "Mã cơ sở học (VD: CS-CG, CS-BT)" },
+        facilityId: { type: "string", description: "ID cơ sở trong CSDL (tùy chọn)" },
         limit: { type: "number", description: "Số lượng sản phẩm tối đa trả về (mặc định 6)" }
       }
     },
@@ -2203,9 +2209,9 @@ export function DeveloperClient() {
             <div className="flex items-center justify-between">
               <h3 className="text-sm sm:text-base font-black font-heading text-foreground flex items-center gap-2">
                 <ListTree className="h-4 w-4 text-primary" />
-                Danh mục 7 Công cụ MCP Đã Đăng ký (Registered Tools):
+                Danh mục {MCP_TOOLS_CATALOG.length} Công cụ MCP Đã Đăng ký (Registered Tools):
               </h3>
-              <Badge variant="aqua" className="font-mono text-xs">7 Tools Available</Badge>
+              <Badge variant="aqua" className="font-mono text-xs">{MCP_TOOLS_CATALOG.length} Tools Available</Badge>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">

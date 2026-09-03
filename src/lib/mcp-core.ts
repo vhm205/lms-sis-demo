@@ -53,12 +53,12 @@ export const MCP_TOOLS: McpToolDefinition[] = [
     inputSchema: {
       type: "object",
       properties: {
-        studentId: { type: "string", description: "ID học viên hoặc Mã học viên (ví dụ: HV0001 hoặc cuid)" },
+        studentCode: { type: "string", description: "Mã học viên (VD: HV0001, HV0002)" },
+        studentId: { type: "string", description: "ID học viên trong CSDL (cuid, tùy chọn thay thế cho studentCode)" },
       },
-      required: ["studentId"],
     },
     sampleArguments: {
-      studentId: "HV0001"
+      studentCode: "HV0001"
     },
     sampleResponse: {
       id: "cmtgpg6vo000up6z8a3fnbb5n",
@@ -97,21 +97,25 @@ export const MCP_TOOLS: McpToolDefinition[] = [
     inputSchema: {
       type: "object",
       properties: {
-        courseId: { type: "string", description: "ID hoặc Mã khóa học (VD: ENG-KID-01, IELTS-INT, MATH-TUDUY)" },
+        courseCode: { type: "string", description: "Mã khóa học (VD: ENG-CAM-MOVERS, ENG-KID-01, IELTS-INT)" },
+        courseId: { type: "string", description: "ID khóa học trong CSDL (cuid, tùy chọn thay thế cho courseCode)" },
       },
-      required: ["courseId"],
     },
     sampleArguments: {
-      courseId: "ENG-KID-01"
+      courseCode: "ENG-CAM-MOVERS"
     },
     sampleResponse: {
       availableClasses: [
         {
-          id: "cmtgpg6vl000op6z88spd7a7x",
-          name: "Lớp Tiếng Anh Kids Cầu Giấy 1",
+          id: "cmtl0ylml000yp6ywawa4g7un",
+          code: "HCM-MOV-BT01",
+          name: "Lớp Cambridge Movers (Bình Thạnh - Tối 3-5)",
+          course: "Cambridge Movers Chuẩn Quốc Tế",
+          facility: "Cơ sở Bình Thạnh",
           capacity: 15,
-          enrolled: 2,
-          available: 13
+          enrolled: 3,
+          availableSlots: 12,
+          status: "ONGOING"
         }
       ]
     }
@@ -123,15 +127,16 @@ export const MCP_TOOLS: McpToolDefinition[] = [
     inputSchema: {
       type: "object",
       properties: {
-        studentId: { type: "string", description: "ID hoặc Mã học viên (VD: HV0001)" },
+        studentCode: { type: "string", description: "Mã học viên (VD: HV0001)" },
+        studentId: { type: "string", description: "ID học viên trong CSDL (cuid, tùy chọn thay thế cho studentCode)" },
         missedScheduleId: { type: "string", description: "ID buổi học đã nghỉ (trạng thái ABSENT hoặc EXCUSED)" },
         targetScheduleId: { type: "string", description: "ID buổi học mục tiêu muốn học bù" },
         notes: { type: "string", description: "Lý do học bù hoặc ghi chú của phụ huynh" },
       },
-      required: ["studentId", "missedScheduleId", "targetScheduleId"],
+      required: ["missedScheduleId", "targetScheduleId"],
     },
     sampleArguments: {
-      studentId: "HV0001",
+      studentCode: "HV0001",
       missedScheduleId: "cmtgpg6vr0012p6z8r16vxfuu",
       targetScheduleId: "cmtgpg6vr0014p6z8ig04sa86",
       notes: "Xin học bù buổi nghỉ ngày 03/10 do bận việc gia đình"
@@ -152,18 +157,20 @@ export const MCP_TOOLS: McpToolDefinition[] = [
       properties: {
         parentName: { type: "string", description: "Họ tên phụ huynh" },
         parentPhone: { type: "string", description: "Số điện thoại phụ huynh" },
-        courseId: { type: "string", description: "ID hoặc Mã khóa học (VD: IELTS-INT, ENG-KID-01)" },
-        facilityId: { type: "string", description: "ID hoặc tên cơ sở học (VD: Cầu Giấy, Bình Thạnh)" },
+        courseCode: { type: "string", description: "Mã khóa học (VD: IELTS-INT, ENG-CAM-MOVERS, ENG-KID-01)" },
+        courseId: { type: "string", description: "ID khóa học trong CSDL (tùy chọn thay thế cho courseCode)" },
+        facilityName: { type: "string", description: "Tên cơ sở học (VD: Cơ sở Cầu Giấy, Bình Thạnh)" },
+        facilityCode: { type: "string", description: "Mã cơ sở học (VD: CS-CG, CS-BT)" },
+        facilityId: { type: "string", description: "ID cơ sở học trong CSDL (tùy chọn)" },
         amount: { type: "number", description: "Số tiền học phí (VND)" },
         notes: { type: "string", description: "Ghi chú đơn hàng" }
       },
-      required: ["courseId"]
     },
     sampleArguments: {
       parentName: "Trần Thị Mai",
       parentPhone: "0912345678",
-      courseId: "IELTS-INT",
-      facilityId: "Cơ sở Cầu Giấy",
+      courseCode: "IELTS-INT",
+      facilityName: "Cơ sở Cầu Giấy",
       amount: 8000000,
       notes: "Tư vấn qua AI Voice Agent - hẹn đóng phí tại cơ sở"
     },
@@ -181,15 +188,16 @@ export const MCP_TOOLS: McpToolDefinition[] = [
     inputSchema: {
       type: "object",
       properties: {
-        studentId: { type: "string", description: "ID hoặc Mã học viên (VD: HV0001)" },
+        studentCode: { type: "string", description: "Mã học viên (VD: HV0001)" },
+        studentId: { type: "string", description: "ID học viên trong CSDL (tùy chọn thay thế cho studentCode)" },
         type: { type: "string", enum: ["LEAVE", "INFO", "SUPPORT", "COMPLAINT", "CALL_BACK"], description: "Loại yêu cầu hỗ trợ" },
         content: { type: "string", description: "Nội dung chi tiết yêu cầu" },
         priority: { type: "string", enum: ["LOW", "NORMAL", "HIGH", "URGENT"], description: "Mức độ ưu tiên" }
       },
-      required: ["studentId", "type", "content"]
+      required: ["content"]
     },
     sampleArguments: {
-      studentId: "HV0001",
+      studentCode: "HV0001",
       type: "LEAVE",
       content: "Xin nghỉ phép buổi ngày 08/10 do bận việc gia đình",
       priority: "NORMAL"
@@ -208,9 +216,13 @@ export const MCP_TOOLS: McpToolDefinition[] = [
     inputSchema: {
       type: "object",
       properties: {
+        studentCode: {
+          type: "string",
+          description: "Mã học viên (VD: HV0001, HV0002)",
+        },
         studentId: {
           type: "string",
-          description: "Mã học viên (VD: HV0001), ID hoặc tên học viên",
+          description: "ID học viên trong CSDL hoặc họ tên (tùy chọn thay thế cho studentCode)",
         },
         type: {
           type: "string",
@@ -218,10 +230,9 @@ export const MCP_TOOLS: McpToolDefinition[] = [
           description: "Loại báo cáo cần xuất: 'ACADEMIC_RESULTS' (Kết quả học tập, điểm số) hoặc 'PROGRESS_OVERVIEW' (Tổng quan quá trình, chuyên cần, tình hình hiện tại)",
         },
       },
-      required: ["studentId"],
     },
     sampleArguments: {
-      studentId: "HV0001",
+      studentCode: "HV0001",
       type: "ACADEMIC_RESULTS",
     },
     sampleResponse: {
@@ -249,7 +260,9 @@ export const MCP_TOOLS: McpToolDefinition[] = [
       properties: {
         campaignCode: { type: "string", description: "Mã chiến dịch cụ thể (VD: CAMP-BACK2SCHOOL-2025, CAMP-RETENTION-MBA)" },
         targetAudience: { type: "string", enum: ["KIDS", "TEEN", "ADULT_MBA", "ALL"], description: "Đối tượng học viên cần tư vấn ưu đãi (KIDS, TEEN, ADULT_MBA, ALL)" },
-        facilityId: { type: "string", description: "ID hoặc tên cơ sở (VD: Cầu Giấy, Bình Thạnh, Quận 7)" },
+        facilityName: { type: "string", description: "Tên cơ sở học (VD: Cầu Giấy, Bình Thạnh, Quận 7)" },
+        facilityCode: { type: "string", description: "Mã cơ sở học (VD: CS-CG, CS-BT)" },
+        facilityId: { type: "string", description: "ID cơ sở trong CSDL (tùy chọn)" },
         limit: { type: "number", description: "Số lượng sản phẩm tối đa trả về (mặc định 6)" }
       }
     },
@@ -329,7 +342,7 @@ export async function executeMcpTool(
 
     // 1. search_students
     if (toolName === "search_students") {
-      const query = (args?.query as string) || "";
+      const query = ((args?.query || args?.q || args?.search || args?.keyword) as string) || "";
       const students = await prisma.student.findMany({
         where: {
           OR: [
@@ -357,13 +370,14 @@ export async function executeMcpTool(
 
     // 2. get_student_info
     if (toolName === "get_student_info") {
-      const identifier = (args?.studentId as string) || "";
-      if (!identifier) throw new Error("Missing required argument: studentId");
+      const identifier =
+        ((args?.studentCode || args?.studentId || args?.code || args?.id) as string) || "";
+      if (!identifier) throw new Error("Missing required argument: studentCode (hoặc studentId)");
 
-      // Find by ID or code
+      // Find by code, ID or phone
       const student = await prisma.student.findFirst({
         where: {
-          OR: [{ id: identifier }, { code: identifier }],
+          OR: [{ code: identifier }, { id: identifier }, { phone: identifier }],
         },
         include: {
           parent: true,
@@ -398,7 +412,7 @@ export async function executeMcpTool(
 
     // 3. get_parent_children
     if (toolName === "get_parent_children") {
-      const phone = (args?.phone as string) || context.parentPhone;
+      const phone = ((args?.phone || args?.parentPhone) as string) || context.parentPhone;
       if (!phone) throw new Error("Missing required argument: phone");
 
       const parent = await prisma.parent.findUnique({
@@ -439,13 +453,14 @@ export async function executeMcpTool(
 
     // 4. find_available_classes
     if (toolName === "find_available_classes") {
-      const courseIdent = (args?.courseId as string) || "";
-      if (!courseIdent) throw new Error("Missing required argument: courseId");
+      const courseIdent =
+        ((args?.courseCode || args?.courseId || args?.code || args?.course) as string) || "";
+      if (!courseIdent) throw new Error("Missing required argument: courseCode (hoặc courseId)");
 
-      // Find course by ID or code
+      // Find course by code, ID, or name
       const course = await prisma.course.findFirst({
         where: {
-          OR: [{ id: courseIdent }, { code: courseIdent }, { name: { contains: courseIdent } }],
+          OR: [{ code: courseIdent }, { id: courseIdent }, { name: { contains: courseIdent } }],
         },
       });
 
@@ -476,17 +491,21 @@ export async function executeMcpTool(
 
     // 5. create_makeup_request
     if (toolName === "create_makeup_request") {
-      const { studentId: studentIdent, missedScheduleId, targetScheduleId, notes } = args as Record<string, string>;
+      const studentIdent =
+        ((args?.studentCode || args?.studentId || args?.code || args?.id) as string) || "";
+      const missedScheduleId = (args?.missedScheduleId as string) || "";
+      const targetScheduleId = (args?.targetScheduleId as string) || "";
+      const notes = (args?.notes as string) || "";
 
       if (!studentIdent || !missedScheduleId || !targetScheduleId) {
-        throw new Error("Missing required arguments: studentId, missedScheduleId, targetScheduleId");
+        throw new Error("Missing required arguments: studentCode (hoặc studentId), missedScheduleId, targetScheduleId");
       }
 
       const student = await prisma.student.findFirst({
-        where: { OR: [{ id: studentIdent }, { code: studentIdent }] },
+        where: { OR: [{ code: studentIdent }, { id: studentIdent }] },
       });
 
-      if (!student) throw new Error(`Student not found: ${studentIdent}`);
+      if (!student) throw new Error(`Student not found with code/id: ${studentIdent}`);
 
       // Check attendance
       const attendance = await prisma.attendance.findUnique({
@@ -564,10 +583,17 @@ export async function executeMcpTool(
 
     // 6. create_order
     if (toolName === "create_order") {
-      let { parentName, parentPhone, courseId: courseIdent, facilityId: facilityIdent, amount, notes } = args as any;
+      let parentName = (args?.parentName as string) || "";
+      let parentPhone = (args?.parentPhone as string) || "";
+      const courseIdent =
+        ((args?.courseCode || args?.courseId || args?.code || args?.course) as string) || "";
+      const facilityIdent =
+        ((args?.facilityName || args?.facilityCode || args?.facilityId || args?.facility) as string) || "";
+      const amount = args?.amount;
+      const notes = (args?.notes as string) || "";
 
       if (!courseIdent) {
-        throw new Error("Missing required argument: courseId (ID, code hoặc tên khóa học)");
+        throw new Error("Missing required argument: courseCode (hoặc courseId)");
       }
 
       // Extract phone from context if omitted
@@ -584,11 +610,11 @@ export async function executeMcpTool(
         parentName = existingParent ? existingParent.name : "Phụ huynh (Đăng ký qua Orchexa AI)";
       }
 
-      // Resolve course
+      // Resolve course by code, ID, or name
       const course = await prisma.course.findFirst({
-        where: { OR: [{ id: courseIdent }, { code: courseIdent }, { name: { contains: courseIdent } }] },
+        where: { OR: [{ code: courseIdent }, { id: courseIdent }, { name: { contains: courseIdent } }] },
       });
-      if (!course) throw new Error(`Course not found: ${courseIdent}`);
+      if (!course) throw new Error(`Course not found with code/id: ${courseIdent}`);
 
       // Resolve facility with fallback
       let facility = null;
@@ -603,7 +629,7 @@ export async function executeMcpTool(
       if (!facility) throw new Error("No active facility found in system.");
 
       const code = `ORD-${Date.now().toString().slice(-6)}`;
-      const parsedAmount = typeof amount === "number" ? amount : parseFloat(amount) || course.fee || 0;
+      const parsedAmount = typeof amount === "number" ? amount : parseFloat(String(amount)) || course.fee || 0;
 
       const order = await prisma.order.create({
         data: {
@@ -645,16 +671,20 @@ export async function executeMcpTool(
 
     // 7. create_support_request
     if (toolName === "create_support_request") {
-      const { studentId: studentIdent, type, content, priority } = args as Record<string, string>;
+      const studentIdent =
+        ((args?.studentCode || args?.studentId || args?.code || args?.id) as string) || "";
+      const type = (args?.type as string) || "INFO";
+      const content = (args?.content as string) || "";
+      const priority = (args?.priority as string) || "NORMAL";
 
-      if (!studentIdent || !type || !content) {
-        throw new Error("Missing required arguments: studentId, type, content");
+      if (!studentIdent || !content) {
+        throw new Error("Missing required arguments: studentCode (hoặc studentId), content");
       }
 
       const student = await prisma.student.findFirst({
-        where: { OR: [{ id: studentIdent }, { code: studentIdent }] },
+        where: { OR: [{ code: studentIdent }, { id: studentIdent }] },
       });
-      if (!student) throw new Error(`Student not found: ${studentIdent}`);
+      if (!student) throw new Error(`Student not found with code/id: ${studentIdent}`);
 
       const req = await prisma.supportRequest.create({
         data: {
@@ -693,15 +723,17 @@ export async function executeMcpTool(
     // 8. generate_student_report
     if (toolName === "generate_student_report") {
       const studentIdent =
-        (args?.studentId as string) ||
         (args?.studentCode as string) ||
+        (args?.studentId as string) ||
+        (args?.code as string) ||
+        (args?.id as string) ||
         (args?.studentName as string) ||
         (args?.query as string) ||
         "";
       const rawType = (args?.type as string) || "ACADEMIC_RESULTS";
 
       if (!studentIdent) {
-        throw new Error("Missing required argument: studentId (Mã học viên hoặc Tên/ID học viên)");
+        throw new Error("Missing required argument: studentCode (hoặc studentId)");
       }
 
       const hostBase = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || "";
@@ -747,7 +779,8 @@ export async function executeMcpTool(
     if (toolName === "get_promotions") {
       const campaignCode = (args?.campaignCode as string) || "";
       const targetAudience = (args?.targetAudience as string) || "";
-      const facilityIdent = (args?.facilityId as string) || "";
+      const facilityIdent =
+        ((args?.facilityName || args?.facilityCode || args?.facilityId || args?.facility) as string) || "";
       const limit = typeof args?.limit === "number" ? args.limit : 6;
 
       // Find active campaigns or specific campaign

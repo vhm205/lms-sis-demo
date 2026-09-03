@@ -18,30 +18,47 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { studentId, type, content, priority } = body;
+    const studentIdent = body.studentCode || body.studentId || body.code;
+    const { type, content, priority } = body;
 
-    if (!studentId || !type || !content) {
-      return NextResponse.json({ error: "Missing required fields (studentId, type, content)" }, { status: 400 });
+    if (!studentIdent || !content) {
+      return NextResponse.json(
+        { error: "Missing required fields (studentCode/studentId, content)", code: "MISSING_FIELDS" },
+        { status: 400 }
+      );
+    }
+
+    const student = await prisma.student.findFirst({
+      where: { OR: [{ code: studentIdent }, { id: studentIdent }] },
+    });
+
+    if (!student) {
+      return NextResponse.json(
+        { error: `Không tìm thấy học viên với mã/ID: ${studentIdent}`, code: "STUDENT_NOT_FOUND" },
+        { status: 404 }
+      );
     }
 
     if (auth.isParent && auth.parent) {
-      const student = await prisma.student.findUnique({ where: { id: studentId } });
-      if (!student || student.parentId !== auth.parent.id) {
-        return NextResponse.json({
-          error: "Forbidden: Bạn không có quyền gửi yêu cầu cho học sinh này.",
-          code: "FORBIDDEN_PARENT_ACCESS"
-        }, { status: 403 });
+      if (student.parentId !== auth.parent.id) {
+        return NextResponse.json(
+          {
+            error: "Forbidden: Bạn không có quyền gửi yêu cầu cho học sinh này.",
+            code: "FORBIDDEN_PARENT_ACCESS",
+          },
+          { status: 403 }
+        );
       }
     }
 
     const req = await prisma.supportRequest.create({
       data: {
-        studentId,
-        type,
+        studentId: student.id,
+        type: type || "INFO",
         content,
         priority: priority || "NORMAL",
-        status: "NEW"
-      }
+        status: "NEW",
+      },
     });
 
     await prisma.activityLog.create({
