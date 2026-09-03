@@ -4,14 +4,16 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 export async function createLead(formData: FormData) {
-  const name = formData.get("name") as string;
-  const phone = formData.get("phone") as string;
-  const courseId = formData.get("courseId") as string || undefined;
-  const facilityId = formData.get("facilityId") as string || undefined;
-  const notes = formData.get("notes") as string || undefined;
+  const name = (formData.get("name") as string)?.trim();
+  const phone = (formData.get("phone") as string)?.trim();
+  const rawCourseId = formData.get("courseId") as string;
+  const courseId = (!rawCourseId || rawCourseId === "none") ? undefined : rawCourseId;
+  const rawFacilityId = formData.get("facilityId") as string;
+  const facilityId = (!rawFacilityId || rawFacilityId === "none") ? undefined : rawFacilityId;
+  const notes = (formData.get("notes") as string)?.trim() || undefined;
 
   if (!name || !phone) {
-    return { error: "Missing name or phone" };
+    return { error: "Vui lòng nhập tên và SĐT khách hàng" };
   }
 
   try {
@@ -22,7 +24,7 @@ export async function createLead(formData: FormData) {
     revalidatePath("/");
     return { success: true };
   } catch (error: any) {
-    return { error: error.message };
+    return { error: error.message || "Có lỗi xảy ra khi tạo khách hàng" };
   }
 }
 
@@ -41,11 +43,13 @@ export async function updateLeadStatus(id: string, status: string) {
 }
 
 export async function updateLead(id: string, formData: FormData) {
-  const name = formData.get("name") as string;
-  const phone = formData.get("phone") as string;
-  const courseId = (formData.get("courseId") as string) || null;
-  const facilityId = (formData.get("facilityId") as string) || null;
-  const notes = (formData.get("notes") as string) || null;
+  const name = (formData.get("name") as string)?.trim();
+  const phone = (formData.get("phone") as string)?.trim();
+  const rawCourseId = formData.get("courseId") as string;
+  const courseId = (!rawCourseId || rawCourseId === "none") ? null : rawCourseId;
+  const rawFacilityId = formData.get("facilityId") as string;
+  const facilityId = (!rawFacilityId || rawFacilityId === "none") ? null : rawFacilityId;
+  const notes = (formData.get("notes") as string)?.trim() || null;
   const status = (formData.get("status") as string) || "NEW";
 
   if (!name || !phone) {

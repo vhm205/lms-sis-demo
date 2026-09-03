@@ -1,95 +1,68 @@
-# Hướng Dẫn Xử Lý Thẻ Khuyến Mãi (Carousel) & Hành Động Các Nút CTA Dành Cho Orchexa AI Agent
+# Hướng Dẫn Xử Lý Thẻ Khuyến Mãi (Carousel) & Cấu Hình 2 Nút CTA Dành Cho Orchexa AI Agent
 
 ## Mục tiêu
-- Hướng dẫn chi tiết cho AI Agent xử lý chính xác, tự động và nhất quán khi người dùng xem và bấm vào các nút hành động (Card Buttons) trên widget Rich Card Carousel của Orchexa.
+- Hướng dẫn chi tiết cho AI Agent xử lý chính xác, tự động và nhất quán khi người dùng xem và bấm vào 2 nút hành động (Primary Button & Secondary Button) trên widget Rich Card Carousel của Orchexa.
 - Đồng bộ hành vi của Agent với hệ thống quản trị học vụ LMS/SIS thông qua các công cụ MCP Tools (`get_promotions`, `create_order`, `find_available_classes`).
 
 ---
 
-## 1. Nguyên tắc Kích hoạt và Trưng bày Sản phẩm (Product Carousel)
-- Khi người dùng hỏi về: học phí, khuyến mãi, voucher, chương trình hè, tựu trường, hoặc có nhu cầu tìm khóa học mới:
-  - **Gọi MCP Tool:** `get_promotions`
-  - **Tham số:**
-    - `targetAudience`: `"KIDS"` (nếu là học sinh tiểu học/mầm non), `"TEEN"` (nếu là THCS/THPT), `"ADULT_MBA"` (nếu là học viên người đi làm/sau đại học), hoặc `"ALL"`.
-    - `facilityId`: Tên hoặc mã cơ sở người dùng đang quan tâm (nếu có).
-- Hệ thống SIS sẽ trả về danh sách thẻ sản phẩm chuẩn định dạng Carousel (ảnh, tên khóa học, giá niêm yết, giá ưu đãi, tỷ lệ giảm, số suất còn lại và 2 nút CTA).
-- Agent luôn giới thiệu ngắn gọn 1-2 câu mở đầu tự nhiên, không liệt kê lại toàn bộ chữ nếu widget đã hiển thị card.
+## 1. Kiến Trúc 2 Nút CTA Trên Orchexa Widget (Primary & Secondary Button)
+Orchexa Widget giới hạn tối đa 2 nút trên mỗi Card để tối ưu trải nghiệm và không gian hiển thị trên di động:
+- **PRIMARY BUTTON (Nút chính nổi bật):** Nút hành động chuyển đổi chính (*High-intent Conversion CTA*). Khuyến nghị đặt là **"Nhận voucher"** (hoặc **"Đăng ký ngay"**).
+- **SECONDARY BUTTON (Nút phụ viền mỏng):** Nút tìm hiểu thông tin (*Low-intent Engagement CTA*). Khuyến nghị đặt là **"Xem chi tiết"** (hoặc **"Lộ trình học"**).
+
+> [!WARNING]
+> **Lưu ý về Message Template Placeholders của Orchexa:**
+> Orchexa chỉ hỗ trợ 4 placeholder: `{name}`, `{price}`, `{id}`, `{user_id}`.
+> **KHÔNG DÙNG** `{discount_percent}` vì Orchexa không nhận diện biến này trong template và sẽ in nguyên chữ `{discount_percent}` vào chat.
 
 ---
 
-## 2. Quy trình Xử lý Button CTA 1: "Nhận voucher" / "Nhận ưu đãi %"
-- **Cơ chế kích hoạt từ Widget:**
-  - Action: `Chat message`
-  - Template gửi đến chat: `"Tôi muốn nhận ưu đãi {discount_percent}% cho khóa {name}"`
-- **Nhận diện Intent:** Khách hàng quan tâm và muốn nhận mã ưu đãi, voucher giảm giá.
-- **Quy trình xử lý của Agent:**
-  1. **Bước 1: Xác nhận ngay mã ưu đãi dành riêng cho khách hàng.**
-     - Định dạng mã: `VOUCHER-[MÃ_KHÓA]-[PHẦN_TRĂM]` (Ví dụ: `VOUCHER-MOVERS-20`).
-  2. **Bước 2: Nêu rõ quyền lợi thiết thực:**
-     - Số tiền tiết kiệm được: Trừ trực tiếp vào học phí (nêu rõ giá gốc gạch ngang và giá sau giảm).
-     - Quà tặng đính kèm (nếu có): Balo, bộ giáo trình bản quyền, buổi mock test speaking 1:1.
-  3. **Bước 3: Nhấn mạnh tính khan hiếm theo số suất thực tế (`stock`):**
-     - *"Hiện tại suất ưu đãi này chỉ còn [X] suất tại cơ sở [Tên cơ sở]."*
-  4. **Bước 4: Proactive Call-to-action (Giữ chỗ):**
-     - Chủ động hỏi: *"Anh/chị có muốn em giữ chỗ lớp học gần nhất tại cơ sở [Tên cơ sở] cho bé để kịp nhận voucher này không ạ?"*
+## 2. Cấu Hình Khuyến Nghị & Quy Trình Xử Lý Cho 2 Nút
+
+### 🔹 Nút Chính (PRIMARY BUTTON): "Nhận voucher" (hoặc "Nhận ưu đãi")
+- **Cấu hình trên Orchexa:**
+  - *Button label:* `Nhận voucher`
+  - *Action:* `Chat message`
+  - *Message template:* `Tôi muốn nhận ưu đãi cho khóa {name} với giá {price}`
+- **Tại sao đây là lựa chọn tối ưu nhất?**
+  - Khách hàng không bị áp lực "phải mua ngay" nên tỷ lệ click cao hơn gấp 3 lần so với nút "Đăng ký ngay".
+  - Sau khi khách click nhận voucher, Agent sẽ tiếp quản cuộc hội thoại và khéo léo chốt sang bước Đăng ký giữ chỗ!
+- **Quy trình xử lý của Agent khi nhận tin nhắn:**
+  1. **Bước 1:** Xác nhận ngay voucher độc quyền cho khách hàng:
+     > *"Dạ em xin gửi anh/chị mã ưu đãi: `VOUCHER-[MÃ KHÓA]` áp dụng cho khóa {name} với mức học phí ưu đãi chỉ còn {price} (đã trừ trực tiếp từ giá niêm yết) ạ!"*
+  2. **Bước 2:** Nêu quyền lợi quà tặng kèm (balo, tài liệu, suất mock test).
+  3. **Bước 3:** Nhấn mạnh tính khan hiếm (trường `stock`):
+     > *"Hiện tại suất ưu đãi này chỉ còn [X] suất tại cơ sở."*
+  4. **Bước 4: Chốt chuyển đổi tự nhiên sang Đăng Ký Giữ Chỗ:**
+     > *"Anh/chị có muốn em đăng ký giữ chỗ lớp học gần nhất cho bé để bảo lưu mức giá ưu đãi {price} này luôn không ạ?"*
+  5. **Bước 5: Khi khách hàng đồng ý ("Có", "Ok", "Giữ chỗ cho chị"):**
+     - Agent lập tức gọi MCP Tool: **`create_order`** với `courseId` và `amount={price}`.
+     - Nhận về `orderCode` (`ORD-XXXXXX`) và gửi hướng dẫn thanh toán cho phụ huynh!
 
 ---
 
-## 3. Quy trình Xử lý Button CTA 2: "Đăng ký ngay"
-- **Cơ chế kích hoạt từ Widget:**
-  - Action: `Chat message`
-  - Template gửi đến chat: `"Tôi muốn đăng ký ghi danh khóa {name} với giá ưu đãi {price}"`
-- **Nhận diện Intent:** Khách hàng đã quyết định đăng ký học với mức giá ưu đãi.
-- **Quy trình xử lý của Agent:**
-  1. **Bước 1: Trích xuất thông tin người dùng từ context hội thoại:**
-     - Tên phụ huynh (`parentName`)
-     - Số điện thoại phụ huynh (`parentPhone`)
-     - Tên/Mã khóa học (`courseId`)
-     - Giá ưu đãi (`amount` = `salePrice`)
-     - Cơ sở mong muốn (`facilityId`)
-  2. **Bước 2: Tự động gọi MCP Tool: `create_order`**
-     - Tham số gọi tool:
-       ```json
-       {
-         "courseId": "{product_code hoặc course_name}",
-         "amount": {sale_price},
-         "parentPhone": "{parent_phone}",
-         "parentName": "{parent_name}",
-         "notes": "Đăng ký từ nút Đăng ký ngay trên Orchexa Carousel"
-       }
-       ```
-  3. **Bước 3: Tiếp nhận phản hồi từ SIS (trả về `orderCode`, ví dụ: `ORD-882194`).**
-  4. **Bước 4: Phản hồi xác nhận chuyên nghiệp cho khách hàng:**
-     - Chúc mừng khách hàng đã đăng ký thành công.
-     - Cung cấp mã đơn đăng ký chính thức: `ORD-XXXXXX`.
-     - Xác nhận số tiền học phí ưu đãi cần thanh toán.
-     - Hướng dẫn bước tiếp theo: *"Bộ phận học vụ cơ sở sẽ liên hệ trong vòng 30 phút để xác nhận lịch học chính thức và gửi hướng dẫn thanh toán VietQR cho anh/chị nhé!"*
-
----
-
-## 4. Quy trình Xử lý Button CTA 3: "Xem chi tiết" / "Lộ trình học"
-- **Cơ chế kích hoạt từ Widget:**
-  - Action: `Chat message` (hoặc `Open URL` dẫn link)
-  - Template gửi đến chat: `"Tư vấn thêm cho tôi về khóa {name}"`
-- **Nhận diện Intent:** Khách hàng muốn tìm hiểu kỹ về nội dung học, đề cương, lịch học và giảng viên trước khi quyết định.
-- **Quy trình xử lý của Agent:**
-  1. **Bước 1:** Gọi MCP Tool: `find_available_classes` với `courseId` tương ứng để tra cứu lớp đang mở.
-  2. **Bước 2:** Trả lời súc tích và rõ ràng về 3 thông tin cốt lõi:
-     - Thời lượng & Số buổi: Ví dụ 32 buổi, 2 buổi/tuần.
-     - Mục tiêu đầu ra: Ví dụ Đạt chứng chỉ Cambridge A1 Movers, tự tin giao tiếp phản xạ 4 kỹ năng.
+### 🔹 Nút Phụ (SECONDARY BUTTON): "Xem chi tiết" (hoặc "Lộ trình học")
+- **Cấu hình trên Orchexa:**
+  - *Button label:* `Xem chi tiết` *(thay cho chữ tiếng Anh "Details")*
+  - *Action:* `Chat message`
+  - *Message template:* `Tư vấn chi tiết cho tôi về khóa {name}`
+- **Quy trình xử lý của Agent khi nhận tin nhắn:**
+  1. **Bước 1:** Gọi MCP Tool: `find_available_classes` với `courseId` để tra cứu các lớp đang mở.
+  2. **Bước 2:** Phản hồi súc tích 3 điểm trọng tâm:
+     - Thời lượng & Số buổi: 32 buổi, lộ trình toàn diện 4 kỹ năng.
+     - Mục tiêu đầu ra: Đạt chứng chỉ chuẩn quốc tế, tự tin giao tiếp phản xạ.
      - Đội ngũ giảng viên: 100% giáo viên bản ngữ kết hợp trợ giảng sư phạm kèm cặp.
-  3. **Bước 3:** Cung cấp thông tin lớp học thực tế gần nhất:
-     - Thứ/ngày/giờ học và cơ sở còn chỗ trống.
+  3. **Bước 3:** Cung cấp ca học thực tế:
+     > *"Hiện cơ sở gần nhất đang có lớp học Thứ 3 - Thứ 5 (18h00 - 19h30) còn chỗ trống ạ."*
   4. **Bước 4: Hướng dẫn Next Step:**
-     - Mời phụ huynh đặt lịch test trình độ miễn phí hoặc trải nghiệm 1 buổi học thử.
+     - Mời phụ huynh đưa bé đến kiểm tra trình độ miễn phí hoặc trải nghiệm 1 buổi học thử.
 
 ---
 
-## 5. Các Quy Tắc An Toàn & Xử Lý Ngoại Lệ (Safety & Edge Cases)
-- **Hết suất ưu đãi (`stock = 0`):**
-  - Tuyệt đối không gọi `create_order` với giá ưu đãi cũ nếu chương trình đã thông báo hết suất.
-  - Giải thích lịch sự: *"Dạ chương trình ưu đãi này vừa hết suất sáng nay. Tuy nhiên trung tâm đang có chương trình [Tên chiến dịch khác], em xin phép gửi anh/chị tham khảo nhé!"*
-- **Khách hàng chưa để lại số điện thoại khi bấm "Đăng ký ngay":**
-  - Nhẹ nhàng xin số điện thoại để hoàn tất đơn: *"Dạ để em tạo đơn giữ mức học phí ưu đãi này vào hệ thống SIS, anh/chị cho em xin số điện thoại liên hệ nhé ạ!"*
-- **Phụ huynh hỏi về chính sách bảo lưu / hoàn phí:**
-  - Trả lời đúng theo chính sách: Học phí ưu đãi theo chiến dịch được bảo lưu tối đa 6 tháng hoặc chuyển nhượng cho anh/chị/em ruột nếu có lý do chính đáng.
+## 3. Kịch Bản Tùy Chọn Thay Thế: Nút "Đăng ký ngay" (Flash Sale)
+Nếu bạn muốn bỏ qua bước nhận voucher và chốt đơn ngay:
+- **PRIMARY BUTTON:** `Đăng ký ngay`
+  - *Template:* `Tôi muốn đăng ký ghi danh khóa {name} với giá {price}`
+  - *Hành vi:* Agent gọi MCP Tool `create_order` ngay lập tức, xuất mã `ORD-XXXXXX` và gửi hướng dẫn thanh toán.
+- **SECONDARY BUTTON:** `Xem chi tiết` (tư vấn lộ trình).

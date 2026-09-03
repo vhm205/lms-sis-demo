@@ -273,7 +273,7 @@ export function ScheduleClient({ schedules, classes, rooms, teachers }: { schedu
             </DialogTitle>
           </DialogHeader>
           {editingSchedule && (
-            <form action={handleUpdate} className="grid gap-4 py-3">
+            <form key={editingSchedule.id} action={handleUpdate} className="grid gap-4 py-3">
               <div className="grid gap-1.5">
                 <Label className="text-xs font-bold font-heading">Lớp học</Label>
                 <Select name="classId" defaultValue={editingSchedule.classId} required>

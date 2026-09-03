@@ -216,7 +216,7 @@ export function ClassesClient({ classes, courses, facilities, teachers }: { clas
             </DialogTitle>
           </DialogHeader>
           {editingClass && (
-            <form action={handleUpdate} className="grid gap-4 py-3">
+            <form key={editingClass.id} action={handleUpdate} className="grid gap-4 py-3">
               <div className="grid grid-cols-2 gap-3">
                 <div className="grid gap-1.5">
                   <Label className="text-xs font-bold font-heading">Mã lớp</Label>

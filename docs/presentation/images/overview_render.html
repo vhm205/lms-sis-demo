@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Overview Demo Flow - High Contrast Large Text</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      width: 2752px;
+      height: 1536px;
+      overflow: hidden;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #eef2f6;
+      color: #0f172a;
+      -webkit-font-smoothing: antialiased;
+    }
+    .panel-box {
+      background: #ffffff;
+      border: 3px solid #cbd5e1;
+      border-radius: 24px;
+      box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.07);
+    }
+    .panel-blue-header {
+      background: #1e3a8a; /* Deep Navy Blue */
+      color: #ffffff;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      padding: 16px 28px;
+    }
+  </style>
+</head>
+<body class="p-8 flex flex-col justify-between">
+
+  <!-- TOP TITLE BANNER -->
+  <header class="w-full h-[110px] bg-white rounded-3xl border-3 border-slate-300 px-10 flex items-center justify-between shadow-md">
+    <div class="flex items-center gap-6">
+      <div class="w-20 h-20 rounded-2xl bg-blue-700 flex items-center justify-center font-black text-white text-4xl shadow-md">
+        OX
+      </div>
+      <div>
+        <div class="flex items-center gap-5">
+          <h1 class="text-4xl font-black tracking-tight text-slate-950">
+            Cách mạng hóa CSKH Giáo dục: Tích hợp Orchexa AI & EduCenter SIS/LMS
+          </h1>
+          <span class="text-lg px-4 py-1.5 rounded-full bg-blue-100 text-blue-900 border-2 border-blue-300 font-extrabold uppercase tracking-wide">
+            Post-Sales Operations
+          </span>
+        </div>
+        <p class="text-2xl font-bold text-slate-700 mt-1">
+          Kênh tiếp nhận: <span class="text-blue-700 font-extrabold underline decoration-blue-500">Web Portal & Mobile App (PWA)</span> • Phản hồi tức thì 24/7 • Đồng bộ EduCenter Realtime
+        </p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-5">
+      <div class="flex items-center gap-3 px-6 py-3 rounded-2xl bg-emerald-50 border-3 border-emerald-300">
+        <span class="w-4 h-4 rounded-full bg-emerald-600 animate-pulse"></span>
+        <span class="text-xl font-black text-emerald-950">Channels: Web Portal & PWA</span>
+      </div>
+      <div class="text-xl font-black text-slate-800 bg-slate-100 px-6 py-3 rounded-2xl border-3 border-slate-300">
+        5 SLIDES OVERVIEW
+      </div>
+    </div>
+  </header>
+
+  <!-- TOP ROW: 3 SLIDE PANELS (Slide 1, Slide 2, Slide 3) -->
+  <div class="grid grid-cols-12 gap-7 h-[660px]">
+
+    <!-- SLIDE 1: OPERATIONAL PAIN POINTS (4 cols) -->
+    <div class="col-span-4 panel-box flex flex-col overflow-hidden">
+      <div class="panel-blue-header flex items-center justify-between">
+        <div>
+          <span class="text-base font-extrabold text-blue-200 tracking-wider uppercase">SLIDE 1: TỪ ĐIỂM NGHẼN ĐẾN TỰ ĐỘNG HÓA</span>
+          <h2 class="text-2xl font-black text-white mt-0.5">3 "Nút thắt cổ chai" CSKH truyền thống</h2>
+        </div>
+        <span class="px-3.5 py-1.5 rounded-xl text-sm font-black bg-rose-500 text-white uppercase">
+          Điểm Nghẽn
+        </span>
+      </div>
+
+      <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+        
+        <!-- Pain 1 -->
+        <div class="p-4 rounded-2xl bg-slate-50 border-2 border-slate-300 flex items-start gap-4">
+          <div class="w-16 h-16 rounded-2xl bg-amber-100 border-2 border-amber-300 flex items-center justify-center text-amber-800 text-3xl font-black flex-shrink-0">
+            ⏱️
+          </div>
+          <div>
+            <div class="text-2xl font-black text-slate-950">1. Xin nghỉ & Học bù thủ công</div>
+            <div class="text-xl font-bold text-amber-800 mt-1">Tốn 15–30 phút / yêu cầu</div>
+            <p class="text-lg font-semibold text-slate-600 mt-0.5">
+              Phụ huynh nhắn xin nghỉ rải rác; giáo vụ phải mở 3–4 màn hình sổ sách dò lớp cùng trình độ, dễ nhầm và quá tải phòng.
+            </p>
+          </div>
+        </div>
+
+        <!-- Pain 2 (UPDATED: 24/7 Academic Report) -->
+        <div class="p-4 rounded-2xl bg-blue-50 border-2 border-blue-300 flex items-start gap-4">
+          <div class="w-16 h-16 rounded-2xl bg-blue-100 border-2 border-blue-400 flex items-center justify-center text-blue-800 text-3xl font-black flex-shrink-0">
+            📊
+          </div>
+          <div>
+            <div class="text-2xl font-black text-slate-950">2. Thiếu báo cáo học tập 24/7</div>
+            <div class="text-xl font-bold text-blue-800 mt-1">Phụ huynh chờ đợi, giáo vụ quá tải</div>
+            <p class="text-lg font-semibold text-slate-600 mt-0.5">
+              Thay thế can thiệp muộn: Phụ huynh sốt ruột hỏi điểm & nhận xét; giáo vụ phải hỏi thầy cô và tổng hợp thủ công mất nhiều ngày.
+            </p>
+          </div>
+        </div>
+
+        <!-- Pain 3 (UPDATED: Marketing Campaign) -->
+        <div class="p-4 rounded-2xl bg-indigo-50 border-2 border-indigo-300 flex items-start gap-4">
+          <div class="w-16 h-16 rounded-2xl bg-indigo-100 border-2 border-indigo-400 flex items-center justify-center text-indigo-800 text-3xl font-black flex-shrink-0">
+            🎯
+          </div>
+          <div>
+            <div class="text-2xl font-black text-slate-950">3. Chưa tự đề xuất Marketing tái tục</div>
+            <div class="text-xl font-bold text-rose-700 mt-1">Tỷ lệ drop-out 20% – 30%</div>
+            <p class="text-lg font-semibold text-slate-600 mt-0.5">
+              Khi học sinh sắp kết thúc khóa hoặc yếu kỹ năng, thiếu cơ chế tự đề xuất lộ trình nâng cao và voucher ưu đãi để giữ chân.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SLIDE 2: INTEGRATION ARCHITECTURE (4 cols) -->
+    <div class="col-span-4 panel-box flex flex-col overflow-hidden">
+      <div class="panel-blue-header flex items-center justify-between">
+        <div>
+          <span class="text-base font-extrabold text-blue-200 tracking-wider uppercase">SLIDE 2: KIẾN TRÚC TÍCH HỢP 2 CHIỀU</span>
+          <h2 class="text-2xl font-black text-white mt-0.5">Orchexa Brain x EduCenter SIS Core</h2>
+        </div>
+        <span class="px-3.5 py-1.5 rounded-xl text-sm font-black bg-blue-500 text-white uppercase">
+          Hai Chiều
+        </span>
+      </div>
+
+      <div class="p-6 flex-1 flex flex-col justify-between">
+        
+        <!-- Channels Diagram -->
+        <div class="grid grid-cols-12 gap-3 items-center my-auto">
+          
+          <!-- Channels (Web Portal & Mobile App PWA) -->
+          <div class="col-span-4 flex flex-col gap-3">
+            <div class="text-center text-sm font-black text-slate-500 uppercase tracking-wider">User Channels</div>
+            
+            <div class="p-4 rounded-2xl bg-blue-50 border-3 border-blue-300 text-center shadow-sm">
+              <div class="text-3xl mb-1">🌐</div>
+              <div class="text-xl font-black text-blue-900">Web Portal</div>
+              <div class="text-base font-bold text-blue-700 mt-0.5">Cổng Học Viên</div>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-indigo-50 border-3 border-indigo-300 text-center shadow-sm">
+              <div class="text-3xl mb-1">📱</div>
+              <div class="text-xl font-black text-indigo-900">Mobile App</div>
+              <div class="text-base font-extrabold text-indigo-700 mt-0.5">PWA Instant App</div>
+            </div>
+          </div>
+
+          <!-- Arrow 1 -->
+          <div class="col-span-1 flex justify-center text-blue-700 text-3xl font-black">
+            ➔
+          </div>
+
+          <!-- Orchexa AI Core (4 cols) -->
+          <div class="col-span-4 p-4 rounded-2xl bg-slate-900 text-white flex flex-col gap-3 shadow-lg">
+            <div class="text-center pb-1 border-b border-slate-700">
+              <span class="text-xs font-black text-blue-400 uppercase tracking-wider">Orchexa Brain</span>
+              <div class="text-lg font-black text-white">Trợ Lý AI Nghiệp Vụ</div>
+            </div>
+
+            <div class="p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-center">
+              <div class="text-sm font-black text-blue-400">Intent Classifier</div>
+              <div class="text-xs font-semibold text-slate-300 mt-0.5">Hiểu đúng câu hỏi & cảm xúc</div>
+            </div>
+
+            <div class="p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-center">
+              <div class="text-sm font-black text-indigo-300">Policy Engine</div>
+              <div class="text-xs font-semibold text-slate-300 mt-0.5">Quy chế đào tạo & học bù</div>
+            </div>
+
+            <div class="p-2.5 rounded-xl bg-emerald-950 border border-emerald-700 text-center">
+              <div class="text-sm font-black text-emerald-400">MCP Protocol & Tools</div>
+              <div class="text-xs font-semibold text-emerald-200 mt-0.5">Report • Promo • Classes</div>
+            </div>
+          </div>
+
+          <!-- Arrow 2 -->
+          <div class="col-span-1 flex justify-center text-blue-700 text-3xl font-black">
+            ⇄
+          </div>
+
+          <!-- EduCenter DB (2 cols) -->
+          <div class="col-span-2 p-3.5 rounded-2xl bg-slate-100 border-3 border-slate-300 text-center flex flex-col justify-center h-full">
+            <div class="text-3xl mb-1 text-emerald-700">🗄️</div>
+            <div class="text-base font-black text-slate-950">EduCenter</div>
+            <div class="text-xs font-bold text-slate-600 mt-0.5">SIS/LMS Core</div>
+            <div class="mt-2 text-[11px] px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900 font-black">
+              Live DB
+            </div>
+          </div>
+
+        </div>
+
+        <div class="p-4 rounded-2xl bg-blue-50 border-2 border-blue-300 text-base text-slate-900 text-center font-bold leading-snug">
+          Kết nối đa kênh (Web Portal / Mobile App PWA) qua MCP & REST API để truy vấn và ghi dữ liệu thời gian thực.
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SLIDE 3: OPERATIONAL MATRIX & USE CASES (4 cols) -->
+    <div class="col-span-4 panel-box flex flex-col overflow-hidden">
+      <div class="panel-blue-header flex items-center justify-between">
+        <div>
+          <span class="text-base font-extrabold text-blue-200 tracking-wider uppercase">SLIDE 3: THỰC THI NGHIỆP VỤ & GIÁ TRỊ</span>
+          <h2 class="text-2xl font-black text-white mt-0.5">Ma trận nhóm kịch bản nghiệp vụ</h2>
+        </div>
+        <span class="px-3.5 py-1.5 rounded-xl text-sm font-black bg-emerald-500 text-white uppercase">
+          Sẵn Sàng
+        </span>
+      </div>
+
+      <div class="p-5 flex-1 flex flex-col justify-between">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b-3 border-slate-300 text-sm text-slate-600 uppercase tracking-wider font-black">
+              <th class="pb-3 w-8 text-center">#</th>
+              <th class="pb-3">Nhóm kịch bản</th>
+              <th class="pb-3">Hành động của AI</th>
+              <th class="pb-3 text-right">Giá trị nghiệp vụ</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y-2 divide-slate-200 text-base font-bold text-slate-800">
+            
+            <!-- Case 1 -->
+            <tr class="hover:bg-slate-50">
+              <td class="py-3 text-center text-blue-700 font-black">1</td>
+              <td class="py-3 text-slate-950 font-black">Daily Ops</td>
+              <td class="py-3 text-slate-700">Tra cứu lịch, xếp học bù 30s</td>
+              <td class="py-3 text-right text-emerald-800 font-black">Giảm 90% giờ giáo vụ</td>
+            </tr>
+
+            <!-- Case 2 -->
+            <tr class="hover:bg-slate-50">
+              <td class="py-3 text-center text-blue-700 font-black">2</td>
+              <td class="py-3 text-slate-950 font-black">Báo cáo 24/7</td>
+              <td class="py-3 text-slate-700">Xuất điểm thi, GPA, nhận xét, PDF</td>
+              <td class="py-3 text-right text-emerald-800 font-black">Chính xác 100%</td>
+            </tr>
+
+            <!-- Case 3 -->
+            <tr class="hover:bg-slate-50">
+              <td class="py-3 text-center text-blue-700 font-black">3</td>
+              <td class="py-3 text-slate-950 font-black">Marketing</td>
+              <td class="py-3 text-slate-700">Đề xuất voucher giảm 15%, giữ chỗ</td>
+              <td class="py-3 text-right text-indigo-800 font-black">Tăng 18% tái tục</td>
+            </tr>
+
+            <!-- Case 4 -->
+            <tr class="hover:bg-slate-50">
+              <td class="py-3 text-center text-blue-700 font-black">4</td>
+              <td class="py-3 text-slate-950 font-black">Handoff</td>
+              <td class="py-3 text-slate-700">Nhận diện bức xúc ➔ Handoff quản lý</td>
+              <td class="py-3 text-right text-amber-800 font-black">Tránh khủng hoảng</td>
+            </tr>
+
+            <!-- Case 5 -->
+            <tr class="hover:bg-slate-50">
+              <td class="py-3 text-center text-blue-700 font-black">5</td>
+              <td class="py-3 text-slate-950 font-black">Học phí</td>
+              <td class="py-3 text-slate-700">Tra cứu công nợ, đối soát minh bạch</td>
+              <td class="py-3 text-right text-blue-800 font-black">An toàn tài chính</td>
+            </tr>
+
+          </tbody>
+        </table>
+
+        <div class="mt-2 p-3.5 rounded-xl bg-emerald-50 border-2 border-emerald-300 flex items-center justify-between text-base font-bold text-emerald-950">
+          <span>💡 <strong>100% On-Demand:</strong> Bắt đầu khi người dùng nhắn tin, không có cảnh báo tự động nền.</span>
+          <span class="text-xs px-2.5 py-1 rounded-md bg-emerald-200 text-emerald-900 font-black uppercase">Active Support</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM ROW: 2 PANELS (Slide 4 Deep Dive, Slide 5 ROI & QC) -->
+  <div class="grid grid-cols-12 gap-7 h-[670px]">
+
+    <!-- SLIDE 4: DEEP DIVE 2 WALKTHROUGHS (8 cols) -->
+    <div class="col-span-8 panel-box flex flex-col overflow-hidden">
+      <div class="panel-blue-header flex items-center justify-between">
+        <div>
+          <span class="text-base font-extrabold text-blue-200 tracking-wider uppercase">SLIDE 4: DEEP DIVE: TỰ ĐỘNG HÓA QUA WEB PORTAL & MOBILE APP (PWA)</span>
+          <h2 class="text-2xl font-black text-white mt-0.5">Trực quan hóa 2 kịch bản chat thực tế</h2>
+        </div>
+        <span class="px-4 py-1.5 rounded-xl text-sm font-black bg-blue-500 text-white uppercase">
+          Live Flow
+        </span>
+      </div>
+
+      <div class="p-7 flex-1 grid grid-cols-2 gap-7">
+        
+        <!-- Case 1: Makeup Booking -->
+        <div class="p-6 rounded-2xl bg-slate-50 border-3 border-slate-300 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 mb-4 border-b-2 border-slate-300">
+              <span class="text-xl font-black text-blue-900 uppercase tracking-wide">CASE 1: BÉ NHẬT MINH (MOVERS)</span>
+              <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-sm font-black">Xong trong 30s</span>
+            </div>
+
+            <!-- Dialogue Steps -->
+            <div class="space-y-4">
+              <div class="p-4 rounded-xl bg-white border-2 border-slate-300 shadow-sm">
+                <div class="text-sm font-black text-blue-700 uppercase mb-1">Phụ huynh nhắn (Web Portal / PWA):</div>
+                <p class="text-lg font-bold text-slate-900 italic">"Hôm nay thứ 3 bé Minh sốt xin nghỉ. Cuối tuần này có lớp Movers nào trống cho bé học bù không em?"</p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-white border-2 border-slate-300 shadow-sm space-y-1">
+                <div class="text-sm font-black text-slate-700 uppercase mb-1">Orchexa AI xử lý thông minh:</div>
+                <div class="text-base font-bold text-slate-800 leading-snug">
+                  ➔ Nhận diện học sinh lớp Cambridge Movers (A1).<br>
+                  ➔ Ghi nhận nghỉ có phép để bảo lưu quyền học bù.<br>
+                  ➔ Quét lớp cùng level còn ghế trống vào Thứ 7 & CN.<br>
+                  ➔ Đề xuất 2 ca học: Sáng T7 (Bình Thạnh) hoặc Sáng CN (Q.7).
+                </div>
+              </div>
+
+              <div class="p-4 rounded-xl bg-emerald-50 border-2 border-emerald-300">
+                <div class="text-sm font-black text-emerald-900 uppercase mb-1">Kết quả chốt lịch tức thì:</div>
+                <p class="text-base font-black text-slate-950">Mẹ chọn Sáng CN ➔ Hệ thống chốt danh sách, gửi lịch học & tên phòng ngay. Giáo vụ không phải mở sổ tìm kiếm.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t-2 border-slate-300 flex items-center justify-between text-base text-slate-700 font-extrabold">
+            <span>Thời gian xử lý: <strong class="text-slate-950 text-xl font-black">30 giây</strong></span>
+            <span class="text-emerald-700 font-black">Tự động hoàn toàn qua Chat</span>
+          </div>
+        </div>
+
+        <!-- Case 2 (Report + Marketing Campaign & Voucher) -->
+        <div class="p-6 rounded-2xl bg-slate-50 border-3 border-slate-300 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 mb-4 border-b-2 border-slate-300">
+              <span class="text-xl font-black text-indigo-900 uppercase tracking-wide">CASE 2: BÁO CÁO 24/7 & MARKETING</span>
+              <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-900 text-sm font-black">Tức thì 24/7</span>
+            </div>
+
+            <!-- Dialogue Steps -->
+            <div class="space-y-4">
+              <div class="p-4 rounded-xl bg-white border-2 border-slate-300 shadow-sm">
+                <div class="text-sm font-black text-indigo-700 uppercase mb-1">Phụ huynh hỏi thăm kết quả học:</div>
+                <p class="text-lg font-bold text-slate-900 italic">"Gửi cho tôi bảng điểm thi giữa kỳ vừa rồi và tình hình học của cháu. Con sắp hết khóa rồi, có khóa tiếp theo nào không?"</p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-white border-2 border-slate-300 shadow-sm space-y-1">
+                <div class="text-sm font-black text-slate-700 uppercase mb-1">Orchexa AI xuất báo cáo & ưu đãi:</div>
+                <div class="text-base font-bold text-slate-800 leading-snug">
+                  ➔ Xuất báo cáo học tập 24/7: GPA 8.5/10, chuyên cần 94%, gửi link xem PDF trực quan.<br>
+                  ➔ Nhận diện sắp hết khóa ➔ Kích hoạt đề xuất marketing.<br>
+                  ➔ Gửi Carousel Card: Voucher giảm 15% khóa Flyers nâng cao.
+                </div>
+              </div>
+
+              <div class="p-4 rounded-xl bg-indigo-50 border-2 border-indigo-300">
+                <div class="text-sm font-black text-indigo-900 uppercase mb-1">Chuyển đổi đăng ký tự nhiên:</div>
+                <p class="text-base font-black text-slate-950">Phụ huynh bấm "Nhận voucher" ➔ AI hỗ trợ giữ chỗ lớp mới ngay trên chat. *(Khiếu nại bức xúc tự động Handoff &lt; 2s)*.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t-2 border-slate-300 flex items-center justify-between text-base text-slate-700 font-extrabold">
+            <span>Tăng tỷ lệ học tiếp: <strong class="text-slate-950 text-xl font-black">+15% – 20%</strong></span>
+            <span class="text-indigo-700 font-black">Marketing đúng thời điểm</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SLIDE 5: ROI & METRICS (4 cols) -->
+    <div class="col-span-4 panel-box flex flex-col overflow-hidden">
+      <div class="panel-blue-header flex items-center justify-between">
+        <div>
+          <span class="text-base font-extrabold text-blue-200 tracking-wider uppercase">SLIDE 5: HIỆU QUẢ KINH DOANH & ĐO LƯỜNG</span>
+          <h2 class="text-2xl font-black text-white mt-0.5">ROI & Tiêu chuẩn vận hành xuất sắc</h2>
+        </div>
+        <span class="px-3.5 py-1.5 rounded-xl text-sm font-black bg-emerald-500 text-white uppercase">
+          Kết Quả
+        </span>
+      </div>
+
+      <div class="p-6 flex-1 flex flex-col justify-between">
+        
+        <!-- 4 Big Metric Cards -->
+        <div class="grid grid-cols-2 gap-4">
+          
+          <div class="p-5 rounded-2xl bg-blue-50 border-3 border-blue-300 text-center shadow-sm">
+            <div class="text-5xl font-black text-blue-800">80%</div>
+            <div class="text-lg font-black text-blue-950 mt-1 uppercase tracking-wide">Tự Động Hóa</div>
+            <p class="text-sm font-bold text-slate-600 mt-0.5">Khối lượng công việc thường nhật</p>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-emerald-50 border-3 border-emerald-300 text-center shadow-sm">
+            <div class="text-5xl font-black text-emerald-700">+18%</div>
+            <div class="text-lg font-black text-emerald-950 mt-1 uppercase tracking-wide">Tăng Tái Tục</div>
+            <p class="text-sm font-bold text-slate-600 mt-0.5">Tối ưu hóa doanh thu trung tâm</p>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-slate-100 border-3 border-slate-300 text-center shadow-sm">
+            <div class="text-4xl font-black text-slate-900 mt-1">ZERO</div>
+            <div class="text-lg font-black text-slate-950 mt-2 uppercase tracking-wide">Hallucination</div>
+            <p class="text-sm font-bold text-slate-600 mt-0.5">Không ảo giác, bảo mật RBAC</p>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-amber-50 border-3 border-amber-300 text-center shadow-sm">
+            <div class="text-5xl font-black text-amber-700">2.5H</div>
+            <div class="text-lg font-black text-amber-950 mt-1 uppercase tracking-wide">Tiết Kiệm / Ngày</div>
+            <p class="text-sm font-bold text-slate-600 mt-0.5">Tiết kiệm cho mỗi nhân sự</p>
+          </div>
+
+        </div>
+
+        <!-- Security & Deployment Commitment -->
+        <div class="p-5 rounded-2xl bg-slate-900 text-white space-y-2 shadow-lg">
+          <div class="flex items-center gap-3 text-lg font-black text-white">
+            <span class="text-blue-400 text-2xl">🛡️</span> Cam kết Zero Hallucination & Bảo mật RBAC
+          </div>
+          <p class="text-base font-semibold text-slate-300 leading-snug">
+            AI tuyệt đối không tự bịa điểm số, không tự xác nhận học phí bừa bãi. Chỉ đọc và ghi dữ liệu có thẩm quyền từ EduCenter SIS/LMS Core.
+          </p>
+          <div class="pt-3 border-t border-slate-700 flex items-center justify-between text-sm font-extrabold text-slate-300">
+            <span>Kênh: <strong class="text-white">Web Portal & Mobile App (PWA)</strong></span>
+            <span class="text-emerald-400 font-black">Sẵn sàng triển khai thực tế</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

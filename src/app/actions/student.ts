@@ -4,19 +4,26 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 export async function createStudent(formData: FormData) {
-  const name = formData.get("name") as string;
-  const phone = formData.get("phone") as string;
-  const code = formData.get("code") as string;
+  const name = (formData.get("name") as string)?.trim();
+  const phone = (formData.get("phone") as string)?.trim();
+  const code = (formData.get("code") as string)?.trim();
   const facilityId = formData.get("facilityId") as string;
-  const parentName = formData.get("parentName") as string;
-  const parentPhone = formData.get("parentPhone") as string;
+  const parentName = (formData.get("parentName") as string)?.trim();
+  const parentPhone = (formData.get("parentPhone") as string)?.trim();
 
   // Simple validation
   if (!name || !code || !facilityId) {
-    return { error: "Missing required fields" };
+    return { error: "Vui lòng nhập đầy đủ các trường bắt buộc (Mã HV, Họ tên, Cơ sở)" };
   }
 
   try {
+    const existing = await prisma.student.findUnique({
+      where: { code }
+    });
+    if (existing) {
+      return { error: `Mã học viên "${code}" đã tồn tại trên hệ thống. Vui lòng chọn mã khác.` };
+    }
+
     // Check or create parent
     let parent = null;
     if (parentPhone) {
@@ -32,7 +39,7 @@ export async function createStudent(formData: FormData) {
       data: {
         name,
         code,
-        phone,
+        phone: phone || null,
         facilityId,
         ...(parent && { parentId: parent.id })
       }
@@ -42,18 +49,20 @@ export async function createStudent(formData: FormData) {
     revalidatePath("/");
     return { success: true, student };
   } catch (error: any) {
-    console.error("Error creating student:", error);
-    return { error: error.message || "Failed to create student" };
+    if (error.code === "P2002" || error.message?.includes("UNIQUE constraint failed")) {
+      return { error: `Mã học viên "${code}" đã tồn tại trên hệ thống. Vui lòng chọn mã khác.` };
+    }
+    return { error: error.message || "Có lỗi xảy ra khi tạo học viên" };
   }
 }
 
 export async function updateStudent(id: string, formData: FormData) {
-  const name = formData.get("name") as string;
-  const phone = formData.get("phone") as string;
-  const code = formData.get("code") as string;
+  const name = (formData.get("name") as string)?.trim();
+  const phone = (formData.get("phone") as string)?.trim();
+  const code = (formData.get("code") as string)?.trim();
   const facilityId = formData.get("facilityId") as string;
-  const parentName = formData.get("parentName") as string;
-  const parentPhone = formData.get("parentPhone") as string;
+  const parentName = (formData.get("parentName") as string)?.trim();
+  const parentPhone = (formData.get("parentPhone") as string)?.trim();
   const status = (formData.get("status") as string) || "ACTIVE";
 
   // Simple validation
@@ -62,6 +71,16 @@ export async function updateStudent(id: string, formData: FormData) {
   }
 
   try {
+    const existing = await prisma.student.findFirst({
+      where: {
+        code,
+        id: { not: id }
+      }
+    });
+    if (existing) {
+      return { error: `Mã học viên "${code}" đã được sử dụng bởi học viên "${existing.name}". Vui lòng chọn mã khác.` };
+    }
+
     // Check or update parent
     let parent = null;
     if (parentPhone) {
@@ -94,8 +113,10 @@ export async function updateStudent(id: string, formData: FormData) {
     revalidatePath("/");
     return { success: true, student };
   } catch (error: any) {
-    console.error("Error updating student:", error);
-    return { error: error.message || "Failed to update student" };
+    if (error.code === "P2002" || error.message?.includes("UNIQUE constraint failed")) {
+      return { error: `Mã học viên "${code}" đã tồn tại trên hệ thống. Vui lòng chọn mã khác.` };
+    }
+    return { error: error.message || "Có lỗi xảy ra khi cập nhật học viên" };
   }
 }
 

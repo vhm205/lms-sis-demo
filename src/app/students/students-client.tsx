@@ -304,7 +304,7 @@ export function StudentsClient({ students, facilities }: { students: any[], faci
             </DialogTitle>
           </DialogHeader>
           {editingStudent && (
-            <form action={handleUpdate} className="grid gap-4 py-3">
+            <form key={editingStudent.id} action={handleUpdate} className="grid gap-4 py-3">
               <div className="grid grid-cols-2 gap-3.5">
                 <div className="grid gap-1.5">
                   <Label htmlFor="edit-code" className="text-xs font-bold font-heading">Mã học viên</Label>

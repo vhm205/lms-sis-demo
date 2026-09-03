@@ -4,19 +4,19 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 export async function createOrder(formData: FormData) {
-  const parentName = formData.get("parentName") as string;
-  const parentPhone = formData.get("parentPhone") as string;
+  const parentName = (formData.get("parentName") as string)?.trim();
+  const parentPhone = (formData.get("parentPhone") as string)?.trim();
   const courseId = formData.get("courseId") as string;
   const facilityId = formData.get("facilityId") as string;
   const amountStr = formData.get("amount") as string;
   const amount = parseFloat(amountStr) || 0;
-  const notes = formData.get("notes") as string;
+  const notes = (formData.get("notes") as string)?.trim() || "";
 
   if (!parentName || !parentPhone || !courseId || !facilityId) {
-    return { error: "Missing required fields" };
+    return { error: "Vui lòng nhập đầy đủ các trường bắt buộc" };
   }
 
-  const code = `ORD-${Date.now().toString().slice(-6)}`;
+  const code = `ORD-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
 
   try {
     const order = await prisma.order.create({
@@ -36,18 +36,21 @@ export async function createOrder(formData: FormData) {
     revalidatePath("/");
     return { success: true, order };
   } catch (error: any) {
-    return { error: error.message || "Failed to create order" };
+    if (error.code === "P2002" || error.message?.includes("UNIQUE constraint failed")) {
+      return { error: "Mã đơn hàng bị trùng lặp, vui lòng thử lại." };
+    }
+    return { error: error.message || "Có lỗi xảy ra khi tạo đơn hàng" };
   }
 }
 
 export async function updateOrder(id: string, formData: FormData) {
-  const parentName = formData.get("parentName") as string;
-  const parentPhone = formData.get("parentPhone") as string;
+  const parentName = (formData.get("parentName") as string)?.trim();
+  const parentPhone = (formData.get("parentPhone") as string)?.trim();
   const courseId = formData.get("courseId") as string;
   const facilityId = formData.get("facilityId") as string;
   const amountStr = formData.get("amount") as string;
   const amount = parseFloat(amountStr) || 0;
-  const notes = formData.get("notes") as string;
+  const notes = (formData.get("notes") as string)?.trim() || "";
   const status = (formData.get("status") as string) || "PENDING";
 
   if (!parentName || !parentPhone || !courseId || !facilityId) {
@@ -63,7 +66,7 @@ export async function updateOrder(id: string, formData: FormData) {
         courseId,
         facilityId,
         amount,
-        notes: notes || "",
+        notes,
         status
       }
     });
@@ -72,7 +75,7 @@ export async function updateOrder(id: string, formData: FormData) {
     revalidatePath("/");
     return { success: true, order };
   } catch (error: any) {
-    return { error: error.message || "Failed to update order" };
+    return { error: error.message || "Có lỗi xảy ra khi cập nhật đơn hàng" };
   }
 }
 

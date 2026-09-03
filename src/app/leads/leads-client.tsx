@@ -254,7 +254,7 @@ export function LeadsClient({ leads, courses, facilities }: { leads: any[], cour
             </DialogTitle>
           </DialogHeader>
           {editingLead && (
-            <form action={handleUpdate} className="grid gap-4 py-3">
+            <form key={editingLead.id} action={handleUpdate} className="grid gap-4 py-3">
               <div className="grid grid-cols-2 gap-3">
                 <div className="grid gap-1.5">
                   <Label className="text-xs font-bold font-heading">Họ và tên</Label>

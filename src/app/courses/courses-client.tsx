@@ -149,7 +149,7 @@ export function CoursesClient({ courses }: { courses: any[] }) {
             </DialogTitle>
           </DialogHeader>
           {editingCourse && (
-            <form action={handleUpdate} className="grid gap-4 py-3">
+            <form key={editingCourse.id} action={handleUpdate} className="grid gap-4 py-3">
               <div className="grid grid-cols-2 gap-3.5">
                 <div className="grid gap-1.5">
                   <Label className="text-xs font-bold font-heading">Mã khóa học</Label>

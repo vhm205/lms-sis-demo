@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo CSKH Giáo Dục: Giải Pháp Trợ Lý AI Orchexa x EduCenter</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0b111e;
+      color: #f1f5f9;
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    .slide {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      transform: translateY(6px);
+    }
+    
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .glass-card {
+      background: #131b2e;
+      border: 1px solid #23314d;
+    }
+
+    .glass-panel {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0b111e;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #23314d;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col justify-between overflow-hidden bg-[#0b111e] text-slate-100">
+
+  <!-- Top Enterprise Navigation Header -->
+  <header class="w-full z-40 bg-[#0f172a] border-b border-slate-800 px-6 py-3 flex items-center justify-between shadow-sm">
+    <div class="flex items-center space-x-3">
+      <div class="flex items-center space-x-2">
+        <div class="w-7 h-7 rounded bg-blue-600 flex items-center justify-center font-bold text-white text-xs">OX</div>
+        <span class="font-bold text-sm tracking-wide text-white">ORCHEXA AI</span>
+        <span class="text-slate-500 font-normal">|</span>
+        <span class="font-medium text-sm text-slate-300">Giải Pháp CSKH Giáo Dục (EduCenter)</span>
+      </div>
+    </div>
+
+    <div class="flex items-center space-x-4">
+      <div class="text-xs font-semibold text-slate-300 bg-slate-900 px-3 py-1 rounded border border-slate-700">
+        TRANG <span id="currentSlideNum" class="text-blue-400 font-bold text-sm">1</span> / <span id="totalSlidesNum">5</span>
+      </div>
+
+      <button id="toggleNotesBtn" title="Bật/Tắt Lời thoại thuyết trình (Phím N)" class="px-3 py-1.5 text-xs rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1.5 transition font-medium">
+        <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        <span>Speaker Notes (N)</span>
+      </button>
+
+      <button id="fullscreenBtn" title="Toàn màn hình (Phím F)" class="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Top Progress Line -->
+  <div class="w-full bg-slate-900 h-1">
+    <div id="progressBar" class="bg-blue-600 h-1 transition-all duration-250 w-1/5"></div>
+  </div>
+
+  <!-- Main Slide Area (Full 16:9 Screen Fill) -->
+  <main class="flex-1 relative overflow-hidden flex items-center justify-center p-5 lg:p-8">
+
+    <!-- ==========================================
+         SLIDE 1: BỐI CẢNH & BÀI TOÁN VẬN HÀNH THỰC TẾ
+         ========================================== -->
+    <section class="slide active flex-col w-full max-w-7xl h-full justify-between" data-slide="1">
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="px-2.5 py-0.5 rounded text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700 uppercase tracking-wider">SLIDE 01</span>
+          <span class="text-xs text-slate-400 font-medium">Bối Cảnh Vận Hành Thực Tế Tại Việt Nam</span>
+        </div>
+        <h2 class="text-2xl lg:text-4xl font-extrabold text-white tracking-tight">
+          Điểm Nghẽn CSKH & Quản Trị Học Viên Sau Tuyển Sinh (Post-Sales)
+        </h2>
+        <p class="text-slate-300 text-sm lg:text-base mt-1.5 max-w-4xl">
+          Tại các trung tâm đào tạo và trường học, 80% doanh thu bền vững đến từ việc giữ chân học viên và tái tục khóa mới. Tuy nhiên, đội ngũ hỗ trợ đang bị quá tải bởi các tin nhắn chat thủ công hàng ngày.
+        </p>
+      </div>
+
+      <!-- Content Grid: 4 Problems (Left) & Real Chat Interface (Right) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 my-auto items-stretch">
+        
+        <!-- Left: 4 Core Operational Pain Points (7 cols) -->
+        <div class="lg:col-span-7 flex flex-col justify-between space-y-3">
+          
+          <!-- Problem 1 -->
+          <div class="glass-card p-3.5 lg:p-4 rounded-xl border border-slate-800 flex items-start gap-3.5">
+            <div class="w-9 h-9 rounded-lg bg-blue-900/40 text-blue-400 border border-blue-700/50 flex-shrink-0 flex items-center justify-center font-bold text-sm">
+              01
+            </div>
+            <div>
+              <h3 class="text-sm lg:text-base font-bold text-white">Quá Tải Xin Nghỉ & Xếp Học Bù Qua Chat</h3>
+              <p class="text-xs text-slate-300 mt-0.5 leading-relaxed">
+                Phụ huynh nhắn tin đột xuất xin nghỉ và đòi bù lịch. Nhân sự phải mở 3–4 màn hình để kiểm tra lớp cùng trình độ, kiểm tra sĩ số còn chỗ và dò lịch trống.
+              </p>
+              <div class="mt-1.5 text-[11px] font-semibold text-amber-400 flex items-center gap-1.5">
+                <span>⚠️</span> <span>Mất 15–30 phút xử lý một yêu cầu; dễ nhầm lẫn gây quá tải phòng học.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Problem 2 -->
+          <div class="glass-card p-3.5 lg:p-4 rounded-xl border border-slate-800 flex items-start gap-3.5">
+            <div class="w-9 h-9 rounded-lg bg-blue-900/40 text-blue-400 border border-blue-700/50 flex-shrink-0 flex items-center justify-center font-bold text-sm">
+              02
+            </div>
+            <div>
+              <h3 class="text-sm lg:text-base font-bold text-white">Thiếu Kênh Trả Lời 24/7 Báo Cáo Tình Hình Kết Quả Học Tập</h3>
+              <p class="text-xs text-slate-300 mt-0.5 leading-relaxed">
+                Phụ huynh sốt ruột muốn biết điểm thi, học lực và nhận xét của giáo viên. Giáo vụ phải liên hệ thầy cô và tổng hợp thủ công nhiều ngày, phụ huynh chờ lâu sinh bất an.
+              </p>
+              <div class="mt-1.5 text-[11px] font-semibold text-amber-400 flex items-center gap-1.5">
+                <span>⚠️</span> <span>Chậm trễ thông tin làm giảm sự tin tưởng của phụ huynh vào nhà trường.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Problem 3 -->
+          <div class="glass-card p-3.5 lg:p-4 rounded-xl border border-slate-800 flex items-start gap-3.5">
+            <div class="w-9 h-9 rounded-lg bg-blue-900/40 text-blue-400 border border-blue-700/50 flex-shrink-0 flex items-center justify-center font-bold text-sm">
+              03
+            </div>
+            <div>
+              <h3 class="text-sm lg:text-base font-bold text-white">Chưa Tự Đề Xuất Chiến Dịch Marketing & Khóa Học Tiếp Nối</h3>
+              <p class="text-xs text-slate-300 mt-0.5 leading-relaxed">
+                Khi học sinh sắp hoàn thành khóa hoặc có kỹ năng còn yếu, trung tâm thiếu cơ chế tự động đề xuất sự kiện ưu đãi, lộ trình nâng cao và voucher khóa học tiếp theo.
+              </p>
+              <div class="mt-1.5 text-[11px] font-semibold text-amber-400 flex items-center gap-1.5">
+                <span>⚠️</span> <span>Tỷ lệ học sinh tái tục (renewal) sụt giảm; dễ mất học viên vào tay đối thủ.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Problem 4 -->
+          <div class="glass-card p-3.5 lg:p-4 rounded-xl border border-slate-800 flex items-start gap-3.5">
+            <div class="w-9 h-9 rounded-lg bg-blue-900/40 text-blue-400 border border-blue-700/50 flex-shrink-0 flex items-center justify-center font-bold text-sm">
+              04
+            </div>
+            <div>
+              <h3 class="text-sm lg:text-base font-bold text-white">Khủng Hoảng Khiếu Nại Không Được Chuyển Giao Kịp Thời</h3>
+              <p class="text-xs text-slate-300 mt-0.5 leading-relaxed">
+                Học viên bức xúc vì sự cố phòng ốc hay lỗi nộp bài. Chatbot thông thường trả lời máy móc làm khách giận hơn, không kết nối ngay được với Quản lý trung tâm.
+              </p>
+              <div class="mt-1.5 text-[11px] font-semibold text-amber-400 flex items-center gap-1.5">
+                <span>⚠️</span> <span>Khách hàng đòi rút học phí ngay vì cảm thấy không được tôn trọng.</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right: Real Chat Interface Illustration (5 cols) -->
+        <div class="lg:col-span-5 flex flex-col justify-between glass-panel rounded-xl p-3.5 border border-slate-800">
+          <div class="relative rounded-lg overflow-hidden border border-slate-700 bg-slate-950">
+            <img src="images/omnichannel_chat.jpg" alt="Tương tác chat thực tế giữa Phụ huynh và Trường học" class="w-full h-auto object-cover max-h-[340px]" />
+            <div class="absolute bottom-0 inset-x-0 bg-slate-900/95 p-3 border-t border-slate-800 text-xs">
+              <span class="font-bold text-white">Kênh giao tiếp thực tế hàng ngày:</span>
+              <p class="text-slate-300 text-[11px] mt-0.5">Phụ huynh chủ động nhắn qua Web Portal hoặc Mobile App (PWA). AI hiểu ngay và giải quyết dứt điểm yêu cầu trong cuộc trò chuyện.</p>
+            </div>
+          </div>
+          <div class="mt-3 p-3 bg-slate-900 rounded-lg border border-slate-800 text-xs text-slate-200 flex items-center justify-between">
+            <span class="font-medium text-white">Mục tiêu giải pháp:</span>
+            <span class="text-emerald-400 font-bold">Giải quyết 80% yêu cầu thường nhật qua Chat 24/7</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer Bar -->
+      <div class="bg-slate-900 px-4 py-2.5 rounded-lg border border-slate-800 flex items-center justify-between text-xs text-slate-300">
+        <span>📌 <strong>Định hướng:</strong> Lấy sự hài lòng của Phụ huynh & Học sinh làm trọng tâm; mọi tương tác bắt đầu từ cuộc trò chuyện tự nhiên.</span>
+        <span class="text-blue-400 font-semibold">Tự động hóa thông minh qua Chat</span>
+      </div>
+    </section>
+
+
+    <!-- ==========================================
+         SLIDE 2: MÔ HÌNH VẬN HÀNH TRỢ LÝ AI TRONG THỰC TẾ
+         ========================================== -->
+    <section class="slide flex-col w-full max-w-7xl h-full justify-between" data-slide="2">
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="px-2.5 py-0.5 rounded text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700 uppercase tracking-wider">SLIDE 02</span>
+          <span class="text-xs text-slate-400 font-medium">Mô Hình Vận Hành Trợ Lý AI</span>
+        </div>
+        <h2 class="text-2xl lg:text-4xl font-extrabold text-white tracking-tight">
+          Mô Hình Hoạt Động: Người Học Nhắn Chat ➔ AI Giải Quyết Dứt Điểm
+        </h2>
+        <p class="text-slate-300 text-sm lg:text-base mt-1.5 max-w-4xl">
+          Phân định rõ ràng: Trợ lý AI Orchexa là <strong>Người Tư Vấn & Xử Lý Nghiệp Vụ</strong>, EduCenter là <strong>Kho Dữ Liệu Thực Tế Của Nhà Trường</strong>.
+        </p>
+      </div>
+
+      <!-- 3 Columns: User Chat ➔ AI Processing ➔ School DB Actions -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 my-auto">
+        
+        <!-- Step 1: User Direct Chat -->
+        <div class="glass-card p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-300">Bước 1: Phụ Huynh / Học Viên Chat</span>
+              <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 text-xs font-semibold">Web Portal & PWA</span>
+            </div>
+            
+            <div class="space-y-3">
+              <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                <div class="text-sm font-bold text-white">Cổng Web Portal Trường Học</div>
+                <p class="text-xs text-slate-300 mt-1">Phụ huynh truy cập trên máy tính hoặc trình duyệt điện thoại, nhắn tin tự nhiên như trao đổi với giáo vụ.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                <div class="text-sm font-bold text-white">Mobile App Cài Đặt Nhanh (PWA)</div>
+                <p class="text-xs text-slate-300 mt-1">Cài đặt trực tiếp từ web không qua app store rườm rà; tra cứu điểm số, lịch thi, nộp đơn nghỉ học 24/7.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                <div class="text-sm font-bold text-white">Mọi Tương Tác Do Người Dùng Khởi Tạo</div>
+                <p class="text-xs text-slate-300 mt-1">Không spam thông báo tự động; chỉ tập trung phản hồi nhanh nhất khi có câu hỏi thực tế.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800 text-xs text-blue-400 text-center font-medium">
+            Tiếp nhận câu hỏi 24/7 không có độ trễ
+          </div>
+        </div>
+
+        <!-- Step 2: Orchexa Brain Intelligence -->
+        <div class="glass-card p-5 rounded-xl border border-blue-600/70 bg-[#121c32] flex flex-col justify-between relative shadow-lg">
+          <div class="absolute -top-3 right-4 px-2.5 py-0.5 rounded bg-blue-600 text-white text-[10px] font-bold uppercase tracking-wider">
+            Trợ Lý Thông Minh
+          </div>
+          <div>
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-blue-900/60">
+              <span class="text-xs font-bold uppercase tracking-wider text-blue-300">Bước 2: AI Orchexa Xử Lý Nghiệp Vụ</span>
+              <span class="px-2 py-0.5 rounded bg-blue-950 text-blue-300 text-xs font-semibold">Quy Chế Trường</span>
+            </div>
+            
+            <div class="space-y-3">
+              <div class="p-3 bg-slate-900/90 rounded-lg border border-blue-900/50">
+                <div class="text-sm font-bold text-white">Hiểu Đúng Ngữ Cảnh & Cảm Xúc</div>
+                <p class="text-xs text-slate-300 mt-1">Phân biệt câu hỏi thường ngày với khiếu nại bức xúc để có thái độ ứng xử đúng mực.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900/90 rounded-lg border border-blue-900/50">
+                <div class="text-sm font-bold text-white">Tuân Thủ Nghiêm Quy Định Trung Tâm</div>
+                <p class="text-xs text-slate-300 mt-1">Chỉ xếp lớp bù khi đủ điều kiện nghỉ có phép; tự động đề xuất ưu đãi khóa học tiếp nối hợp lệ.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900/90 rounded-lg border border-blue-900/50">
+                <div class="text-sm font-bold text-white">Cơ Chế Chuyển Giao Người Thật (Handoff)</div>
+                <p class="text-xs text-slate-300 mt-1">Gặp ca khó hoặc khách hàng yêu cầu gặp quản lý, AI lập tức chuyển giao trong 2 giây.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-blue-900/60 text-xs text-blue-300 flex justify-between font-medium">
+            <span>An toàn thông tin</span>
+            <span>Không suy diễn bừa bãi</span>
+          </div>
+        </div>
+
+        <!-- Step 3: EduCenter Core Sync -->
+        <div class="glass-card p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-300">Bước 3: Dữ Liệu Trường Học EduCenter</span>
+              <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 text-xs font-semibold">Dữ Liệu Thật</span>
+            </div>
+            
+            <div class="space-y-3">
+              <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                <div class="text-sm font-bold text-white">Kiểm Tra Sĩ Số Thực Tế Theo Giờ</div>
+                <p class="text-xs text-slate-300 mt-1">Đảm bảo lớp học bù còn ghế trống; không để xảy ra tình trạng thiếu chỗ ngồi.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                <div class="text-sm font-bold text-white">Trích Xuất Báo Cáo & Sổ Điểm Thật</div>
+                <p class="text-xs text-slate-300 mt-1">Tổng hợp điểm thi, GPA, nhận xét của giáo viên để xuất báo cáo PDF/Preview tức thì.</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                <div class="text-sm font-bold text-white">Ghi Nhận Yêu Cầu Tức Thì</div>
+                <p class="text-xs text-slate-300 mt-1">Cập nhật ngay danh sách điểm danh và lịch học bù vào hồ sơ của học sinh.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800 text-xs text-emerald-400 text-center font-medium">
+            ✓ Đồng bộ chính xác 100% với hệ thống nhà trường
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer Bar -->
+      <div class="bg-slate-900 px-4 py-2.5 rounded-lg border border-slate-800 flex items-center justify-between text-xs text-slate-300">
+        <span>🔒 <strong>3 Cam kết bất biến:</strong> Nói sự thật dựa trên dữ liệu trường • Kiểm tra điều kiện trước khi chốt • Nhường quyền cho con người khi cần.</span>
+        <span class="text-slate-400 font-medium">Bảo Vệ Uy Tín Trung Tâm</span>
+      </div>
+    </section>
+
+
+    <!-- ==========================================
+         SLIDE 3: 5 NHÓM TÌNH HUỐNG THỰC TẾ QUA CHAT
+         ========================================== -->
+    <section class="slide flex-col w-full max-w-7xl h-full justify-between" data-slide="3">
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="px-2.5 py-0.5 rounded text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700 uppercase tracking-wider">SLIDE 03</span>
+          <span class="text-xs text-slate-400 font-medium">Các Tình Huống Thực Tế Tại Việt Nam</span>
+        </div>
+        <h2 class="text-2xl lg:text-4xl font-extrabold text-white tracking-tight">
+          5 Tình Huống CSKH Thực Tế Được Giải Quyết Trọn Vẹn Qua Chat
+        </h2>
+        <p class="text-slate-300 text-sm lg:text-base mt-1.5 max-w-4xl">
+          Tất cả các tình huống đều được phụ huynh và học viên chủ động nhắn hỏi trên Web Portal & Mobile App (PWA).
+        </p>
+      </div>
+
+      <!-- 2 Columns: 5 Scenario Cards (Left) & Real System Dashboard (Right) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 my-auto items-stretch">
+        
+        <!-- Left: 5 Real-World Scenarios (7 cols) -->
+        <div class="lg:col-span-7 flex flex-col justify-between space-y-2.5">
+          
+          <!-- Card 1 -->
+          <div class="glass-card p-3.5 rounded-lg border border-slate-800 hover:border-blue-600 transition flex items-start gap-3.5">
+            <span class="px-2 py-1 rounded bg-blue-900/40 text-blue-400 border border-blue-800/60 text-xs font-bold">01</span>
+            <div class="flex-1">
+              <div class="flex items-center justify-between">
+                <h4 class="text-sm lg:text-base font-bold text-white">Xin Nghỉ Phép & Tự Động Xếp Lịch Học Bù</h4>
+                <span class="text-[11px] font-semibold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/40">Tiết kiệm 90% thời gian</span>
+              </div>
+              <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                Phụ huynh nhắn xin nghỉ ➔ AI tự tra cứu lớp, tìm ca học bù cùng trình độ còn trống chỗ vào cuối tuần, gửi phụ huynh chọn và chốt lịch ngay trong 30 giây.
+              </p>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="glass-card p-3.5 rounded-lg border border-slate-800 hover:border-blue-600 transition flex items-start gap-3.5">
+            <span class="px-2 py-1 rounded bg-blue-900/40 text-blue-400 border border-blue-800/60 text-xs font-bold">02</span>
+            <div class="flex-1">
+              <div class="flex items-center justify-between">
+                <h4 class="text-sm lg:text-base font-bold text-white">Trả Lời 24/7 Báo Cáo Kết Quả Học Tập & Chuyên Cần</h4>
+                <span class="text-[11px] font-semibold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/40">Xuất PDF/Preview</span>
+              </div>
+              <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                Phụ huynh hỏi tình hình học ➔ AI trích xuất điểm thi thật, GPA, nhận xét chi tiết của thầy cô và gửi link xem trước / xuất bản PDF trực quan tức thì.
+              </p>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="glass-card p-3.5 rounded-lg border border-slate-800 hover:border-blue-600 transition flex items-start gap-3.5">
+            <span class="px-2 py-1 rounded bg-blue-900/40 text-blue-400 border border-blue-800/60 text-xs font-bold">03</span>
+            <div class="flex-1">
+              <div class="flex items-center justify-between">
+                <h4 class="text-sm lg:text-base font-bold text-white">Tự Đề Xuất Chiến Dịch Marketing & Khóa Học Tiếp Nối</h4>
+                <span class="text-[11px] font-semibold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/40">Tăng 15–20% Tái Tục</span>
+              </div>
+              <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                Học viên sắp hoàn thành khóa hoặc có kỹ năng còn yếu ➔ AI tự gợi ý môn nâng cao, gửi voucher ưu đãi (Carousel Card) và hỗ trợ đăng ký giữ chỗ.
+              </p>
+            </div>
+          </div>
+
+          <!-- Card 4 -->
+          <div class="glass-card p-3.5 rounded-lg border border-slate-800 hover:border-blue-600 transition flex items-start gap-3.5">
+            <span class="px-2 py-1 rounded bg-blue-900/40 text-blue-400 border border-blue-800/60 text-xs font-bold">04</span>
+            <div class="flex-1">
+              <div class="flex items-center justify-between">
+                <h4 class="text-sm lg:text-base font-bold text-white">Xử Lý Khiếu Nại Bức Xúc & Nối Máy Cho Quản Lý</h4>
+                <span class="text-[11px] font-semibold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/40">Handoff &lt; 2 giây</span>
+              </div>
+              <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                Phụ huynh gắt gỏng vì sự cố cơ sở vật chất ➔ AI nhận diện thái độ, xoa dịu, lập tức dừng tự động và chuyển trọn vẹn cuộc trò chuyện sang Quản lý cơ sở để gọi lại ngay.
+              </p>
+            </div>
+          </div>
+
+          <!-- Card 5 -->
+          <div class="glass-card p-3.5 rounded-lg border border-slate-800 hover:border-blue-600 transition flex items-start gap-3.5">
+            <span class="px-2 py-1 rounded bg-blue-900/40 text-blue-400 border border-blue-800/60 text-xs font-bold">05</span>
+            <div class="flex-1">
+              <div class="flex items-center justify-between">
+                <h4 class="text-sm lg:text-base font-bold text-white">Hỏi Học Phí & Xác Nhận Chuyển Khoản</h4>
+                <span class="text-[11px] font-semibold text-blue-400 bg-blue-950/60 px-2 py-0.5 rounded border border-blue-800/40">Minh bạch tiền bạc</span>
+              </div>
+              <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                Phụ huynh vừa chuyển 5 triệu hỏi sao chưa cập nhật ➔ AI tra cứu trạng thái ngân hàng, giải thích độ trễ đối soát, xin ảnh biên lai; tuyệt đối không xác nhận bừa.
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right: Real System Visual Preview (5 cols) -->
+        <div class="lg:col-span-5 flex flex-col justify-between glass-panel rounded-xl p-3.5 border border-slate-800">
+          <div class="relative rounded-lg overflow-hidden border border-slate-700 bg-slate-950">
+            <img src="images/edtech_dashboard.jpg" alt="EduCenter SIS Dashboard Screenshot" class="w-full h-auto object-cover max-h-[350px]" />
+            <div class="absolute bottom-0 inset-x-0 bg-slate-900/95 p-3 border-t border-slate-800 text-xs">
+              <span class="font-bold text-white">Màn hình Quản trị Trung tâm (EduCenter):</span>
+              <p class="text-slate-300 text-[11px] mt-0.5">Mọi yêu cầu học bù, đổi lớp, hay khiếu nại qua chat đều được đồng bộ tức thì vào bảng điều khiển để giáo vụ theo dõi.</p>
+            </div>
+          </div>
+          
+          <div class="mt-3 p-3 bg-slate-900 rounded-lg border border-slate-800 text-xs text-slate-300 flex items-center justify-between">
+            <span class="font-medium text-slate-400">Dữ liệu kiểm thử thực tế:</span>
+            <span class="text-blue-400 font-semibold">Cơ sở Cầu Giấy, Bình Thạnh, Q.7</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer Bar -->
+      <div class="bg-slate-900 px-4 py-2.5 rounded-lg border border-slate-800 flex items-center justify-between text-xs text-slate-300">
+        <span>✅ 100% các tình huống đều được xây dựng từ thực tế vận hành hàng ngày của các trường học và trung tâm tại Việt Nam.</span>
+        <span class="text-slate-400 font-semibold">Kịch Bản Thực Nghiệm</span>
+      </div>
+    </section>
+
+
+    <!-- ==========================================
+         SLIDE 4: CHI TIẾT 2 WALKTHROUGH THỰC TẾ QUA CHAT
+         ========================================== -->
+    <section class="slide flex-col w-full max-w-7xl h-full justify-between" data-slide="4">
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="px-2.5 py-0.5 rounded text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700 uppercase tracking-wider">SLIDE 04</span>
+          <span class="text-xs text-slate-400 font-medium">Trực Quan Hóa 2 Tình Huống Tiêu Biểu</span>
+        </div>
+        <h2 class="text-2xl lg:text-4xl font-extrabold text-white tracking-tight">
+          Chi Tiết Trải Nghiệm Chat: Xếp Học Bù & Báo Cáo Học Tập Kèm Ưu Đãi
+        </h2>
+        <p class="text-slate-300 text-sm lg:text-base mt-1.5 max-w-4xl">
+          Người dùng nhắn tin tự nhiên qua Web Portal hoặc Mobile App (PWA) ➔ AI xử lý nghiệp vụ thông minh ➔ Phản hồi chính xác hoặc kết nối quản lý ngay lập tức.
+        </p>
+      </div>
+
+      <!-- 2 Walkthrough Columns: Case 1 (Makeup) & Case 2 (Report + Marketing) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 my-auto items-stretch">
+        
+        <!-- Case 1: Makeup Booking -->
+        <div class="glass-card p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-blue-900/50 text-blue-300 border border-blue-700 text-xs font-bold">TÌNH HUỐNG 1</span>
+                <h3 class="text-base font-bold text-white">Xếp Học Bù Tự Động Cho Bé Nhật Minh</h3>
+              </div>
+              <span class="text-xs text-emerald-400 font-bold">Xong trong 30 giây</span>
+            </div>
+
+            <!-- Dialogue & Execution Steps -->
+            <div class="space-y-3 text-xs lg:text-sm">
+              <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                <div class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-1">1. Phụ huynh Lê Thu Trang nhắn (Web/App):</div>
+                <p class="text-slate-200 italic">"Hôm nay thứ 3 bé Minh sốt xin nghỉ. Cuối tuần này có lớp Movers nào trống cho bé học bù không em?"</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 space-y-1.5">
+                <div class="text-xs font-bold text-slate-300 uppercase tracking-wider">2. Trợ lý AI Orchexa kiểm tra & phản hồi:</div>
+                <div class="text-slate-300 text-xs space-y-1">
+                  <div>• Nhận diện bé Minh đang học lớp Cambridge Movers (A1).</div>
+                  <div>• Tự động ghi nhận buổi nghỉ có phép để giữ quyền học bù.</div>
+                  <div>• Quét nhanh các lớp cùng trình độ còn ghế trống vào Thứ 7 và Chủ Nhật.</div>
+                  <div>• Đề xuất 2 ca học khả thi: Sáng T7 (Cơ sở Bình Thạnh) hoặc Sáng CN (Cơ sở Quận 7).</div>
+                </div>
+              </div>
+
+              <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                <div class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-1">3. Phụ huynh chọn & Hoàn tất tức thì:</div>
+                <p class="text-slate-300 text-xs">
+                  Phụ huynh chọn ca sáng CN ➔ Hệ thống chốt danh sách, gửi lịch học và tên phòng cho mẹ. Giáo vụ không cần mất 30 phút dò sổ sách.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+            <span>Thời gian xử lý: <strong class="text-white">30 giây</strong></span>
+            <span class="text-emerald-400 font-semibold">Tự động hoàn toàn qua Chat</span>
+          </div>
+        </div>
+
+        <!-- Case 2: Report & Retention Marketing -->
+        <div class="glass-card p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-emerald-900/50 text-emerald-300 border border-emerald-700 text-xs font-bold">TÌNH HUỐNG 2</span>
+                <h3 class="text-base font-bold text-white">Báo Cáo Học Tập & Đề Xuất Ưu Đãi Khóa Mới</h3>
+              </div>
+              <span class="text-xs text-emerald-400 font-bold">Tức thì 24/7</span>
+            </div>
+
+            <!-- Dialogue & Execution Steps -->
+            <div class="space-y-3 text-xs lg:text-sm">
+              <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                <div class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-1">1. Phụ huynh hỏi tình hình học & lộ trình:</div>
+                <p class="text-slate-200 italic">"Gửi cho tôi bảng điểm thi giữa kỳ vừa rồi và tình hình học của cháu. Con sắp hết khóa rồi, trung tâm có khóa tiếp theo nào không?"</p>
+              </div>
+
+              <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 space-y-1.5">
+                <div class="text-xs font-bold text-slate-300 uppercase tracking-wider">2. Ứng xử thông minh của Trợ lý AI:</div>
+                <div class="text-slate-300 text-xs space-y-1">
+                  <div>• Tổng hợp GPA, chuyên cần, nhận xét của giáo viên & gửi link xem báo cáo PDF trực quan.</div>
+                  <div>• Nhận diện khóa học sắp kết thúc để kích hoạt playbook Retention & Upsell.</div>
+                  <div>• Đề xuất lộ trình Flyers nâng cao kèm thẻ Voucher ưu đãi 15% (Carousel Card).</div>
+                </div>
+              </div>
+
+              <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                <div class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-1">3. Phụ huynh nhận ưu đãi & Giữ chỗ:</div>
+                <p class="text-slate-300 text-xs">
+                  Phụ huynh bấm "Nhận voucher" ➔ AI hỗ trợ giữ chỗ lớp mới ngay trên giao diện chat. *(Khiếu nại bức xúc vẫn kích hoạt Handoff &lt; 2s tới Quản lý)*.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+            <span>Tăng tỷ lệ học tiếp: <strong class="text-white">+15% - 20%</strong></span>
+            <span class="text-emerald-400 font-semibold">Tự động gợi ý đúng thời điểm</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer Bar -->
+      <div class="bg-slate-900 px-4 py-2.5 rounded-lg border border-slate-800 flex items-center justify-between text-xs text-slate-300">
+        <span>💡 AI xử lý tác vụ thường ngày nhanh chóng, nhưng luôn biết nhường quyền cho con người trong các tình huống nhạy cảm.</span>
+        <span class="text-slate-400 font-semibold">Tự Động Hóa Nhân Văn</span>
+      </div>
+    </section>
+
+
+    <!-- ==========================================
+         SLIDE 5: GIÁ TRỊ THỰC TẾ & HIỆU QUẢ ĐẦU TƯ
+         ========================================== -->
+    <section class="slide flex-col w-full max-w-7xl h-full justify-between" data-slide="5">
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="px-2.5 py-0.5 rounded text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700 uppercase tracking-wider">SLIDE 05</span>
+          <span class="text-xs text-slate-400 font-medium">Giá Trị Thực Tế Mang Lại</span>
+        </div>
+        <h2 class="text-2xl lg:text-4xl font-extrabold text-white tracking-tight">
+          Giá Trị Mang Lại Cho Phụ Huynh, Nhân Viên & Ban Giám Đốc
+        </h2>
+        <p class="text-slate-300 text-sm lg:text-base mt-1.5 max-w-4xl">
+          Giải pháp không chỉ tiết kiệm chi phí mà còn trực tiếp nâng cao trải nghiệm phụ huynh và giữ chân học viên lâu dài.
+        </p>
+      </div>
+
+      <!-- 2 Columns: 3 Stakeholders Values & 4 Concrete Metrics -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 my-auto items-stretch">
+        
+        <!-- Values for Stakeholders (6 cols) -->
+        <div class="lg:col-span-6 glass-card p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
+          <div>
+            <h3 class="text-base font-bold text-white uppercase tracking-wider pb-3 mb-3 border-b border-slate-800 flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+              Giá Trị Cho Từng Đối Tượng
+            </h3>
+
+            <div class="space-y-3.5">
+              <div class="flex items-start gap-3">
+                <span class="w-6 h-6 rounded bg-blue-900/50 text-blue-400 flex items-center justify-center font-bold text-xs mt-0.5">01</span>
+                <div>
+                  <h4 class="text-sm font-bold text-white">Đối Với Phụ Huynh & Học Sinh</h4>
+                  <p class="text-xs text-slate-300 mt-0.5 leading-relaxed">
+                    Được phản hồi ngay lập tức 24/7 qua Web Portal & Mobile App (PWA); không còn cảnh chờ đợi nửa ngày để xin nghỉ, hỏi điểm hay nhận xét; an tâm tuyệt đối.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3">
+                <span class="w-6 h-6 rounded bg-blue-900/50 text-blue-400 flex items-center justify-center font-bold text-xs mt-0.5">02</span>
+                <div>
+                  <h4 class="text-sm font-bold text-white">Đối Với Đội Ngũ CSKH & Giáo Vụ</h4>
+                  <p class="text-xs text-slate-300 mt-0.5 leading-relaxed">
+                    Trút bỏ 80% gánh nặng trả lời các câu hỏi lặp đi lặp lại về lịch học, học phí, điểm số; có thêm thời gian để chăm sóc chuyên sâu các học viên cần hỗ trợ.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3">
+                <span class="w-6 h-6 rounded bg-blue-900/50 text-blue-400 flex items-center justify-center font-bold text-xs mt-0.5">03</span>
+                <div>
+                  <h4 class="text-sm font-bold text-white">Đối Với Ban Giám Đốc & Chủ Trung Tâm</h4>
+                  <p class="text-xs text-slate-300 mt-0.5 leading-relaxed">
+                    Tăng 15–20% tỷ lệ tái tục khóa mới nhờ cơ chế tự đề xuất chiến dịch marketing thông minh; ngăn chặn nguy cơ khủng hoảng khiếu nại dịch vụ ngay từ sớm.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800 text-xs text-emerald-400 font-semibold">
+            ✓ Nâng cấp toàn diện chất lượng phục vụ mà không cần tăng biên chế nhân sự
+          </div>
+        </div>
+
+        <!-- Measurable Results Grid (6 cols) -->
+        <div class="lg:col-span-6 glass-card p-5 rounded-xl border border-slate-800 flex flex-col justify-between bg-[#121a2c]">
+          <div>
+            <h3 class="text-base font-bold text-white uppercase tracking-wider pb-3 mb-3 border-b border-slate-800 flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              Chỉ Số Đo Lường Hiệu Quả Thực Tế
+            </h3>
+
+            <!-- 4 Big Metrics Grid -->
+            <div class="grid grid-cols-2 gap-3.5 mb-4">
+              <div class="p-4 bg-slate-900 rounded-lg border border-slate-800 text-center">
+                <div class="text-3xl lg:text-4xl font-extrabold text-white">75% - 80%</div>
+                <div class="text-xs text-slate-300 mt-1 font-medium">Yêu cầu hỏi đáp qua chat được giải quyết tự động 24/7</div>
+              </div>
+
+              <div class="p-4 bg-slate-900 rounded-lg border border-slate-800 text-center">
+                <div class="text-3xl lg:text-4xl font-extrabold text-blue-400">2 - 3 Giờ</div>
+                <div class="text-xs text-slate-300 mt-1 font-medium">Tiết kiệm mỗi ngày cho mỗi nhân viên giáo vụ / CSKH</div>
+              </div>
+
+              <div class="p-4 bg-slate-900 rounded-lg border border-slate-800 text-center">
+                <div class="text-3xl lg:text-4xl font-extrabold text-emerald-400">+15% - 20%</div>
+                <div class="text-xs text-slate-300 mt-1 font-medium">Tỷ lệ phụ huynh tiếp tục đăng ký khóa học tiếp theo</div>
+              </div>
+
+              <div class="p-4 bg-slate-900 rounded-lg border border-slate-800 text-center">
+                <div class="text-3xl lg:text-4xl font-extrabold text-amber-400">&lt; 2 Giây</div>
+                <div class="text-xs text-slate-300 mt-1 font-medium">Thời gian chuyển giao khiếu nại tới người quản lý</div>
+              </div>
+            </div>
+
+            <p class="text-xs lg:text-sm text-slate-300 leading-relaxed">
+              Trợ lý AI giúp trung tâm vận hành chuyên nghiệp hơn, tạo thiện cảm mạnh mẽ với phụ huynh ngay từ lần nhắn tin đầu tiên.
+            </p>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800 text-center">
+            <span class="text-xs font-bold text-blue-400">✨ Sẵn sàng triển khai thực tế trên Web Portal và Mobile App (PWA) của trung tâm</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer Bar -->
+      <div class="bg-slate-900 px-4 py-2.5 rounded-lg border border-slate-800 flex items-center justify-between text-xs text-slate-300">
+        <span>🎯 <strong>Bước tiếp theo:</strong> Bắt đầu trải nghiệm các kịch bản Live Demo trực tiếp tại hệ thống EduCenter.</span>
+        <button onclick="goToSlide(1)" class="text-blue-400 hover:underline font-bold">Trở về Trang Đầu (Home)</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Speaker Notes Drawer (Toggled with 'N') -->
+  <aside id="notesDrawer" class="fixed bottom-14 left-0 right-0 max-h-60 overflow-y-auto bg-slate-900/95 border-t border-blue-600 p-4 hidden z-50 text-xs md:text-sm text-slate-200 backdrop-blur-md shadow-2xl">
+    <div class="max-w-5xl mx-auto">
+      <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded bg-blue-900 text-blue-300 text-[10px] font-bold">SPEAKER NOTES (LỜI THOẠI MC)</span>
+          <span id="noteSlideTitle" class="text-xs font-semibold text-white">Slide 1</span>
+        </div>
+        <button id="closeNotesBtn" class="text-slate-400 hover:text-white text-xs font-medium">✕ Đóng</button>
+      </div>
+      <div id="noteContent" class="leading-relaxed text-slate-300 font-sans space-y-2">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </aside>
+
+  <!-- Bottom Navigation Bar -->
+  <footer class="w-full bg-[#0d1322] border-t border-slate-800 px-6 py-2.5 flex items-center justify-between z-40 text-xs">
+    <div class="flex items-center space-x-2 text-slate-400 hidden sm:flex">
+      <span>Điều khiển:</span>
+      <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[10px] text-slate-300">← / →</kbd>
+      <span>hoặc</span>
+      <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[10px] text-slate-300">Space</kbd>
+      <span class="text-slate-600">|</span>
+      <span>Lời thoại:</span>
+      <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[10px] text-slate-300">N</kbd>
+      <span class="text-slate-600">|</span>
+      <span>Toàn màn hình:</span>
+      <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[10px] text-slate-300">F</kbd>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="flex items-center space-x-3 mx-auto sm:mx-0">
+      <button id="prevBtn" class="px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 flex items-center gap-1 transition disabled:opacity-40 disabled:cursor-not-allowed font-medium">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        <span>Trang trước</span>
+      </button>
+
+      <!-- Slide Quick Pickers -->
+      <div class="flex items-center space-x-1.5 px-2">
+        <button onclick="goToSlide(1)" class="slide-indicator w-3 h-3 rounded-full bg-blue-500 transition-all"></button>
+        <button onclick="goToSlide(2)" class="slide-indicator w-3 h-3 rounded-full bg-slate-700 hover:bg-slate-500 transition-all"></button>
+        <button onclick="goToSlide(3)" class="slide-indicator w-3 h-3 rounded-full bg-slate-700 hover:bg-slate-500 transition-all"></button>
+        <button onclick="goToSlide(4)" class="slide-indicator w-3 h-3 rounded-full bg-slate-700 hover:bg-slate-500 transition-all"></button>
+        <button onclick="goToSlide(5)" class="slide-indicator w-3 h-3 rounded-full bg-slate-700 hover:bg-slate-500 transition-all"></button>
+      </div>
+
+      <button id="nextBtn" class="px-3.5 py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white flex items-center gap-1 font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed shadow">
+        <span>Tiếp theo</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </footer>
+
+  <!-- Script for Navigation & Speaker Notes -->
+  <script>
+    const speakerNotes = {
+      1: `Kính chào các anh chị ban lãnh đạo trung tâm. Trong quản trị giáo dục, giữ chân học sinh và duy trì sự an tâm của phụ huynh sau khi chốt nhập học (Post-Sales) quyết định sống còn đến doanh thu bền vững. Tuy nhiên, đội ngũ hỗ trợ hiện nay đang bị quá tải: phụ huynh nhắn tin xin nghỉ đột xuất, nhân sự phải mất nửa tiếng dò sổ sách để tìm lớp bù; phụ huynh muốn xem báo cáo học tập 24/7 thì phải chờ đợi tổng hợp thủ công nhiều ngày; khi học sinh kết thúc khóa thì chưa có cơ chế tự đề xuất chiến dịch marketing, voucher ưu đãi cho khóa liên quan; còn khi phụ huynh bức xúc về phòng ốc thì không nối máy kịp cho quản lý. Hôm nay, chúng tôi trình bày giải pháp Trợ lý AI Orchexa x EduCenter giải quyết dứt điểm các bài toán này qua Web Portal và Mobile App (PWA).`,
+      2: `Tại Slide 2, chúng ta nhìn vào mô hình hoạt động thực tế: Tất cả mọi tương tác đều bắt đầu khi người học hoặc phụ huynh chủ động mở Web Portal hoặc Mobile App (PWA) để nhắn tin. Trợ lý AI Orchexa đóng vai trò là một tư vấn viên thông minh — hiểu đúng câu hỏi, nhận biết được cảm xúc lo lắng hay giận dữ của phụ huynh, và đối chiếu với quy chế đào tạo của trung tâm. Đồng thời, AI kết nối trực tiếp với hệ thống EduCenter để lấy dữ liệu thật về sĩ số phòng học, điểm thi, báo cáo học tập và chính sách ưu đãi. Ba cam kết bất biến: Nói sự thật dựa trên dữ liệu trường, kiểm tra điều kiện trước khi xếp lớp, và ngay lập tức nhường quyền cho con người khi gặp khiếu nại nóng.`,
+      3: `Slide 3 tổng kết 5 tình huống thực tế đã có sẵn trên hệ thống: 1. Xin nghỉ ốm và chốt lịch học bù trong 30 giây; 2. Trả lời 24/7 báo cáo kết quả học tập và tiến độ chuyên cần, xuất link PDF trực quan; 3. Tự đề xuất các sự kiện chiến dịch marketing và voucher cho các khóa học liên quan sau kết thúc khóa; 4. Nhận diện bức xúc để chuyển giao khẩn cấp cho Quản lý cơ sở dưới 2 giây; 5. Minh bạch học phí và hướng dẫn đối soát chuyển khoản trung thực. Không có luồng spam cảnh báo tự động gây phiền toái.`,
+      4: `Để các anh chị thấy rõ nhất, Slide 4 mô phỏng 2 tình huống chat điển hình trên Web Portal và Mobile App PWA: Bên trái là mẹ bé Nhật Minh nhắn tin xin nghỉ và hỏi lớp học bù. AI lập tức nhận diện học sinh, tự động ghi nhận nghỉ có phép, quét lớp Movers còn ghế trống vào cuối tuần và gửi cho mẹ chọn, hoàn tất xếp lớp trong 30 giây mà không cần giáo vụ can thiệp. Bên phải là phụ huynh hỏi kết quả thi giữa kỳ và lộ trình tiếp theo: AI xuất ngay báo cáo học tập 24/7 trực quan, đồng thời tự động đề xuất chiến dịch ưu đãi khóa Flyers nâng cao với voucher giảm 15%, giúp phụ huynh an tâm và bấm giữ chỗ khóa mới ngay trong chat.`,
+      5: `Cuối cùng, giải pháp mang lại giá trị thiết thực cho cả 3 bên: Phụ huynh được hỗ trợ tức thì 24/7 qua Web Portal & Mobile App PWA; Nhân viên giáo vụ tiết kiệm 2 đến 3 tiếng mỗi ngày để tập trung chăm sóc các học sinh yếu; và Ban Giám Đốc gia tăng 15 đến 20% tỷ lệ tái tục khóa học nhờ các chiến dịch ưu đãi được đề xuất đúng lúc. Xin cảm ơn các anh chị và sau đây chúng ta sẽ bước vào phần Live Demo thực tế!`
+    };
+
+    let currentSlide = 1;
+    const totalSlides = 5;
+
+    const slides = document.querySelectorAll('.slide');
+    const indicators = document.querySelectorAll('.slide-indicator');
+    const currentSlideNumEl = document.getElementById('currentSlideNum');
+    const totalSlidesNumEl = document.getElementById('totalSlidesNum');
+    const progressBar = document.getElementById('progressBar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const notesDrawer = document.getElementById('notesDrawer');
+    const noteContent = document.getElementById('noteContent');
+    const noteSlideTitle = document.getElementById('noteSlideTitle');
+    const toggleNotesBtn = document.getElementById('toggleNotesBtn');
+    const closeNotesBtn = document.getElementById('closeNotesBtn');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+    function updateSlide() {
+      slides.forEach((s, idx) => {
+        if (idx + 1 === currentSlide) {
+          s.classList.add('active');
+        } else {
+          s.classList.remove('active');
+        }
+      });
+
+      indicators.forEach((ind, idx) => {
+        if (idx + 1 === currentSlide) {
+          ind.className = 'slide-indicator w-6 h-3 rounded-full bg-blue-500 transition-all';
+        } else {
+          ind.className = 'slide-indicator w-3 h-3 rounded-full bg-slate-700 hover:bg-slate-500 transition-all';
+        }
+      });
+
+      currentSlideNumEl.textContent = currentSlide;
+      progressBar.style.width = `${(currentSlide / totalSlides) * 100}%`;
+
+      prevBtn.disabled = currentSlide === 1;
+      nextBtn.disabled = currentSlide === totalSlides;
+      if (currentSlide === totalSlides) {
+        nextBtn.innerHTML = `<span>Hoàn tất</span>`;
+      } else {
+        nextBtn.innerHTML = `<span>Tiếp theo</span><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>`;
+      }
+
+      noteSlideTitle.textContent = `Slide ${currentSlide} / ${totalSlides}`;
+      noteContent.innerHTML = `<p>${speakerNotes[currentSlide] || ''}</p>`;
+    }
+
+    function goToSlide(n) {
+      if (n >= 1 && n <= totalSlides) {
+        currentSlide = n;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function toggleNotes() {
+      notesDrawer.classList.toggle('hidden');
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    prevBtn.addEventListener('click', prevSlide);
+    nextBtn.addEventListener('click', nextSlide);
+    toggleNotesBtn.addEventListener('click', toggleNotes);
+    closeNotesBtn.addEventListener('click', () => notesDrawer.classList.add('hidden'));
+    fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        goToSlide(1);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        goToSlide(totalSlides);
+      } else if (e.key === 'n' || e.key === 'N') {
+        toggleNotes();
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+      }
+    });
+
+    updateSlide();
+  </script>
+</body>
+</html>

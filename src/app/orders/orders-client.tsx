@@ -283,7 +283,7 @@ export function OrdersClient({ orders, courses, facilities }: { orders: any[], c
             </DialogTitle>
           </DialogHeader>
           {editingOrder && (
-            <form action={handleUpdate} className="grid gap-4 py-3">
+            <form key={editingOrder.id} action={handleUpdate} className="grid gap-4 py-3">
               <div className="grid grid-cols-2 gap-3">
                 <div className="grid gap-1.5">
                   <Label className="text-xs font-bold font-heading">Họ tên phụ huynh</Label>

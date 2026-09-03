@@ -26,25 +26,25 @@ export async function submitAttendance(scheduleId: string, attendances: { studen
         continue;
       }
 
-      const existing = await prisma.attendance.findFirst({
-        where: { scheduleId, studentId: record.studentId }
-      });
-      if (existing) {
-        await prisma.attendance.update({
-          where: { id: existing.id },
-          data: { status: record.status, note: record.notes }
-        });
-      } else {
-        await prisma.attendance.create({
-          data: {
+      await prisma.attendance.upsert({
+        where: {
+          scheduleId_studentId: {
             scheduleId,
-            studentId: record.studentId,
-            classId: schedule.classId,
-            status: record.status,
-            note: record.notes
+            studentId: record.studentId
           }
-        });
-      }
+        },
+        update: {
+          status: record.status,
+          note: record.notes
+        },
+        create: {
+          scheduleId,
+          studentId: record.studentId,
+          classId: schedule.classId,
+          status: record.status,
+          note: record.notes
+        }
+      });
     }
 
     // Check remaining attendances
