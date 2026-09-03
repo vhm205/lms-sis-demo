@@ -1,56 +1,14 @@
 import { prisma } from './src/lib/prisma'
 
-// Seed helper random utilities
-function randomItem<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)]
-}
-
-function randomInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min
-}
-
-const LAST_NAMES = [
-  'Nguyễn', 'Trần', 'Lê', 'Phạm', 'Hoàng', 'Huỳnh', 'Phan', 'Vũ', 'Võ', 'Đặng',
-  'Bùi', 'Đỗ', 'Hồ', 'Ngô', 'Dương', 'Lý', 'Đinh', 'Đoàn', 'Lâm', 'Trịnh'
-]
-
-const MIDDLE_MALE = ['Văn', 'Đức', 'Minh', 'Hải', 'Thanh', 'Quốc', 'Đình', 'Hoàng', 'Bảo', 'Tuấn', 'Trọng', 'Công', 'Gia', 'Hữu']
-const MIDDLE_FEMALE = ['Thị', 'Ngọc', 'Thu', 'Mai', 'Anh', 'Phương', 'Khánh', 'Thùy', 'Hải', 'Bảo', 'Tuyết', 'Diệu', 'Yến', 'Quỳnh']
-
-const FIRST_MALE = [
-  'An', 'Bình', 'Cường', 'Dũng', 'Đạt', 'Hải', 'Hiếu', 'Hoàng', 'Hùng', 'Huy',
-  'Khánh', 'Khoa', 'Long', 'Minh', 'Nam', 'Nghĩa', 'Phong', 'Phúc', 'Quân', 'Quang',
-  'Sơn', 'Tân', 'Thắng', 'Thịnh', 'Trung', 'Tuấn', 'Tùng', 'Việt', 'Vinh', 'Vũ'
-]
-
-const FIRST_FEMALE = [
-  'Anh', 'Bích', 'Châu', 'Chi', 'Dung', 'Duyên', 'Giang', 'Hà', 'Hạnh', 'Hoa',
-  'Hương', 'Lan', 'Linh', 'Mai', 'My', 'Nga', 'Ngân', 'Ngọc', 'Nhi', 'Như',
-  'Phương', 'Quỳnh', 'Tâm', 'Thảo', 'Trang', 'Trâm', 'Uyên', 'Vân', 'Vy', 'Yến'
-]
-
-function generateFullName(gender?: 'M' | 'F'): { name: string; isMale: boolean } {
-  const isMale = gender !== undefined ? gender === 'M' : Math.random() > 0.5
-  const lastName = randomItem(LAST_NAMES)
-  const middleName = isMale ? randomItem(MIDDLE_MALE) : randomItem(MIDDLE_FEMALE)
-  const firstName = isMale ? randomItem(FIRST_MALE) : randomItem(FIRST_FEMALE)
-  return { name: `${lastName} ${middleName} ${firstName}`, isMale }
-}
-
-function generatePhone(index: number): string {
-  const prefixes = ['090', '091', '092', '093', '094', '096', '097', '098', '086', '088', '089', '077', '078', '079']
-  const prefix = prefixes[index % prefixes.length]
-  const suffix = String(1000000 + (index * 137 + randomInt(1, 99)) % 9000000).slice(1)
-  return `${prefix}${suffix}`
-}
-
 async function main() {
-  console.log('🚀 Starting deep database seed with 1,000+ student records...')
+  console.log('🚀 Starting streamlined database seed tailored for CSKH Testing Scenarios...')
   const startTime = Date.now()
 
   // 1. Clear existing data in correct dependency order
   console.log('Cleaning old data...')
   await prisma.activityLog.deleteMany()
+  await prisma.campaignItem.deleteMany()
+  await prisma.campaign.deleteMany()
   await prisma.transferRequest.deleteMany()
   await prisma.makeUpRequest.deleteMany()
   await prisma.supportRequest.deleteMany()
@@ -67,470 +25,977 @@ async function main() {
   await prisma.user.deleteMany()
   await prisma.facility.deleteMany()
 
-  // 2. Facilities
-  console.log('Creating facilities...')
-  const facilities = await Promise.all([
-    prisma.facility.create({
-      data: { id: 'facility-cau-giay', name: 'Cơ sở Cầu Giấy', address: '123 Xuân Thủy, Dịch Vọng Hậu, Cầu Giấy, Hà Nội' }
-    }),
-    prisma.facility.create({
-      data: { id: 'facility-binh-thanh', name: 'Cơ sở Bình Thạnh', address: '456 Điện Biên Phủ, Phường 25, Bình Thạnh, TP.HCM' }
-    }),
-    prisma.facility.create({
-      data: { id: 'facility-hai-chau', name: 'Cơ sở Hải Châu', address: '789 Nguyễn Văn Linh, Nam Dương, Hải Châu, Đà Nẵng' }
-    })
-  ])
+  // 2. Facilities (Aligned with Scenarios: Cầu Giấy, Bình Thạnh, Quận 7)
+  console.log('Creating 3 target facilities...')
+  const facilityHN = await prisma.facility.create({
+    data: {
+      id: 'facility-cau-giay',
+      name: 'Cơ sở Cầu Giấy',
+      address: '123 Xuân Thủy, Dịch Vọng Hậu, Cầu Giấy, Hà Nội'
+    }
+  })
 
-  const [facilityHN, facilityHCM, facilityDN] = facilities
+  const facilityBT = await prisma.facility.create({
+    data: {
+      id: 'facility-binh-thanh',
+      name: 'Cơ sở Bình Thạnh',
+      address: '456 Điện Biên Phủ, Phường 25, Bình Thạnh, TP.HCM'
+    }
+  })
 
-  // 3. Rooms (6 rooms per facility = 18 rooms total)
+  const facilityQ7 = await prisma.facility.create({
+    data: {
+      id: 'facility-quan-7',
+      name: 'Cơ sở Quận 7',
+      address: '789 Nguyễn Thị Thập, Phường Tân Phú, Quận 7, TP.HCM'
+    }
+  })
+
+  // 3. Rooms
   console.log('Creating rooms...')
-  const roomData = [
-    // HN
-    { name: 'Phòng 101 (Lab A)', capacity: 25, facilityId: facilityHN.id },
-    { name: 'Phòng 102 (Smart Room)', capacity: 20, facilityId: facilityHN.id },
-    { name: 'Phòng 201 (Kids Active)', capacity: 16, facilityId: facilityHN.id },
-    { name: 'Phòng 202 (IELTS Studio)', capacity: 18, facilityId: facilityHN.id },
-    { name: 'Phòng 301 (Hội trường)', capacity: 40, facilityId: facilityHN.id },
-    { name: 'Phòng 302 (Coding Lab)', capacity: 22, facilityId: facilityHN.id },
-    // HCM
-    { name: 'Phòng S-101 (Creative)', capacity: 20, facilityId: facilityHCM.id },
-    { name: 'Phòng S-102 (Language Hub)', capacity: 25, facilityId: facilityHCM.id },
-    { name: 'Phòng S-201 (Kids Junior)', capacity: 18, facilityId: facilityHCM.id },
-    { name: 'Phòng S-202 (IELTS Master)', capacity: 15, facilityId: facilityHCM.id },
-    { name: 'Phòng S-301 (STEM Workshop)', capacity: 24, facilityId: facilityHCM.id },
-    { name: 'Phòng S-302 (Seminar Room)', capacity: 35, facilityId: facilityHCM.id },
-    // DN
-    { name: 'Phòng D-101 (General)', capacity: 20, facilityId: facilityDN.id },
-    { name: 'Phòng D-102 (Kids Wonder)', capacity: 16, facilityId: facilityDN.id },
-    { name: 'Phòng D-201 (IELTS Intensive)', capacity: 18, facilityId: facilityDN.id },
-    { name: 'Phòng D-202 (Math & Logic)', capacity: 22, facilityId: facilityDN.id },
-    { name: 'Phòng D-301 (Tech Lab)', capacity: 20, facilityId: facilityDN.id },
-  ]
-  const rooms = await Promise.all(roomData.map(r => prisma.room.create({ data: r })))
+  const roomHN101 = await prisma.room.create({ data: { name: 'Phòng HN-101 (Smart Lab)', capacity: 20, facilityId: facilityHN.id } })
+  const roomHN102 = await prisma.room.create({ data: { name: 'Phòng HN-102 (Kids Active)', capacity: 18, facilityId: facilityHN.id } })
 
-  // 4. Users (Admin, Teachers, Sales, CS, Managers)
+  const roomBT101 = await prisma.room.create({ data: { name: 'Phòng BT-101 (Movers Class)', capacity: 18, facilityId: facilityBT.id } })
+  const roomBT102 = await prisma.room.create({ data: { name: 'Phòng BT-102 (Flyers Studio)', capacity: 20, facilityId: facilityBT.id } })
+  const roomBT201 = await prisma.room.create({ data: { name: 'Phòng BT-201 (MBA Executive)', capacity: 25, facilityId: facilityBT.id } })
+
+  const roomQ7101 = await prisma.room.create({ data: { name: 'Phòng Q7-101 (Creative Junior)', capacity: 18, facilityId: facilityQ7.id } })
+  const roomQ7102 = await prisma.room.create({ data: { name: 'Phòng Q7-102 (Language Hub)', capacity: 20, facilityId: facilityQ7.id } })
+
+  // 4. Users (Admin, Manager, Teachers, Sales & CS)
   console.log('Creating system users...')
-  const users = await Promise.all([
-    prisma.user.create({ data: { name: 'Nguyễn Văn Admin', email: 'admin@educenter.vn', role: 'ADMIN' } }),
-    prisma.user.create({ data: { name: 'Hoàng Minh Giám Đốc', email: 'manager@educenter.vn', role: 'MANAGER' } }),
-    // Teachers HN
-    prisma.user.create({ data: { name: 'Trần Thị Mai Anh', email: 'teacher.maianh@educenter.vn', role: 'TEACHER', facilityId: facilityHN.id } }),
-    prisma.user.create({ data: { name: 'Nguyễn Quốc Tuấn', email: 'teacher.tuannq@educenter.vn', role: 'TEACHER', facilityId: facilityHN.id } }),
-    prisma.user.create({ data: { name: 'Sarah Wilson', email: 'sarah.w@educenter.vn', role: 'TEACHER', facilityId: facilityHN.id } }),
-    // Teachers HCM
-    prisma.user.create({ data: { name: 'Lê Văn Hoàng Long', email: 'teacher.longlvh@educenter.vn', role: 'TEACHER', facilityId: facilityHCM.id } }),
-    prisma.user.create({ data: { name: 'Phạm Quỳnh Nga', email: 'teacher.ngapq@educenter.vn', role: 'TEACHER', facilityId: facilityHCM.id } }),
-    prisma.user.create({ data: { name: 'David Miller', email: 'david.m@educenter.vn', role: 'TEACHER', facilityId: facilityHCM.id } }),
-    // Teachers DN
-    prisma.user.create({ data: { name: 'Đặng Thảo Vy', email: 'teacher.vydt@educenter.vn', role: 'TEACHER', facilityId: facilityDN.id } }),
-    prisma.user.create({ data: { name: 'Bùi Hải Đăng', email: 'teacher.dangbh@educenter.vn', role: 'TEACHER', facilityId: facilityDN.id } }),
-    // Sales & CS
-    prisma.user.create({ data: { name: 'Phạm Thị Tư Vấn HN', email: 'sales.hn@educenter.vn', role: 'SALES', facilityId: facilityHN.id } }),
-    prisma.user.create({ data: { name: 'Vũ Đức Thịnh Sales HCM', email: 'sales.hcm@educenter.vn', role: 'SALES', facilityId: facilityHCM.id } }),
-    prisma.user.create({ data: { name: 'Trương Ngọc Lan Sales ĐN', email: 'sales.dn@educenter.vn', role: 'SALES', facilityId: facilityDN.id } }),
-    prisma.user.create({ data: { name: 'Hoàng Văn CSKH 1', email: 'cs1@educenter.vn', role: 'CS', facilityId: facilityHN.id } }),
-    prisma.user.create({ data: { name: 'Đỗ Thị Minh Châu CSKH 2', email: 'cs2@educenter.vn', role: 'CS', facilityId: facilityHCM.id } })
-  ])
+  const adminUser = await prisma.user.create({
+    data: { name: 'Nguyễn Văn Admin', email: 'admin@educenter.vn', role: 'ADMIN' }
+  })
+  const managerUser = await prisma.user.create({
+    data: { name: 'Hoàng Minh Giám Đốc', email: 'manager@educenter.vn', role: 'MANAGER' }
+  })
 
-  const teachers = users.filter(u => u.role === 'TEACHER')
-  const teachersHN = teachers.filter(t => t.facilityId === facilityHN.id)
-  const teachersHCM = teachers.filter(t => t.facilityId === facilityHCM.id)
-  const teachersDN = teachers.filter(t => t.facilityId === facilityDN.id)
+  const teacherMaiAnh = await prisma.user.create({
+    data: { name: 'Trần Thị Mai Anh', email: 'teacher.maianh@educenter.vn', role: 'TEACHER', facilityId: facilityHN.id }
+  })
+  const teacherLong = await prisma.user.create({
+    data: { name: 'Lê Văn Hoàng Long', email: 'teacher.long@educenter.vn', role: 'TEACHER', facilityId: facilityBT.id }
+  })
+  const teacherNga = await prisma.user.create({
+    data: { name: 'Phạm Quỳnh Nga', email: 'teacher.nga@educenter.vn', role: 'TEACHER', facilityId: facilityQ7.id }
+  })
+  const teacherDavid = await prisma.user.create({
+    data: { name: 'TS. David Miller', email: 'david.miller@educenter.vn', role: 'TEACHER', facilityId: facilityBT.id }
+  })
 
-  // 5. Courses (12 diverse courses)
-  console.log('Creating courses...')
-  const coursesData = [
-    { code: 'ENG-KIDS-STARTER', name: 'Tiếng Anh Mầm Non (Kindy Stars)', type: 'Tiếng Anh thiếu nhi', targetAge: '4-6', duration: 24, fee: 3200000, description: 'Phát triển phản xạ tự nhiên qua bài hát, vận động và Flashcard sinh động.' },
-    { code: 'ENG-CAM-MOVERS', name: 'Cambridge Movers Chuẩn Quốc Tế', type: 'Tiếng Anh thiếu nhi', targetAge: '7-9', duration: 32, fee: 4500000, description: 'Trang bị 4 kỹ năng Nghe - Nói - Đọc - Viết theo chuẩn Cambridge Young Learners.' },
-    { code: 'ENG-CAM-FLYERS', name: 'Cambridge Flyers Bứt Phá', type: 'Tiếng Anh thiếu nhi', targetAge: '10-12', duration: 32, fee: 4800000, description: 'Chinh phục chứng chỉ A2 Flyers, chuẩn bị nền tảng chuyển cấp.' },
-    { code: 'IELTS-FOU-45', name: 'IELTS Foundation (3.5 - 4.5)', type: 'Luyện thi IELTS', targetAge: '13-18', duration: 36, fee: 6500000, description: 'Xây dựng nền tảng ngữ pháp chuyên sâu và phát âm chuẩn IPA.' },
-    { code: 'IELTS-INT-65', name: 'IELTS Intensive Target 6.5+', type: 'Luyện thi IELTS', targetAge: '15+', duration: 40, fee: 8500000, description: 'Chiến thuật giải đề Writing Task 2 và Speaking Part 2-3 nâng band nhanh.' },
-    { code: 'IELTS-MAS-75', name: 'IELTS Master Target 7.5+', type: 'Luyện thi IELTS', targetAge: '16+', duration: 48, fee: 12000000, description: 'Lớp chuyên gia luyện tư duy phản biện và từ vựng C1-C2 cao cấp.' },
-    { code: 'MATH-SINGAPORE-1', name: 'Toán Tư Duy Singapore Lớp 1-2', type: 'Toán tư duy', targetAge: '6-8', duration: 24, fee: 3500000, description: 'Phương pháp CPA (Concrete - Pictorial - Abstract) kích thích tư duy logic.' },
-    { code: 'MATH-OLYMPIAD', name: 'Toán Olympic & Phân Tích Logic', type: 'Toán tư duy', targetAge: '9-12', duration: 30, fee: 4200000, description: 'Bồi dưỡng học sinh giỏi chuẩn bị cho các kỳ thi Kangaroo, TIMO, SASMO.' },
-    { code: 'CODE-SCRATCH-JUNIOR', name: 'Lập Trình Scratch & Game 2D', type: 'Lập trình & STEM', targetAge: '8-11', duration: 20, fee: 3800000, description: 'Khám phá tư duy lập trình kéo thả và sáng tạo trò chơi tương tác.' },
-    { code: 'CODE-PYTHON-AI', name: 'Python Lập Trình & Ứng Dụng AI', type: 'Lập trình & STEM', targetAge: '12-16', duration: 30, fee: 5200000, description: 'Làm quen ngôn ngữ Python, xử lý dữ liệu và thuật toán AI cơ bản.' },
-    { code: 'ENG-COMM-BUSINESS', name: 'Tiếng Anh Giao Tiếp Doanh Nghiệp', type: 'Tiếng Anh giao tiếp', targetAge: '18+', duration: 24, fee: 4000000, description: 'Thực hành thuyết trình, đàm phán và viết Email thương mại chuẩn chỉnh.' },
-    { code: 'SAT-DIGITAL-CRACK', name: 'Luyện Thi Digital SAT 1400+', type: 'Luyện thi SAT', targetAge: '15-18', duration: 36, fee: 9800000, description: 'Bí quyết bứt phá điểm phần Math & Verbal trên nền tảng Digital SAT.' },
-  ]
-  const courses = await Promise.all(coursesData.map(c => prisma.course.create({ data: c })))
+  await prisma.user.create({
+    data: { name: 'Vũ Đức Thịnh Sales', email: 'sales.hcm@educenter.vn', role: 'SALES', facilityId: facilityBT.id }
+  })
+  const csChau = await prisma.user.create({
+    data: { name: 'Đỗ Thị Minh Châu CSKH', email: 'cs2@educenter.vn', role: 'CS', facilityId: facilityBT.id }
+  })
 
-  // 6. Classes (48 classes distributed across facilities)
-  console.log('Creating classes...')
-  const classList: any[] = []
-  let classIndex = 1
-
-  for (const fac of [facilityHN, facilityHCM, facilityDN]) {
-    const facPrefix = fac.id === facilityHN.id ? 'HN' : fac.id === facilityHCM.id ? 'HCM' : 'DN'
-    const facTeachers = fac.id === facilityHN.id ? teachersHN : fac.id === facilityHCM.id ? teachersHCM : teachersDN
-
-    for (let cIdx = 0; cIdx < courses.length; cIdx++) {
-      const course = courses[cIdx]
-      // Create 1-2 classes per course per facility
-      const classCount = (cIdx % 2 === 0) ? 2 : 1
-      for (let k = 1; k <= classCount; k++) {
-        const classCode = `${facPrefix}-${course.code.split('-')[0]}-${String(classIndex).padStart(3, '0')}`
-        const teacher = facTeachers[classIndex % facTeachers.length]
-        const statuses = ['ONGOING', 'ONGOING', 'ONGOING', 'COMPLETED', 'PAUSED']
-        const status = statuses[classIndex % statuses.length]
-
-        const createdClass = await prisma.class.create({
-          data: {
-            code: classCode,
-            name: `Lớp ${course.name} (${facPrefix} - Nhóm ${k})`,
-            courseId: course.id,
-            teacherId: teacher.id,
-            facilityId: fac.id,
-            capacity: randomInt(15, 25),
-            status: status
-          }
-        })
-        classList.push(createdClass)
-        classIndex++
-      }
+  // 5. Courses (5 Focus Courses covering all scenarios)
+  console.log('Creating 5 core courses...')
+  const courseMBABase = await prisma.course.create({
+    data: {
+      code: 'MBA-FOUNDATION',
+      name: 'Thạc sĩ Quản trị Kinh doanh - Giai đoạn Cơ sở (MBA Foundation)',
+      type: 'Đào tạo Sau Đại học (MBA)',
+      targetAge: '23+',
+      level: 'Foundation',
+      duration: 24,
+      fee: 25000000,
+      description: 'Nền tảng Quản trị chiến lược, Tài chính doanh nghiệp và Hành vi tổ chức.'
     }
-  }
+  })
 
-  console.log(`Created ${classList.length} active/ongoing classes.`)
-
-  // 7. Parents (700 parents)
-  console.log('Creating 700 parent records...')
-  const parentData: { name: string; phone: string; email?: string; notes?: string }[] = []
-  for (let i = 1; i <= 700; i++) {
-    const { name } = generateFullName()
-    const phone = generatePhone(i)
-    const notesArr = [
-      'Liên hệ qua Zalo buổi tối',
-      'Phụ huynh quan tâm học phí đóng theo năm',
-      'Đăng ký kèm xe đưa đón',
-      'Ưu tiên xếp lớp cuối tuần',
-      'Muốn nhận báo cáo học tập hàng tuần',
-      null,
-      null
-    ]
-    parentData.push({
-      name: `PH. ${name}`,
-      phone: phone,
-      email: `parent${i}@gmail.com`,
-      notes: randomItem(notesArr) || undefined
-    })
-  }
-
-  // Insert parents in chunks
-  const chunkSize = 100
-  const createdParents: any[] = []
-  for (let i = 0; i < parentData.length; i += chunkSize) {
-    const chunk = parentData.slice(i, i + chunkSize)
-    const res = await Promise.all(chunk.map(p => prisma.parent.create({ data: p })))
-    createdParents.push(...res)
-  }
-
-  // 8. Students (Target: Exactly 1,000 students!)
-  console.log('Creating 1,000 student records...')
-  const studentData: any[] = []
-  const TOTAL_STUDENTS = 1000
-
-  for (let i = 1; i <= TOTAL_STUDENTS; i++) {
-    const code = `HV${String(i).padStart(4, '0')}`
-    const isMale = Math.random() > 0.48
-    const { name } = generateFullName(isMale ? 'M' : 'F')
-    
-    // Facility distribution (45% HN, 35% HCM, 20% DN)
-    let assignedFacility = facilityHN
-    const randFac = Math.random()
-    if (randFac < 0.45) assignedFacility = facilityHN
-    else if (randFac < 0.80) assignedFacility = facilityHCM
-    else assignedFacility = facilityDN
-
-    // Parent mapping (each parent has 1-2 students)
-    const parent = createdParents[i % createdParents.length]
-    const dobYear = randomInt(2006, 2019)
-    const dobMonth = randomInt(1, 12)
-    const dobDay = randomInt(1, 28)
-    const dob = new Date(`${dobYear}-${String(dobMonth).padStart(2, '0')}-${String(dobDay).padStart(2, '0')}`)
-    
-    // Status (88% ACTIVE, 12% INACTIVE)
-    const status = Math.random() < 0.88 ? 'ACTIVE' : 'INACTIVE'
-    const studentPhone = (dobYear <= 2008 && Math.random() > 0.3) ? generatePhone(2000 + i) : undefined
-
-    studentData.push({
-      code,
-      name,
-      dob,
-      phone: studentPhone,
-      parentId: parent.id,
-      facilityId: assignedFacility.id,
-      status
-    })
-  }
-
-  // Insert students in chunks
-  const createdStudents: any[] = []
-  for (let i = 0; i < studentData.length; i += chunkSize) {
-    const chunk = studentData.slice(i, i + chunkSize)
-    const res = await Promise.all(chunk.map(s => prisma.student.create({ data: s })))
-    createdStudents.push(...res)
-  }
-
-  console.log(`Created ${createdStudents.length} students successfully.`)
-
-  // 9. Assign Students to Classes (Connecting relation)
-  console.log('Assigning students to classes according to facility...')
-  for (const s of createdStudents) {
-    // Pick 1-2 classes in student's facility
-    const eligibleClasses = classList.filter(c => c.facilityId === s.facilityId)
-    if (eligibleClasses.length > 0) {
-      const classToJoin = randomItem(eligibleClasses)
-      try {
-        await prisma.student.update({
-          where: { id: s.id },
-          data: {
-            classes: { connect: { id: classToJoin.id } }
-          }
-        })
-      } catch (e) {
-        // Continue
-      }
+  const courseMBAAdv = await prisma.course.create({
+    data: {
+      code: 'MBA-ADVANCED-MGMT',
+      name: 'MBA Chuyên ngành Quản trị Chiến lược & Đổi mới (MBA Advanced)',
+      type: 'Đào tạo Sau Đại học (MBA)',
+      targetAge: '23+',
+      level: 'Advanced',
+      duration: 30,
+      fee: 32000000,
+      description: 'Chuyên sâu về Lãnh đạo chuyển đổi số, Quản trị chuỗi cung ứng và Khởi nghiệp đổi mới sáng tạo.'
     }
-  }
+  })
 
-  // 10. Schedules & Attendances
-  console.log('Generating schedules and attendances...')
-  const schedulesToCreate: any[] = []
-  
-  for (let cIdx = 0; cIdx < classList.length; cIdx++) {
-    const cls = classList[cIdx]
-    const facRooms = rooms.filter(r => r.facilityId === cls.facilityId)
-    const room = facRooms[cIdx % facRooms.length] || rooms[0]
-
-    // Create 3 schedules per class (2 completed past, 1 upcoming)
-    const dates = [
-      new Date(Date.now() - 7 * 24 * 60 * 60 * 1000 + (cIdx % 5) * 3600000), // Past 1
-      new Date(Date.now() - 3 * 24 * 60 * 60 * 1000 + (cIdx % 5) * 3600000), // Past 2
-      new Date(Date.now() + 4 * 24 * 60 * 60 * 1000 + (cIdx % 5) * 3600000), // Upcoming
-    ]
-
-    for (let sIdx = 0; sIdx < dates.length; sIdx++) {
-      const isPast = sIdx < 2
-      const sched = await prisma.schedule.create({
-        data: {
-          classId: cls.id,
-          roomId: room.id,
-          date: dates[sIdx],
-          duration: 90,
-          status: isPast ? 'COMPLETED' : 'SCHEDULED'
-        }
-      })
-      schedulesToCreate.push(sched)
-
-      // If past schedule, create attendance records for some students
-      if (isPast) {
-        const studentsInFac = createdStudents.filter(st => st.facilityId === cls.facilityId).slice(0, 12)
-        for (const st of studentsInFac) {
-          const attendanceStatuses = ['PRESENT', 'PRESENT', 'PRESENT', 'PRESENT', 'ABSENT', 'LATE', 'EXCUSED']
-          const attStatus = randomItem(attendanceStatuses)
-          const notes = attStatus === 'ABSENT' ? 'Bận việc riêng có phép' : attStatus === 'LATE' ? 'Đến muộn 10p' : null
-          try {
-            await prisma.attendance.create({
-              data: {
-                scheduleId: sched.id,
-                studentId: st.id,
-                classId: cls.id,
-                status: attStatus,
-                note: notes
-              }
-            })
-          } catch {}
-        }
-      }
+  const courseMovers = await prisma.course.create({
+    data: {
+      code: 'ENG-CAM-MOVERS',
+      name: 'Tiếng Anh Cambridge Movers Chuẩn Quốc Tế',
+      type: 'Tiếng Anh thiếu nhi',
+      targetAge: '7-9',
+      level: 'A1 Movers',
+      duration: 32,
+      fee: 4500000,
+      description: 'Trang bị 4 kỹ năng Nghe - Nói - Đọc - Viết theo chuẩn Cambridge Young Learners.'
     }
-  }
+  })
 
-  // 11. Assignments (400+ assignment submissions)
-  console.log('Generating assignments and scores...')
-  const assignmentTitles = [
-    'Bài tập kiểm tra giữa kỳ Unit 1-4',
-    'Mini-Test Vocabulary & Collocations',
-    'IELTS Speaking Part 2 Mock Practice',
-    'Bài tập logic & Giải thuật tuần 3',
-    'Listening Comprehension Section 2',
-    'Reading Analysis & Short Summary',
-    'Toán ứng dụng thực tế bài số 5'
-  ]
-  const sampleStudentsForAssignments = createdStudents.slice(0, 350)
-  for (const st of sampleStudentsForAssignments) {
-    const title = randomItem(assignmentTitles)
-    const score = Number((randomInt(60, 100) / 10).toFixed(1))
-    const status = Math.random() > 0.1 ? 'COMPLETED' : 'PENDING'
-    const notes = [
-      'Làm bài tốt, nắm chắc khái niệm',
-      'Cần chú ý thêm ngữ pháp và dấu câu',
-      'Tiến bộ rõ rệt so với bài trước',
-      'Hoàn thành xuất sắc bài tập nâng cao',
-      'Cần nộp đúng hạn hơn vào lần tới'
-    ]
-    await prisma.assignment.create({
+  const courseFlyers = await prisma.course.create({
+    data: {
+      code: 'ENG-CAM-FLYERS',
+      name: 'Tiếng Anh Cambridge Flyers Bứt Phá',
+      type: 'Tiếng Anh thiếu nhi',
+      targetAge: '10-12',
+      level: 'A2 Flyers',
+      duration: 32,
+      fee: 4800000,
+      description: 'Chinh phục chứng chỉ A2 Flyers, chuẩn bị nền tảng chuyển cấp.'
+    }
+  })
+
+  const courseSpeak1on1 = await prisma.course.create({
+    data: {
+      code: 'ENG-SPEAK-1ON1',
+      name: 'Lớp Bổ Trợ Phát Âm & Phản Xạ Giao Tiếp 1:1',
+      type: 'Tiếng Anh bổ trợ',
+      targetAge: '8-16',
+      level: 'Personalized',
+      duration: 12,
+      fee: 3600000,
+      description: 'Khắc phục triệt để điểm yếu phát âm, tăng cường phản xạ Listening & Speaking 1 kèm 1 với giáo viên.'
+    }
+  })
+
+  // 6. Classes (Tailored for transfers, makeups, and persona tests)
+  console.log('Creating targeted classes...')
+  // Class 1: Bé Minh hiện tại (Bình Thạnh - Tối 3-5)
+  const classMoversBT01 = await prisma.class.create({
+    data: {
+      code: 'HCM-MOV-BT01',
+      name: 'Lớp Cambridge Movers (Bình Thạnh - Tối 3-5)',
+      courseId: courseMovers.id,
+      teacherId: teacherLong.id,
+      facilityId: facilityBT.id,
+      capacity: 15,
+      status: 'ONGOING'
+    }
+  })
+
+  // Class 2: Target chuyển cơ sở của Bé Minh (Quận 7 - Tối 3-5)
+  const classMoversQ701 = await prisma.class.create({
+    data: {
+      code: 'HCM-MOV-Q701',
+      name: 'Lớp Cambridge Movers (Quận 7 - Tối 3-5)',
+      courseId: courseMovers.id,
+      teacherId: teacherNga.id,
+      facilityId: facilityQ7.id,
+      capacity: 15,
+      status: 'ONGOING'
+    }
+  })
+
+  // Class 3: Lớp học bù cuối tuần (Bình Thạnh - Sáng T7-CN)
+  const classMoversBTWeekend = await prisma.class.create({
+    data: {
+      code: 'HCM-MOV-BT-WK',
+      name: 'Lớp Cambridge Movers Bù & Tăng cường (Bình Thạnh - Sáng T7-CN)',
+      courseId: courseMovers.id,
+      teacherId: teacherLong.id,
+      facilityId: facilityBT.id,
+      capacity: 12,
+      status: 'ONGOING'
+    }
+  })
+
+  // Class 4: Lớp Flyers Bình Thạnh
+  const classFlyersBT01 = await prisma.class.create({
+    data: {
+      code: 'HCM-FLY-BT01',
+      name: 'Lớp Cambridge Flyers (Bình Thạnh - Tối 2-4-6)',
+      courseId: courseFlyers.id,
+      teacherId: teacherLong.id,
+      facilityId: facilityBT.id,
+      capacity: 15,
+      status: 'ONGOING'
+    }
+  })
+
+  // Class 5: Lớp Flyers Cầu Giấy HN
+  const classFlyersHN01 = await prisma.class.create({
+    data: {
+      code: 'HN-FLY-CG01',
+      name: 'Lớp Cambridge Flyers (Cầu Giấy - Tối 3-5)',
+      courseId: courseFlyers.id,
+      teacherId: teacherMaiAnh.id,
+      facilityId: facilityHN.id,
+      capacity: 16,
+      status: 'ONGOING'
+    }
+  })
+
+  // Class 6: Lớp MBA Cơ sở của anh Nam
+  const classMBABT01 = await prisma.class.create({
+    data: {
+      code: 'HCM-MBA-K28',
+      name: 'Lớp MBA Cơ sở Khóa 28 (Bình Thạnh - Tối Thứ 4 & Thứ 7)',
+      courseId: courseMBABase.id,
+      teacherId: teacherDavid.id,
+      facilityId: facilityBT.id,
+      capacity: 25,
+      status: 'ONGOING'
+    }
+  })
+
+  // Class 7: Lớp MBA Chuyên ngành tiếp theo (Upsell)
+  const classMBAAdvBT01 = await prisma.class.create({
+    data: {
+      code: 'HCM-MBA-ADV27',
+      name: 'Lớp MBA Chuyên ngành Quản trị Khóa 27 (Bình Thạnh - Cuối tuần)',
+      courseId: courseMBAAdv.id,
+      teacherId: teacherDavid.id,
+      facilityId: facilityBT.id,
+      capacity: 20,
+      status: 'ONGOING'
+    }
+  })
+
+  // Class 8: Lớp bổ trợ 1:1 Speaking (Cross-sell)
+  const classSpeak1on1BT = await prisma.class.create({
+    data: {
+      code: 'HCM-SPK-1ON1',
+      name: 'Lớp Bổ Trợ Giao Tiếp 1:1 Chuyên Sâu (Bình Thạnh / Online)',
+      courseId: courseSpeak1on1.id,
+      teacherId: teacherNga.id,
+      facilityId: facilityBT.id,
+      capacity: 5,
+      status: 'ONGOING'
+    }
+  })
+
+  // 7. Exactly 5 Deterministic Parents
+  console.log('Creating 5 test-persona parents...')
+  // Parent 1: Mẹ bé Nhật Minh & Nhật An
+  const parentTrang = await prisma.parent.create({
+    data: {
+      name: 'PH. Lê Thu Trang',
+      phone: '0901234567',
+      email: 'lethutrang@gmail.com',
+      notes: 'Phụ huynh bé Nguyễn Nhật Minh và Nguyễn Nhật An. Có kế hoạch chuyển nhà sang Quận 7 trong tháng tới.'
+    }
+  })
+
+  // Parent 2: Anh Trần Hoàng Nam (Học viên MBA tự học)
+  const parentNam = await prisma.parent.create({
+    data: {
+      name: 'Trần Hoàng Nam (Học viên MBA)',
+      phone: '0912345678',
+      email: 'nam.tran@company.com.vn',
+      notes: 'Học viên cao học MBA, Trưởng phòng Marketing bận công tác thường xuyên.'
+    }
+  })
+
+  // Parent 3: Mẹ bé Hoàng Đức Long
+  const parentHuong = await prisma.parent.create({
+    data: {
+      name: 'PH. Phạm Quỳnh Hương',
+      phone: '0923456789',
+      email: 'quynhhuong.pham@gmail.com',
+      notes: 'Phụ huynh rất quan tâm điểm số thi giữa kỳ và cần cải thiện kỹ năng Speaking cho con.'
+    }
+  })
+
+  // Parent 4: Bố bé Vũ Bảo Ngọc
+  const parentHung = await prisma.parent.create({
+    data: {
+      name: 'PH. Vũ Đình Hùng',
+      phone: '0934567890',
+      email: 'dinhhung.vu@gmail.com',
+      notes: 'Phụ huynh đang phân vân không muốn tái tục do cảm thấy con chưa tự tin sau 1 năm học.'
+    }
+  })
+
+  // Parent 5: Mẹ bé Đặng Gia Huy & Đặng Hải Đăng
+  const parentNga = await prisma.parent.create({
+    data: {
+      name: 'PH. Đặng Thúy Nga',
+      phone: '0945678901',
+      email: 'thuynga.dang@gmail.com',
+      notes: 'Phụ huynh 2 bé Gia Huy và Hải Đăng. Vừa chuyển khoản học phí 5 triệu và từng khiếu nại điều hòa phòng học.'
+    }
+  })
+
+  // 8. Exactly 7 Students (1-2 students per parent)
+  console.log('Creating 7 students mapped to parents...')
+  // Student 1: Nguyễn Nhật Minh (Con mẹ Trang)
+  const studentMinh = await prisma.student.create({
+    data: {
+      code: 'HV0001',
+      name: 'Nguyễn Nhật Minh',
+      dob: new Date('2016-05-15'),
+      parentId: parentTrang.id,
+      facilityId: facilityBT.id,
+      status: 'ACTIVE',
+      classes: { connect: [{ id: classMoversBT01.id }] }
+    }
+  })
+
+  // Student 2: Nguyễn Nhật An (Con mẹ Trang)
+  const studentAn = await prisma.student.create({
+    data: {
+      code: 'HV0002',
+      name: 'Nguyễn Nhật An',
+      dob: new Date('2014-08-20'),
+      parentId: parentTrang.id,
+      facilityId: facilityBT.id,
+      status: 'ACTIVE',
+      classes: { connect: [{ id: classFlyersBT01.id }] }
+    }
+  })
+
+  // Student 3: Trần Hoàng Nam (Học viên MBA tự học)
+  const studentNam = await prisma.student.create({
+    data: {
+      code: 'HV0003',
+      name: 'Trần Hoàng Nam',
+      phone: '0912345678',
+      dob: new Date('1992-11-10'),
+      parentId: parentNam.id,
+      facilityId: facilityBT.id,
+      status: 'ACTIVE',
+      classes: { connect: [{ id: classMBABT01.id }] }
+    }
+  })
+
+  // Student 4: Hoàng Đức Long (Con mẹ Hương - Grammar tốt, Speaking điểm C)
+  const studentLong = await prisma.student.create({
+    data: {
+      code: 'HV0004',
+      name: 'Hoàng Đức Long',
+      dob: new Date('2013-03-25'),
+      parentId: parentHuong.id,
+      facilityId: facilityBT.id,
+      status: 'ACTIVE',
+      classes: { connect: [{ id: classFlyersBT01.id }] }
+    }
+  })
+
+  // Student 5: Vũ Bảo Ngọc (Con bố Hùng - Phụ huynh phân vân retention)
+  const studentNgoc = await prisma.student.create({
+    data: {
+      code: 'HV0005',
+      name: 'Vũ Bảo Ngọc',
+      dob: new Date('2016-09-12'),
+      parentId: parentHung.id,
+      facilityId: facilityBT.id,
+      status: 'ACTIVE',
+      classes: { connect: [{ id: classMoversBT01.id }] }
+    }
+  })
+
+  // Student 6: Đặng Gia Huy (Con mẹ Nga - Vừa nộp 5tr, khiếu nại máy lạnh)
+  const studentHuy = await prisma.student.create({
+    data: {
+      code: 'HV0006',
+      name: 'Đặng Gia Huy',
+      dob: new Date('2015-12-05'),
+      parentId: parentNga.id,
+      facilityId: facilityBT.id,
+      status: 'ACTIVE',
+      classes: { connect: [{ id: classMoversBT01.id }] }
+    }
+  })
+
+  // Student 7: Đặng Hải Đăng (Con mẹ Nga - Học sinh mới)
+  const studentDang = await prisma.student.create({
+    data: {
+      code: 'HV0007',
+      name: 'Đặng Hải Đăng',
+      dob: new Date('2018-04-18'),
+      parentId: parentNga.id,
+      facilityId: facilityBT.id,
+      status: 'ACTIVE',
+      classes: { connect: [{ id: classMoversBT01.id }] }
+    }
+  })
+
+  // 9. Schedules & Attendances
+  console.log('Generating deterministic schedules and attendance records...')
+  const now = new Date()
+
+  // --- Schedules for Movers Bình Thạnh (Tối 3-5: 18h00 - 19h30) ---
+  const schedMoversPast1 = await prisma.schedule.create({
+    data: {
+      classId: classMoversBT01.id,
+      roomId: roomBT101.id,
+      date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
+      duration: 90,
+      status: 'COMPLETED'
+    }
+  })
+
+  const schedMoversPast2 = await prisma.schedule.create({
+    data: {
+      classId: classMoversBT01.id,
+      roomId: roomBT101.id,
+      date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+      duration: 90,
+      status: 'COMPLETED'
+    }
+  })
+
+  const schedMoversUpcoming1 = await prisma.schedule.create({
+    data: {
+      classId: classMoversBT01.id,
+      roomId: roomBT101.id,
+      date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // Next Thursday 18h00
+      duration: 90,
+      status: 'SCHEDULED'
+    }
+  })
+
+  // Attendance for Movers Class
+  const moversStudents = [studentMinh, studentNgoc, studentHuy, studentDang]
+  for (const st of moversStudents) {
+    await prisma.attendance.create({
       data: {
-        title,
+        scheduleId: schedMoversPast1.id,
         studentId: st.id,
-        score: status === 'COMPLETED' ? score : null,
-        maxScore: 10,
-        status,
-        teacherNote: status === 'COMPLETED' ? randomItem(notes) : null,
-        date: new Date(Date.now() - randomInt(1, 30) * 24 * 60 * 60 * 1000)
+        classId: classMoversBT01.id,
+        status: 'PRESENT',
+        note: 'Có mặt đúng giờ, tham gia sôi nổi'
       }
     })
-  }
-
-  // 12. Leads (350+ leads across facilities)
-  console.log('Generating 350 lead records...')
-  const leadStatuses = ['NEW', 'CONTACTED', 'CONSULTING', 'TRIAL_BOOKED', 'TRIAL_DONE', 'ENROLLED', 'UNSUITABLE', 'UNREACHABLE']
-  const leadSources = ['Facebook Ads', 'Google Search', 'Website Form', 'Giới thiệu từ học viên cũ', 'Hotline tư vấn', 'Tiktok Video', 'Sự kiện Open Day']
-
-  for (let i = 1; i <= 350; i++) {
-    const { name } = generateFullName()
-    const assignedFac = (i % 3 === 0) ? facilityHN : (i % 3 === 1) ? facilityHCM : facilityDN
-    const selectedCourse = randomItem(courses)
-    const status = randomItem(leadStatuses)
-    const source = randomItem(leadSources)
-    const notes = [
-      'Phụ huynh hỏi học phí và chính sách giảm giá 2 con',
-      'Muốn học thử 1 buổi vào thứ 7',
-      'Đã tư vấn lộ trình 6 tháng, hẹn chốt cuối tuần',
-      'Học sinh lớp 11 muốn thi IELTS cấp tốc',
-      'Chưa nghe máy, hẹn gọi lại sau 17h'
-    ]
-
-    await prisma.lead.create({
+    await prisma.attendance.create({
       data: {
-        name: `Khách hàng ${name}`,
-        phone: generatePhone(5000 + i),
-        courseId: selectedCourse.id,
-        facilityId: assignedFac.id,
-        age: randomInt(5, 22),
-        source: source,
-        status: status,
-        notes: randomItem(notes),
-        createdAt: new Date(Date.now() - randomInt(0, 45) * 24 * 60 * 60 * 1000)
+        scheduleId: schedMoversPast2.id,
+        studentId: st.id,
+        classId: classMoversBT01.id,
+        status: 'PRESENT',
+        note: 'Có mặt đầy đủ'
       }
     })
   }
 
-  // 13. Orders (300+ orders)
-  console.log('Generating 300 order records...')
-  const orderStatuses = ['PAID', 'PAID', 'PAID', 'PENDING', 'CANCELLED']
-  for (let i = 1; i <= 300; i++) {
-    const student = createdStudents[i % createdStudents.length]
-    const course = courses[i % courses.length]
-    const assignedFac = facilities.find(f => f.id === student.facilityId) || facilityHN
-    const status = randomItem(orderStatuses)
-    const parentName = student.name ? `PH. ${student.name.split(' ').slice(0, 2).join(' ')}` : 'Phụ huynh'
+  // --- Schedules for Weekend Make-up Class (HCM-MOV-BT-WK) ---
+  const schedWeekendSat = await prisma.schedule.create({
+    data: {
+      classId: classMoversBTWeekend.id,
+      roomId: roomBT101.id,
+      date: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000), // Thứ 7 tuần này lúc 09h00
+      duration: 90,
+      status: 'SCHEDULED'
+    }
+  })
 
-    await prisma.order.create({
-      data: {
-        code: `ORD-2025-${String(i).padStart(4, '0')}`,
-        studentId: student.id,
-        parentName: parentName,
-        parentPhone: generatePhone(7000 + i),
-        courseId: course.id,
-        facilityId: assignedFac.id,
-        amount: course.fee || 3500000,
-        status: status,
-        notes: status === 'PAID' ? 'Đã thanh toán qua chuyển khoản VietQR' : 'Chờ phụ huynh xác nhận chuyển khoản',
-        createdAt: new Date(Date.now() - randomInt(0, 60) * 24 * 60 * 60 * 1000)
+  const schedWeekendSun = await prisma.schedule.create({
+    data: {
+      classId: classMoversBTWeekend.id,
+      roomId: roomBT101.id,
+      date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // Chủ Nhật tuần này lúc 09h00
+      duration: 90,
+      status: 'SCHEDULED'
+    }
+  })
+
+  // --- Schedules for Target Class in Quận 7 (HCM-MOV-Q701) ---
+  const schedQ7Tue = await prisma.schedule.create({
+    data: {
+      classId: classMoversQ701.id,
+      roomId: roomQ7101.id,
+      date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // Tối Thứ 3 tuần tới 18h00
+      duration: 90,
+      status: 'SCHEDULED'
+    }
+  })
+
+  const schedQ7Thu = await prisma.schedule.create({
+    data: {
+      classId: classMoversQ701.id,
+      roomId: roomQ7101.id,
+      date: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000), // Tối Thứ 5 tuần tới 18h00
+      duration: 90,
+      status: 'SCHEDULED'
+    }
+  })
+
+  // --- Schedules & 3 consecutive absences for MBA Student Nam (Risk Intervention test) ---
+  const schedMBAPast1 = await prisma.schedule.create({
+    data: {
+      classId: classMBABT01.id,
+      roomId: roomBT201.id,
+      date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
+      duration: 120,
+      status: 'COMPLETED'
+    }
+  })
+
+  const schedMBAPast2 = await prisma.schedule.create({
+    data: {
+      classId: classMBABT01.id,
+      roomId: roomBT201.id,
+      date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      duration: 120,
+      status: 'COMPLETED'
+    }
+  })
+
+  const schedMBAPast3 = await prisma.schedule.create({
+    data: {
+      classId: classMBABT01.id,
+      roomId: roomBT201.id,
+      date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      duration: 120,
+      status: 'COMPLETED'
+    }
+  })
+
+  const schedMBAExam = await prisma.schedule.create({
+    data: {
+      classId: classMBABT01.id,
+      roomId: roomBT201.id,
+      date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days later
+      duration: 120,
+      status: 'SCHEDULED'
+    }
+  })
+
+  const schedMBAThesis = await prisma.schedule.create({
+    data: {
+      classId: classMBABT01.id,
+      roomId: roomBT201.id,
+      date: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000), // 12 days later
+      duration: 180,
+      status: 'SCHEDULED'
+    }
+  })
+
+  // 3 ABSENT attendances for MBA Student Nam to trigger Scenario 3.2
+  await prisma.attendance.create({
+    data: {
+      scheduleId: schedMBAPast1.id,
+      studentId: studentNam.id,
+      classId: classMBABT01.id,
+      status: 'ABSENT',
+      note: 'Vắng có phép - Bận công tác đột xuất'
+    }
+  })
+
+  await prisma.attendance.create({
+    data: {
+      scheduleId: schedMBAPast2.id,
+      studentId: studentNam.id,
+      classId: classMBABT01.id,
+      status: 'ABSENT',
+      note: 'Vắng không phép buổi thứ 2'
+    }
+  })
+
+  await prisma.attendance.create({
+    data: {
+      scheduleId: schedMBAPast3.id,
+      studentId: studentNam.id,
+      classId: classMBABT01.id,
+      status: 'ABSENT',
+      note: 'Vắng buổi thứ 3 liên tiếp môn Quản trị Chiến lược - Cần cảnh báo học vụ'
+    }
+  })
+
+  // 10. Assignments & Scores (Scenarios 3.1, 6.2, 6.3)
+  console.log('Creating assignments & score records...')
+  // Case 6.2 & 3.1: Hoàng Đức Long (Grammar cao, Speaking & Listening điểm C)
+  await prisma.assignment.create({
+    data: {
+      title: 'Bài thi giữa kỳ: Ngữ pháp & Từ vựng Unit 1-6',
+      studentId: studentLong.id,
+      score: 9.0,
+      maxScore: 10,
+      status: 'COMPLETED',
+      teacherNote: 'Nắm vững cấu trúc câu, ngữ pháp rất tốt, làm bài cẩn thận.',
+      date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
+    }
+  })
+
+  await prisma.assignment.create({
+    data: {
+      title: 'Kiểm tra Kỹ năng Nói & Giao tiếp phản xạ (Speaking Mock Test)',
+      studentId: studentLong.id,
+      score: 5.5,
+      maxScore: 10,
+      status: 'COMPLETED',
+      teacherNote: 'Phát âm còn ngập ngừng, phản xạ Speaking còn hạn chế (Điểm C). Nên bổ sung thêm lớp luyện nói 1:1 với giáo viên bản ngữ.',
+      date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000)
+    }
+  })
+
+  await prisma.assignment.create({
+    data: {
+      title: 'Kiểm tra Kỹ năng Nghe hiểu (Listening Section 2)',
+      studentId: studentLong.id,
+      score: 6.0,
+      maxScore: 10,
+      status: 'COMPLETED',
+      teacherNote: 'Cần luyện thêm khả năng bắt từ khóa trong đoạn hội thoại dài.',
+      date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
+    }
+  })
+
+  // Case 6.3: Vũ Bảo Ngọc (Tiến bộ rõ rệt từ đầu vào 4.5 -> hiện tại 7.5 để xử lý nguy cơ nghỉ học)
+  await prisma.assignment.create({
+    data: {
+      title: 'Đánh giá năng lực đầu vào (Placement Test)',
+      studentId: studentNgoc.id,
+      score: 4.5,
+      maxScore: 10,
+      status: 'COMPLETED',
+      teacherNote: 'Chưa nhớ bảng chữ cái tiếng Anh, rất nhút nhát, chưa dám phát biểu.',
+      date: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
+    }
+  })
+
+  await prisma.assignment.create({
+    data: {
+      title: 'Bảng điểm kiểm tra giữa kỳ (Mid-term Assessment)',
+      studentId: studentNgoc.id,
+      score: 7.5,
+      maxScore: 10,
+      status: 'COMPLETED',
+      teacherNote: 'Đã thuộc từ vựng các chủ đề gia đình, trường học. Tích cực tham gia trò chơi tương tác, tiến bộ vượt bậc so với đầu khóa.',
+      date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000)
+    }
+  })
+
+  // Case 3.1: Bé Minh có bảng điểm giữa kỳ tốt
+  await prisma.assignment.create({
+    data: {
+      title: 'Bảng điểm thi giữa kỳ Cambridge Movers',
+      studentId: studentMinh.id,
+      score: 8.5,
+      maxScore: 10,
+      status: 'COMPLETED',
+      teacherNote: 'Bé thông minh, tiếp thu bài nhanh, làm bài tập về nhà đầy đủ.',
+      date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000)
+    }
+  })
+
+  // Case 4.2: Luận văn MBA của anh Nam chưa hoàn thành
+  await prisma.assignment.create({
+    data: {
+      title: 'Báo cáo Chuyên đề & Tiểu luận Quản trị Chiến lược',
+      studentId: studentNam.id,
+      score: null,
+      maxScore: 10,
+      status: 'PENDING',
+      teacherNote: null,
+      date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)
+    }
+  })
+
+  // 11. Orders & Billing Records (Scenarios 5.1 & 5.2)
+  console.log('Generating target orders & bills...')
+  // Case 5.1: Bé Minh đã đóng kỳ 1, nhưng có công nợ kỳ mới 4.500.000 VNĐ
+  await prisma.order.create({
+    data: {
+      code: 'ORD-2025-0001',
+      studentId: studentMinh.id,
+      parentName: 'PH. Lê Thu Trang',
+      parentPhone: '0901234567',
+      courseId: courseMovers.id,
+      facilityId: facilityBT.id,
+      amount: 4500000,
+      status: 'PAID',
+      notes: 'Học phí Movers Kỳ 1 - Đã thanh toán đầy đủ',
+      createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
+    }
+  })
+
+  await prisma.order.create({
+    data: {
+      code: 'ORD-2025-0002',
+      studentId: studentMinh.id,
+      parentName: 'PH. Lê Thu Trang',
+      parentPhone: '0901234567',
+      courseId: courseMovers.id,
+      facilityId: facilityBT.id,
+      amount: 4500000,
+      status: 'PENDING',
+      notes: 'Học phí Movers Kỳ 2 - Chưa thanh toán (Công nợ tháng này)',
+      createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
+    }
+  })
+
+  // Case 5.2: Phụ huynh Đặng Thúy Nga vừa chuyển khoản 5 triệu (Đang PENDING đối soát)
+  await prisma.order.create({
+    data: {
+      code: 'ORD-2025-0003',
+      studentId: studentHuy.id,
+      parentName: 'PH. Đặng Thúy Nga',
+      parentPhone: '0945678901',
+      courseId: courseMovers.id,
+      facilityId: facilityBT.id,
+      amount: 5000000,
+      status: 'PENDING',
+      notes: 'Chờ đối soát kế toán - Khách hàng báo đã chuyển khoản qua VietQR lúc 09h30 sáng nay',
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
+    }
+  })
+
+  // Order của anh Nam (MBA - Đã thanh toán)
+  await prisma.order.create({
+    data: {
+      code: 'ORD-2025-0004',
+      studentId: studentNam.id,
+      parentName: 'Trần Hoàng Nam',
+      parentPhone: '0912345678',
+      courseId: courseMBABase.id,
+      facilityId: facilityBT.id,
+      amount: 25000000,
+      status: 'PAID',
+      notes: 'Đã hoàn tất thanh toán chuyển khoản doanh nghiệp',
+      createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
+    }
+  })
+
+  // 12. Support Requests & Tickets (Scenarios 4.2, 4.3, 2.2)
+  console.log('Generating support tickets...')
+  // Case 4.3: Khiếu nại gay gắt về máy lạnh hỏng -> High Priority & Human Handoff
+  await prisma.supportRequest.create({
+    data: {
+      studentId: studentHuy.id,
+      type: 'COMPLAINT',
+      priority: 'HIGH',
+      status: 'NEW',
+      assigneeId: csChau.id,
+      content: 'Phòng học hôm nay nóng không có điều hòa. Báo mấy lần không sửa. Nối máy cho tôi gặp quản lý trung tâm ngay, không nói chuyện với máy nữa!',
+      notes: 'Khách hàng bức xúc. Đã kích hoạt cơ chế Handoff cho Quản lý cơ sở Bình Thạnh xử lý trực tiếp.',
+      createdAt: new Date(Date.now() - 30 * 60 * 1000) // 30 mins ago
+    }
+  })
+
+  // Case 4.2: Lỗi upload luận văn 5MB PWA
+  await prisma.supportRequest.create({
+    data: {
+      studentId: studentNam.id,
+      type: 'SUPPORT',
+      priority: 'NORMAL',
+      status: 'IN_PROGRESS',
+      assigneeId: csChau.id,
+      content: 'App bị lỗi à? Tôi không tải file luận văn lên hệ thống PWA được, cứ báo quá dung lượng dù file chỉ có 5MB.',
+      notes: 'Đã chuyển sang IT kiểm tra giới hạn upload của hệ thống nộp bài PWA.',
+      createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000)
+    }
+  })
+
+  // Case 2.2: Đơn xin nghỉ của bé Minh
+  await prisma.supportRequest.create({
+    data: {
+      studentId: studentMinh.id,
+      type: 'LEAVE',
+      priority: 'NORMAL',
+      status: 'NEW',
+      assigneeId: csChau.id,
+      content: 'Hôm nay thứ 3 con tôi bị ốm không đi học được. Xin cho cháu nghỉ và sắp xếp học bù vào cuối tuần này. Trung tâm xem có lớp nào trống không?',
+      notes: 'Chờ CS xác nhận ca bù thứ 7 hoặc chủ nhật.',
+      createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000)
+    }
+  })
+
+  // 13. Leads (5 sample leads for sales testing)
+  console.log('Generating sample leads...')
+  await prisma.lead.create({
+    data: {
+      name: 'Khách hàng Nguyễn Hoàng Nam',
+      phone: '0988111222',
+      courseId: courseMBAAdv.id,
+      facilityId: facilityBT.id,
+      age: 28,
+      source: 'Facebook Ads',
+      status: 'CONSULTING',
+      notes: 'Quan tâm chương trình MBA Chuyên ngành Quản trị Chiến lược.'
+    }
+  })
+
+  await prisma.lead.create({
+    data: {
+      name: 'Khách hàng Lê Kiều Oanh',
+      phone: '0977333444',
+      courseId: courseMovers.id,
+      facilityId: facilityQ7.id,
+      age: 8,
+      source: 'Website Form',
+      status: 'TRIAL_BOOKED',
+      notes: 'Đã đăng ký học thử Cambridge Movers tại Cơ sở Quận 7 tối thứ 5.'
+    }
+  })
+
+  await prisma.lead.create({
+    data: {
+      name: 'Khách hàng Vũ Thanh Tùng',
+      phone: '0966555666',
+      courseId: courseSpeak1on1.id,
+      facilityId: facilityBT.id,
+      age: 12,
+      source: 'Giới thiệu từ học viên cũ',
+      status: 'NEW',
+      notes: 'Cần lớp 1:1 tăng cường Speaking chuẩn bị thi học bổng.'
+    }
+  })
+
+  // 14. Campaigns & Promotional Events (Rich Product Carousel for Orchexa AI)
+  console.log('Generating campaigns & recommended products...')
+  const campBack2School = await prisma.campaign.create({
+    data: {
+      code: 'CAMP-BACK2SCHOOL-2025',
+      title: 'Mùa Tựu Trường 2025 - Bứt Phá Cambridge',
+      description: 'Chương trình ưu đãi tựu trường lớn nhất năm dành cho các bé tiểu học & THCS. Giảm ngay 20% học phí khi đăng ký trước ngày 15 hàng tháng.',
+      badge: 'HOT EVENT 20%',
+      type: 'PROMOTION',
+      startDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      endDate: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000),
+      status: 'ACTIVE',
+      bannerUrl: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&auto=format&fit=crop&q=80',
+      facilityId: facilityBT.id,
+      items: {
+        create: [
+          {
+            productCode: 'ENG-CAM-MOVERS-PROMO',
+            courseId: courseMovers.id,
+            name: 'Cambridge Movers Chuẩn Quốc Tế',
+            title: 'Lớp Movers (7-9 tuổi)',
+            description: 'Tặng ngay học bổng 20% học phí + Bộ giáo trình bản quyền và balo phản quang khi phụ huynh đăng ký sớm.',
+            imageUrl: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&auto=format&fit=crop&q=80',
+            listPrice: 4500000,
+            salePrice: 3600000,
+            discountPercent: 20,
+            stock: 8,
+            featured: true,
+            orderIndex: 1,
+            targetAudience: 'KIDS',
+            primaryBtnLabel: 'Nhận voucher',
+            primaryBtnMsg: 'Tôi muốn nhận ưu đãi 20% cho khóa Cambridge Movers Chuẩn Quốc Tế',
+            secondaryBtnLabel: 'Xem chi tiết',
+            secondaryBtnMsg: 'Tư vấn thêm cho tôi về khóa Cambridge Movers Chuẩn Quốc Tế'
+          },
+          {
+            productCode: 'ENG-CAM-FLYERS-PROMO',
+            courseId: courseFlyers.id,
+            name: 'Cambridge Flyers Bứt Phá',
+            title: 'Lớp Flyers (10-12 tuổi)',
+            description: 'Chinh phục chứng chỉ A2 Flyers. Giảm ngay 20% học phí kỳ 1 + Tặng 2 buổi Speaking Mock Test cùng giáo viên bản ngữ.',
+            imageUrl: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=600&auto=format&fit=crop&q=80',
+            listPrice: 4800000,
+            salePrice: 3840000,
+            discountPercent: 20,
+            stock: 5,
+            featured: false,
+            orderIndex: 2,
+            targetAudience: 'TEEN',
+            primaryBtnLabel: 'Nhận voucher',
+            primaryBtnMsg: 'Tôi muốn nhận ưu đãi cho khóa Cambridge Flyers Bứt Phá',
+            secondaryBtnLabel: 'Xem chi tiết',
+            secondaryBtnMsg: 'Tư vấn thêm cho tôi về khóa Cambridge Flyers Bứt Phá'
+          }
+        ]
       }
-    })
-  }
+    }
+  })
 
-  // 14. Support Requests (120+ requests)
-  console.log('Generating 120 support requests...')
-  const requestTypes = ['LEAVE', 'INFO', 'SUPPORT', 'COMPLAINT', 'CALL_BACK']
-  const requestStatuses = ['NEW', 'IN_PROGRESS', 'RESOLVED', 'CLOSED']
-  const requestPriorities = ['LOW', 'NORMAL', 'HIGH']
-  const supportContents = [
-    'Xin phép nghỉ học buổi tới do gia đình có việc bận.',
-    'Phụ huynh hỏi về thời gian thi kết thúc học phần và chứng nhận.',
-    'Đăng ký đổi lịch học từ thứ 3-5 sang thứ 4-6.',
-    'Phản ánh phòng học máy chiếu bị mờ.',
-    'Cần tư vấn nâng band điểm kỹ năng Speaking trước kỳ thi thật.',
-    'Yêu cầu cấp lại tài liệu và video ôn tập buổi học trước.'
-  ]
-
-  for (let i = 1; i <= 120; i++) {
-    const student = createdStudents[i % createdStudents.length]
-    await prisma.supportRequest.create({
-      data: {
-        studentId: student.id,
-        type: randomItem(requestTypes),
-        content: randomItem(supportContents),
-        status: randomItem(requestStatuses),
-        priority: randomItem(requestPriorities),
-        notes: 'Đã phân công CS phụ trách xử lý trong ngày.',
-        createdAt: new Date(Date.now() - randomInt(0, 30) * 24 * 60 * 60 * 1000)
+  const campRetentionMBA = await prisma.campaign.create({
+    data: {
+      code: 'CAMP-RETENTION-MBA',
+      title: 'Học Tiếp Chuyên Ngành MBA - Ưu Đãi Tái Tục & Nâng Băng',
+      description: 'Đặc quyền dành riêng cho học viên đã hoàn thành Giai đoạn Cơ sở MBA: Tặng voucher trực tiếp 3.000.000 VNĐ khi đăng ký học phần Chuyên ngành.',
+      badge: 'VOUCHER 3TR',
+      type: 'UPSELL',
+      startDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+      endDate: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000),
+      status: 'ACTIVE',
+      bannerUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1200&auto=format&fit=crop&q=80',
+      facilityId: facilityBT.id,
+      items: {
+        create: [
+          {
+            productCode: 'MBA-ADVANCED-MGMT-PROMO',
+            courseId: courseMBAAdv.id,
+            name: 'MBA Chuyên ngành Quản trị Chiến lược & Đổi mới',
+            title: 'MBA Advanced Management',
+            description: 'Đặc quyền học viên MBA: Tặng ngay voucher 3.000.000 VNĐ + Suất tham gia Hội thảo Quản trị Đổi mới sáng tạo Quốc tế.',
+            imageUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600&auto=format&fit=crop&q=80',
+            listPrice: 32000000,
+            salePrice: 29000000,
+            discountPercent: 9.4,
+            stock: 10,
+            featured: true,
+            orderIndex: 1,
+            targetAudience: 'ADULT_MBA',
+            primaryBtnLabel: 'Đăng ký ngay',
+            primaryBtnMsg: 'Tôi muốn áp dụng voucher 3 triệu đăng ký khóa MBA Chuyên ngành Quản trị Chiến lược',
+            secondaryBtnLabel: 'Xem lộ trình',
+            secondaryBtnMsg: 'Gửi cho tôi thông tin chi tiết lộ trình môn học MBA Chuyên ngành'
+          }
+        ]
       }
-    })
-  }
+    }
+  })
 
-  // 15. MakeUp & Transfer Requests
-  console.log('Generating makeup & transfer requests...')
-  for (let i = 1; i <= 60; i++) {
-    const student = createdStudents[i % createdStudents.length]
-    const missedSched = schedulesToCreate[(i * 2) % schedulesToCreate.length] || schedulesToCreate[0]
-    const targetSched = schedulesToCreate[(i * 2 + 1) % schedulesToCreate.length] || schedulesToCreate[1]
-    await prisma.makeUpRequest.create({
-      data: {
-        studentId: student.id,
-        missedScheduleId: missedSched?.id || 'sched-1',
-        targetScheduleId: targetSched?.id || 'sched-2',
-        status: randomItem(['PENDING', 'APPROVED', 'REJECTED']),
-        notes: 'Học sinh bù lớp cùng trình độ.'
+  const campCrossSell1on1 = await prisma.campaign.create({
+    data: {
+      code: 'CAMP-CROSS-SELL-1ON1',
+      title: 'Khắc Phục Kỹ Năng Yếu - Bổ Trợ Giao Tiếp 1:1 Cấp Tốc',
+      description: 'Khóa học kèm riêng 1:1 giải quyết dứt điểm rào cản phát âm và phản xạ Speaking cho các bé điểm Speaking/Listening chưa đạt chuẩn.',
+      badge: 'GIẢM 25%',
+      type: 'PROMOTION',
+      startDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      status: 'ACTIVE',
+      bannerUrl: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1200&auto=format&fit=crop&q=80',
+      facilityId: facilityBT.id,
+      items: {
+        create: [
+          {
+            productCode: 'ENG-SPEAK-1ON1-PROMO',
+            courseId: courseSpeak1on1.id,
+            name: 'Lớp Bổ Trợ Phát Âm & Phản Xạ Giao Tiếp 1:1',
+            title: 'Kèm Riêng 1:1 Phản Xạ',
+            description: 'Giảm 25% học phí cho học viên đang theo học. Kèm riêng với giáo viên bản ngữ, chỉnh phát âm IPA và tăng phản xạ nói tự nhiên.',
+            imageUrl: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&auto=format&fit=crop&q=80',
+            listPrice: 3600000,
+            salePrice: 2700000,
+            discountPercent: 25,
+            stock: 6,
+            featured: true,
+            orderIndex: 1,
+            targetAudience: 'KIDS',
+            primaryBtnLabel: 'Nhận ưu đãi 25%',
+            primaryBtnMsg: 'Tôi muốn nhận ưu đãi giảm 25% cho Lớp Bổ Trợ Phát Âm & Phản Xạ Giao Tiếp 1:1',
+            secondaryBtnLabel: 'Xem chi tiết',
+            secondaryBtnMsg: 'Tư vấn cho tôi lịch học kèm 1:1 bổ trợ kỹ năng Nói'
+          }
+        ]
       }
-    })
-  }
+    }
+  })
 
-  for (let i = 1; i <= 40; i++) {
-    const student = createdStudents[i % createdStudents.length]
-    const c1 = classList[0]?.id || 'c1'
-    const c2 = classList[1]?.id || 'c2'
-    await prisma.transferRequest.create({
-      data: {
-        studentId: student.id,
-        fromClassId: c1,
-        toClassId: c2,
-        status: randomItem(['PENDING', 'APPROVED', 'REJECTED']),
-        notes: 'Phụ huynh xin chuyển ca học do trùng lịch học trên trường.'
-      }
-    })
-  }
-
-  // 16. Activity Logs
+  // 15. Activity Logs
   console.log('Generating activity logs...')
-  for (let i = 1; i <= 80; i++) {
-    await prisma.activityLog.create({
-      data: {
-        userId: users[0].id,
-        role: 'ADMIN',
-        action: randomItem(['CREATE_STUDENT', 'UPDATE_ATTENDANCE', 'PROCESS_ORDER', 'ASSIGN_CLASS', 'AI_SYNC']),
-        entityType: randomItem(['STUDENT', 'ATTENDANCE', 'ORDER', 'CLASS']),
-        entityId: `entity-${i}`,
-        details: JSON.stringify({ message: `Hoạt động hệ thống mẫu số ${i}`, timestamp: new Date() }),
-        source: randomItem(['UI', 'API', 'AI_AGENT'])
-      }
-    })
-  }
+  await prisma.activityLog.create({
+    data: {
+      userId: adminUser.id,
+      role: 'ADMIN',
+      action: 'INIT_STREAMLINED_DATABASE',
+      entityType: 'SYSTEM',
+      entityId: 'SYSTEM-001',
+      details: JSON.stringify({ message: 'Khởi tạo seed data rút gọn theo 5 kịch bản kiểm thử CSKH.' }),
+      source: 'SYSTEM'
+    }
+  })
 
-  const durationSec = ((Date.now() - startTime) / 1000).toFixed(1)
-  console.log(`✅ Seeding complete in ${durationSec}s!`)
+  const durationSec = ((Date.now() - startTime) / 1000).toFixed(2)
+  console.log(`\n✅ Streamlined Seeding complete in ${durationSec}s!`)
   console.log(`📊 Total summary:`)
-  console.log(`   - Facilities: 3`)
-  console.log(`   - Courses: ${courses.length}`)
-  console.log(`   - Classes: ${classList.length}`)
-  console.log(`   - Parents: ${createdParents.length}`)
-  console.log(`   - Students: ${createdStudents.length} (Goal: 1000)`)
-  console.log(`   - Leads: 350`)
-  console.log(`   - Orders: 300`)
-  console.log(`   - Schedules: ${schedulesToCreate.length}`)
+  console.log(`   - Facilities: 3 (Cầu Giấy, Bình Thạnh, Quận 7)`)
+  console.log(`   - Courses: 5 (MBA Base, MBA Adv, Movers, Flyers, Speaking 1:1)`)
+  console.log(`   - Classes: 8`)
+  console.log(`   - Parents: 5`)
+  console.log(`   - Students: 7`)
+  console.log(`   - Schedules: 10`)
+  console.log(`   - Orders: 4`)
+  console.log(`   - Support Requests: 3`)
+  console.log(`   - Leads: 3`)
+  console.log(`   - Campaigns: 3`)
+  console.log(`   - Promotional Products: 4`)
 }
 
 main()

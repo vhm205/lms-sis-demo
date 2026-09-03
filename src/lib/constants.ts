@@ -94,6 +94,7 @@ export function getScheduleStatusLabel(status?: string): string {
 }
 
 export const ATTENDANCE_STATUS_MAP: Record<string, { label: string; badgeVariant: "default" | "secondary" | "outline" | "green" | "aqua" | "pink" | "amber" | "orange" }> = {
+  UNMARKED: { label: "Chưa điểm danh", badgeVariant: "outline" },
   PRESENT: { label: "Có mặt", badgeVariant: "green" },
   EXCUSED: { label: "Vắng có phép", badgeVariant: "amber" },
   ABSENT_EXCUSED: { label: "Vắng có phép", badgeVariant: "amber" },
@@ -103,14 +104,17 @@ export const ATTENDANCE_STATUS_MAP: Record<string, { label: string; badgeVariant
 };
 
 export const ATTENDANCE_STATUS_OPTIONS = [
+  { value: "UNMARKED", label: "⚪ Chưa điểm danh" },
   { value: "PRESENT", label: "🟢 Có mặt" },
-  { value: "ABSENT_EXCUSED", label: "🟡 Vắng có phép" },
-  { value: "ABSENT_UNEXCUSED", label: "🔴 Vắng không phép" },
   { value: "LATE", label: "⏰ Đi muộn" },
+  { value: "EXCUSED", label: "🟡 Vắng có phép" },
+  { value: "ABSENT", label: "🔴 Vắng mặt" },
 ];
 
 export function getAttendanceStatusLabel(status?: string): string {
-  if (!status) return "Chưa điểm danh";
+  if (!status || status === "UNMARKED") return "Chưa điểm danh";
+  if (status === "ABSENT_EXCUSED") return "Vắng có phép";
+  if (status === "ABSENT_UNEXCUSED") return "Vắng không phép";
   return ATTENDANCE_STATUS_MAP[status]?.label || status;
 }
 

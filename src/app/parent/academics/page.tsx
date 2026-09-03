@@ -287,8 +287,10 @@ export default function ParentAcademicsPage() {
                 PRESENT: { label: 'Có mặt', color: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800', icon: CheckCircle2 },
                 LATE: { label: 'Đi muộn', color: 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200 dark:border-amber-800', icon: Clock },
                 ABSENT: { label: 'Vắng mặt', color: 'bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300 border-red-200 dark:border-red-800', icon: XCircle },
-                EXCUSED: { label: 'Có phép', color: 'bg-sky-50 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300 border-sky-200 dark:border-sky-800', icon: CheckCircle2 }
-              }[att.status as string] || { label: att.status, color: 'bg-muted text-foreground', icon: CheckCircle2 }
+                EXCUSED: { label: 'Có phép', color: 'bg-sky-50 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300 border-sky-200 dark:border-sky-800', icon: CheckCircle2 },
+                ABSENT_EXCUSED: { label: 'Có phép', color: 'bg-sky-50 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300 border-sky-200 dark:border-sky-800', icon: CheckCircle2 },
+                ABSENT_UNEXCUSED: { label: 'Vắng không phép', color: 'bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300 border-red-200 dark:border-red-800', icon: XCircle },
+              }[att.status as string] || { label: 'Chưa điểm danh', color: 'bg-muted text-foreground', icon: CheckCircle2 }
 
               const StatusIcon = statusConfig.icon
 

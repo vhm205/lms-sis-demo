@@ -33,6 +33,7 @@ model Facility {
   leads     Lead[]
   students  Student[]
   orders    Order[]
+  campaigns Campaign[]
 }
 
 model Room {
@@ -58,6 +59,7 @@ model Course {
   classes     Class[]
   leads       Lead[]   // Interests
   orders      Order[]
+  campaignItems CampaignItem[]
 }
 
 model Class {
@@ -234,4 +236,48 @@ model Order {
   notes       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Campaign {
+  id          String         @id @default(cuid())
+  code        String         @unique
+  title       String
+  description String?
+  badge       String?        // e.g. "HOT EVENT", "GIẢM 25%", "EARLY BIRD"
+  type        String         @default("PROMOTION") // PROMOTION, EVENT, FLASH_SALE, UPSELL, RETENTION
+  startDate   DateTime
+  endDate     DateTime
+  status      String         @default("ACTIVE") // ACTIVE, SCHEDULED, EXPIRED, PAUSED
+  bannerUrl   String?
+  facilityId  String?
+  facility    Facility?      @relation(fields: [facilityId], references: [id])
+  items       CampaignItem[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model CampaignItem {
+  id                String    @id @default(cuid())
+  campaignId        String
+  campaign          Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  courseId          String?
+  course            Course?   @relation(fields: [courseId], references: [id])
+  productCode       String
+  name              String
+  title             String?
+  description       String
+  imageUrl          String
+  listPrice         Float     // Giá gốc
+  salePrice         Float     // Giá ưu đãi
+  discountPercent   Float?
+  stock             Int       @default(10)
+  featured          Boolean   @default(false)
+  orderIndex        Int       @default(0)
+  targetAudience    String?   // KIDS, TEEN, ADULT_MBA, RETENTION, ALL
+  primaryBtnLabel   String?   @default("Nhận voucher")
+  primaryBtnMsg     String?   @default("Tôi muốn nhận ưu đãi cho khóa {name}")
+  secondaryBtnLabel String?   @default("Xem chi tiết")
+  secondaryBtnMsg   String?   @default("Tư vấn thêm cho tôi về khóa {name}")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 }

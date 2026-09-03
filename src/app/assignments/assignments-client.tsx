@@ -108,11 +108,11 @@ export function AssignmentsClient({ assignments }: { assignments: any[] }) {
         <Table>
           <TableHeader className="bg-muted/50 border-b-2 border-border/70">
             <TableRow className="hover:bg-transparent">
-              <TableHead className="font-heading font-extrabold text-xs">Học Viên</TableHead>
-              <TableHead className="font-heading font-extrabold text-xs">Tên Bài Tập / Bài Kiểm Tra</TableHead>
-              <TableHead className="w-[140px] font-heading font-extrabold text-xs">Điểm Số</TableHead>
-              <TableHead className="font-heading font-extrabold text-xs">Nhận Xét Của Giáo Viên</TableHead>
-              <TableHead className="w-[140px] font-heading font-extrabold text-xs">Trạng Thái</TableHead>
+              <TableHead className="font-heading font-extrabold text-xs min-w-[150px]">Học Viên</TableHead>
+              <TableHead className="font-heading font-extrabold text-xs min-w-[200px]">Tên Bài Tập / Bài Kiểm Tra</TableHead>
+              <TableHead className="w-[140px] min-w-[130px] font-heading font-extrabold text-xs">Điểm Số</TableHead>
+              <TableHead className="min-w-[280px] max-w-md lg:max-w-lg font-heading font-extrabold text-xs">Nhận Xét Của Giáo Viên</TableHead>
+              <TableHead className="w-[140px] min-w-[130px] font-heading font-extrabold text-xs">Trạng Thái</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -126,14 +126,14 @@ export function AssignmentsClient({ assignments }: { assignments: any[] }) {
               paginatedAssignments.map((assignment) => {
                 return (
                   <TableRow key={assignment.id} className="hover:bg-[#FAF6F0]/80 dark:hover:bg-[#28221D]/80 transition-colors">
-                    <TableCell>
+                    <TableCell className="min-w-[150px]">
                       <div className="space-y-1 py-1">
                         <div className="font-bold text-sm text-foreground font-heading">{assignment.student.name}</div>
                         <div className="text-[11px] text-muted-foreground font-mono font-semibold">{assignment.student.code}</div>
                       </div>
                     </TableCell>
 
-                    <TableCell>
+                    <TableCell className="min-w-[200px] whitespace-normal">
                       <div className="space-y-0.5 py-1">
                         <div className="font-bold text-sm text-foreground font-heading">{assignment.title}</div>
                         <div className="text-[11px] text-muted-foreground font-medium">
@@ -142,7 +142,7 @@ export function AssignmentsClient({ assignments }: { assignments: any[] }) {
                       </div>
                     </TableCell>
 
-                    <TableCell>
+                    <TableCell className="w-[140px] min-w-[130px]">
                       {assignment.score !== null ? (
                         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#FFF0E6] text-[#D97736] border border-[#FCDCC8] font-mono font-black text-xs">
                           <Star className="h-4 w-4 fill-[#D97736]" />
@@ -153,20 +153,20 @@ export function AssignmentsClient({ assignments }: { assignments: any[] }) {
                       )}
                     </TableCell>
 
-                    <TableCell className="max-w-md">
+                    <TableCell className="min-w-[280px] max-w-md lg:max-w-lg whitespace-normal align-middle">
                       {assignment.teacherNote ? (
-                        <p className="text-xs text-foreground italic bg-muted/40 p-3 rounded-2xl border border-border/70 font-medium leading-relaxed">
+                        <div className="text-xs text-foreground italic bg-muted/40 p-3 rounded-2xl border border-border/70 font-medium leading-relaxed whitespace-normal break-words">
                           &ldquo;{assignment.teacherNote}&rdquo;
-                        </p>
+                        </div>
                       ) : (
                         <span className="text-xs text-muted-foreground italic font-medium">-</span>
                       )}
                     </TableCell>
 
-                    <TableCell>
+                    <TableCell className="w-[140px] min-w-[130px]">
                       <Badge 
                         variant={ASSIGNMENT_STATUS_MAP[assignment.status]?.badgeVariant || 'pink'}
-                        className="text-xs px-3 py-1"
+                        className="text-xs px-3 py-1 whitespace-nowrap"
                       >
                         {getAssignmentStatusLabel(assignment.status)}
                       </Badge>

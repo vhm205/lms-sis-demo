@@ -208,6 +208,47 @@ async function syncTurso() {
       FOREIGN KEY ("studentId") REFERENCES "Student" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
       FOREIGN KEY ("courseId") REFERENCES "Course" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
       FOREIGN KEY ("facilityId") REFERENCES "Facility" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    );`,
+    `CREATE TABLE IF NOT EXISTS "Campaign" (
+      "id" TEXT PRIMARY KEY,
+      "code" TEXT NOT NULL UNIQUE,
+      "title" TEXT NOT NULL,
+      "description" TEXT,
+      "badge" TEXT,
+      "type" TEXT NOT NULL DEFAULT 'PROMOTION',
+      "startDate" DATETIME NOT NULL,
+      "endDate" DATETIME NOT NULL,
+      "status" TEXT NOT NULL DEFAULT 'ACTIVE',
+      "bannerUrl" TEXT,
+      "facilityId" TEXT,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY ("facilityId") REFERENCES "Facility" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+    );`,
+    `CREATE TABLE IF NOT EXISTS "CampaignItem" (
+      "id" TEXT PRIMARY KEY,
+      "campaignId" TEXT NOT NULL,
+      "courseId" TEXT,
+      "productCode" TEXT NOT NULL,
+      "name" TEXT NOT NULL,
+      "title" TEXT,
+      "description" TEXT NOT NULL,
+      "imageUrl" TEXT NOT NULL,
+      "listPrice" REAL NOT NULL,
+      "salePrice" REAL NOT NULL,
+      "discountPercent" REAL,
+      "stock" INTEGER NOT NULL DEFAULT 10,
+      "featured" BOOLEAN NOT NULL DEFAULT 0,
+      "orderIndex" INTEGER NOT NULL DEFAULT 0,
+      "targetAudience" TEXT,
+      "primaryBtnLabel" TEXT DEFAULT 'Nhận voucher',
+      "primaryBtnMsg" TEXT DEFAULT 'Tôi muốn nhận ưu đãi cho khóa {name}',
+      "secondaryBtnLabel" TEXT DEFAULT 'Xem chi tiết',
+      "secondaryBtnMsg" TEXT DEFAULT 'Tư vấn thêm cho tôi về khóa {name}',
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY ("campaignId") REFERENCES "Campaign" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+      FOREIGN KEY ("courseId") REFERENCES "Course" ("id") ON DELETE SET NULL ON UPDATE CASCADE
     );`
   ];
 

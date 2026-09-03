@@ -389,7 +389,7 @@ export function ReportViewClient({ initialReport, autoPrint }: ReportViewClientP
                                   "-"
                                 )}
                               </td>
-                              <td className="py-3 px-3.5 text-foreground/90 italic">
+                              <td className="py-3 px-3.5 text-foreground/90 italic whitespace-normal break-words max-w-sm">
                                 {asg.teacherNote ? `"${asg.teacherNote}"` : <span className="text-muted-foreground not-italic">-</span>}
                               </td>
                             </tr>
@@ -558,7 +558,10 @@ export function ReportViewClient({ initialReport, autoPrint }: ReportViewClientP
                             LATE: { label: "Đi muộn", color: "bg-amber-50 text-amber-700 border-amber-200" },
                             ABSENT: { label: "Vắng mặt", color: "bg-red-50 text-red-700 border-red-200" },
                             EXCUSED: { label: "Có phép", color: "bg-sky-50 text-sky-700 border-sky-200" },
-                          }[att.status] || { label: att.status, color: "bg-muted text-foreground" };
+                            ABSENT_EXCUSED: { label: "Có phép", color: "bg-sky-50 text-sky-700 border-sky-200" },
+                            ABSENT_UNEXCUSED: { label: "Vắng không phép", color: "bg-red-50 text-red-700 border-red-200" },
+                            UNMARKED: { label: "Chưa điểm danh", color: "bg-muted text-foreground" },
+                          }[att.status] || { label: "Chưa điểm danh", color: "bg-muted text-foreground" };
 
                           return (
                             <tr key={att.id} className="hover:bg-muted/30 transition-colors">

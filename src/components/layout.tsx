@@ -23,6 +23,7 @@ import {
   Check, 
   MapPin, 
   Smartphone,
+  Sparkles,
   type LucideIcon 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -93,6 +94,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       items: [
         { name: "Khách hàng tiềm năng", href: "/leads", icon: UserPlus, badge: "CRM", badgeColor: "clay-badge-amber" },
         { name: "Đơn đăng ký", href: "/orders", icon: Receipt },
+        { name: "Chiến dịch & Ưu đãi", href: "/campaigns", icon: Sparkles, badge: "Sự kiện", badgeColor: "clay-badge-amber" },
         { name: "Yêu cầu hỗ trợ", href: "/requests", icon: Headphones, badge: "1 mới", badgeColor: "clay-badge-pink" },
       ]
     },
@@ -283,7 +285,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </span>
               <span className="text-xs font-bold text-foreground font-heading">Orchexa AI Voice</span>
             </div>
-            <Badge variant="aqua" className="text-[9px] h-4.5 px-1.5">Active</Badge>
+            <Badge variant="aqua" className="text-[9px] h-4.5 px-1.5">Đang hoạt động</Badge>
           </div>
           <p className="text-[11px] text-muted-foreground font-medium leading-tight">
             Agent ID: <span className="font-mono font-bold text-primary">911aa67c</span> sẵn sàng kết nối.
@@ -396,6 +398,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   </Link>
                   <Link href="/orders" className="flex items-center gap-2.5 rounded-2xl px-3 py-2 text-xs hover:bg-[#FFF0E6] hover:text-[#D97736] font-bold transition-colors">
                     <Receipt className="h-4 w-4 text-primary" /> Tạo đơn đăng ký
+                  </Link>
+                  <Link href="/campaigns" className="flex items-center gap-2.5 rounded-2xl px-3 py-2 text-xs hover:bg-[#FFF0E6] hover:text-[#D97736] font-bold transition-colors">
+                    <Sparkles className="h-4 w-4 text-primary" /> Tạo chiến dịch ưu đãi
                   </Link>
                   <Link href="/leads" className="flex items-center gap-2.5 rounded-2xl px-3 py-2 text-xs hover:bg-[#FFF0E6] hover:text-[#D97736] font-bold transition-colors">
                     <UserPlus className="h-4 w-4 text-primary" /> Thêm khách tiềm năng

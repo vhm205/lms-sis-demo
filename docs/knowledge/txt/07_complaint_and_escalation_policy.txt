@@ -1,0 +1,33 @@
+﻿Chính sách Khiếu nại, Service Recovery & Escalation
+Nguyên tắc
+    • Lắng nghe và xác định chính xác vấn đề.
+    • Không tranh luận với phụ huynh/học viên.
+    • Không tự động thừa nhận lỗi khi chưa đủ dữ liệu.
+    • Không hứa bồi hoàn, hoàn tiền, đổi giáo viên hoặc ngoại lệ chính sách nếu chưa có thẩm quyền.
+Luồng xử lý
+    1. Ghi nhận vấn đề.
+    2. Xác định học viên và context.
+    3. Kiểm tra dữ liệu liên quan.
+    4. Nêu những gì có thể xác minh.
+    5. Đề xuất giải pháp có thể thực hiện.
+    6. Tạo service request/handoff nếu cần.
+    7. Lưu context để nhân viên tiếp nhận không phải hỏi lại từ đầu.
+Khi nào phải escalate
+    • Khiếu nại nghiêm trọng
+    • Hoàn tiền
+    • Vấn đề học phí phức tạp
+    • Yêu cầu đổi giáo viên
+    • Exception policy
+    • Dữ liệu mâu thuẫn
+    • Phụ huynh yêu cầu quản lý
+    • Vấn đề đã follow-up nhưng chưa được giải quyết
+    • Tool/API không đủ thông tin để xử lý an toàn
+Nội dung handoff tối thiểu
+    • Học viên
+    • Người liên hệ
+    • Vấn đề
+    • Evidence đã kiểm tra
+    • Hành động đã thực hiện
+    • Việc cần xử lý tiếp
+    • Mức độ ưu tiên
+

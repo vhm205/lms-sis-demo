@@ -117,10 +117,16 @@ export function ScheduleClient({ schedules, classes, rooms, teachers }: { schedu
   function openAttendanceModal(schedule: any) {
     const initialData: Record<string, { status: string, notes: string }> = {};
     schedule.class.students.forEach((student: any) => {
-      const existing = schedule.attendances.find((a: any) => a.studentId === student.id);
+      const existing = schedule.attendances?.find((a: any) => a.studentId === student.id);
+      let initialStatus = "UNMARKED";
+      if (existing && existing.status) {
+        if (existing.status === "ABSENT_EXCUSED") initialStatus = "EXCUSED";
+        else if (existing.status === "ABSENT_UNEXCUSED") initialStatus = "ABSENT";
+        else initialStatus = existing.status;
+      }
       initialData[student.id] = {
-        status: existing ? existing.status : "PRESENT",
-        notes: existing?.notes || ""
+        status: initialStatus,
+        notes: existing?.note || existing?.notes || ""
       };
     });
     setAttendanceData(initialData);
@@ -139,8 +145,31 @@ export function ScheduleClient({ schedules, classes, rooms, teachers }: { schedu
     setAttendanceData(updated);
   }
 
+  function markAllUnmarked() {
+    if (!activeScheduleForAttendance) return;
+    const updated = { ...attendanceData };
+    activeScheduleForAttendance.class.students.forEach((student: any) => {
+      updated[student.id] = {
+        status: "UNMARKED",
+        notes: updated[student.id]?.notes || ""
+      };
+    });
+    setAttendanceData(updated);
+  }
+
   async function handleSaveAttendance() {
     if (!activeScheduleForAttendance) return;
+
+    const allUnmarked = Object.values(attendanceData).every(
+      (item) => !item.status || item.status === "UNMARKED"
+    );
+
+    if (allUnmarked) {
+      if (!confirm("Tất cả học viên đều đang ở trạng thái 'Chưa điểm danh'. Bạn có muốn xóa toàn bộ bản ghi điểm danh đã có (đặt lại trạng thái chưa điểm danh) cho ca học này không?")) {
+        return;
+      }
+    }
+
     setIsPending(true);
     const formattedData = Object.keys(attendanceData).map(studentId => ({
       studentId,
@@ -322,8 +351,9 @@ export function ScheduleClient({ schedules, classes, rooms, teachers }: { schedu
                 const dayStr = dateObj.toLocaleDateString("vi-VN", { weekday: "short", day: "2-digit", month: "2-digit", year: "numeric" });
                 const timeStr = dateObj.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
                 const studentCount = s.class?.students?.length || 0;
-                const isMarked = s.attendances && s.attendances.length > 0;
-                const presentCount = s.attendances?.filter((a: any) => a.status === 'PRESENT').length || 0;
+                const validAttendances = s.attendances?.filter((a: any) => a.status && a.status !== 'UNMARKED') || [];
+                const isMarked = validAttendances.length > 0;
+                const presentCount = validAttendances.filter((a: any) => a.status === 'PRESENT').length;
 
                 return (
                   <TableRow key={s.id} className="hover:bg-[#FAF6F0]/80 dark:hover:bg-[#28221D]/80 transition-colors">
@@ -366,7 +396,10 @@ export function ScheduleClient({ schedules, classes, rooms, teachers }: { schedu
 
                     <TableCell>
                       {isMarked ? (
-                        <Badge variant="green" className="text-xs px-3 py-1">
+                        <Badge 
+                          variant={presentCount === studentCount ? "green" : presentCount > 0 ? "amber" : "pink"} 
+                          className="text-xs px-3 py-1"
+                        >
                           <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" /> Có mặt: {presentCount}/{studentCount}
                         </Badge>
                       ) : (
@@ -437,23 +470,59 @@ export function ScheduleClient({ schedules, classes, rooms, teachers }: { schedu
       <Dialog open={!!activeScheduleForAttendance} onOpenChange={(open) => !open && setActiveScheduleForAttendance(null)}>
         <DialogContent className="max-w-2xl sm:max-w-[650px]">
           <DialogHeader className="border-b-2 border-border/70 pb-3">
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-base font-extrabold flex items-center gap-2 font-heading">
-                <ClipboardCheck className="h-5 w-5 text-primary" /> Điểm danh: {activeScheduleForAttendance?.class?.name}
-              </DialogTitle>
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm" 
-                className="text-xs h-9 px-3 text-primary border-2 border-primary/30 hover:bg-[#FFF0E6] rounded-xl font-bold"
-                onClick={markAllPresent}
-              >
-                ✓ Tất cả có mặt
-              </Button>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <div>
+                <DialogTitle className="text-base font-extrabold flex items-center gap-2 font-heading">
+                  <ClipboardCheck className="h-5 w-5 text-primary" /> Điểm danh: {activeScheduleForAttendance?.class?.name}
+                </DialogTitle>
+                {activeScheduleForAttendance && (
+                  <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2 flex-wrap font-medium">
+                    <span>📅 {new Date(activeScheduleForAttendance.date).toLocaleDateString("vi-VN", { weekday: "short", day: "2-digit", month: "2-digit", year: "numeric" })}</span>
+                    <span>•</span>
+                    <span>⏰ {new Date(activeScheduleForAttendance.date).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })} ({activeScheduleForAttendance.duration}p)</span>
+                    {activeScheduleForAttendance.room?.name && (
+                      <>
+                        <span>•</span>
+                        <span>Phòng {activeScheduleForAttendance.room.name}</span>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-xs h-9 px-2.5 text-muted-foreground hover:text-foreground rounded-xl font-semibold border-2"
+                  onClick={markAllUnmarked}
+                  title="Đặt lại toàn bộ về Chưa điểm danh"
+                >
+                  Đặt lại
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-xs h-9 px-3 text-primary border-2 border-primary/30 hover:bg-[#FFF0E6] rounded-xl font-bold"
+                  onClick={markAllPresent}
+                >
+                  ✓ Tất cả có mặt
+                </Button>
+              </div>
             </div>
           </DialogHeader>
 
           <div className="py-3 max-h-[60vh] overflow-y-auto">
+            {activeScheduleForAttendance && new Date(activeScheduleForAttendance.date) > new Date() && (
+              <div className="mb-3 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-200 text-xs flex items-center gap-2.5 font-medium">
+                <Clock className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                <span>
+                  <strong>Lịch học trong tương lai:</strong> Buổi học này chưa diễn ra. Trạng thái học viên mặc định là <strong>Chưa điểm danh</strong>.
+                </span>
+              </div>
+            )}
+
             {activeScheduleForAttendance?.class?.students?.length === 0 ? (
               <p className="text-xs text-muted-foreground text-center py-6 font-semibold">Lớp học hiện tại chưa có học viên nào.</p>
             ) : (
@@ -474,7 +543,7 @@ export function ScheduleClient({ schedules, classes, rooms, teachers }: { schedu
                       </TableCell>
                       <TableCell>
                         <Select 
-                          value={attendanceData[student.id]?.status || "PRESENT"} 
+                          value={attendanceData[student.id]?.status || "UNMARKED"} 
                           onValueChange={(val) => setAttendanceData({
                             ...attendanceData, 
                             [student.id]: { ...(attendanceData[student.id] || {}), status: val, notes: attendanceData[student.id]?.notes || "" }
@@ -497,7 +566,7 @@ export function ScheduleClient({ schedules, classes, rooms, teachers }: { schedu
                           value={attendanceData[student.id]?.notes || ""}
                           onChange={(e) => setAttendanceData({
                             ...attendanceData, 
-                            [student.id]: { ...(attendanceData[student.id] || {}), status: attendanceData[student.id]?.status || "PRESENT", notes: e.target.value }
+                            [student.id]: { ...(attendanceData[student.id] || {}), status: attendanceData[student.id]?.status || "UNMARKED", notes: e.target.value }
                           })}
                         />
                       </TableCell>

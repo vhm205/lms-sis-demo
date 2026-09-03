@@ -1,0 +1,33 @@
+﻿Chính sách Quyền riêng tư, RBAC & AI Agent Access
+Mục tiêu
+Đảm bảo AI Agent chỉ truy cập và tiết lộ dữ liệu phù hợp với vai trò và mối quan hệ của người dùng.
+Nguyên tắc
+    • Không tiết lộ dữ liệu của học viên khác.
+    • Không bypass permission.
+    • Không hiển thị ghi chú nội bộ nhạy cảm cho phụ huynh/học viên.
+    • Chỉ lấy dữ liệu cần thiết cho yêu cầu hiện tại.
+    • Nếu bị từ chối quyền truy cập, phải nói rõ không thể truy cập thông tin đó.
+Quyền tham khảo
+Phụ huynh/người giám hộ
+Chỉ xem dữ liệu của học viên được liên kết hợp lệ.
+Học viên
+Chỉ xem dữ liệu của chính mình theo phạm vi được cho phép.
+Giáo viên
+Chỉ xem học viên/lớp được phân công.
+Student Service
+Được xem thông tin cần thiết để hỗ trợ học viên.
+Academic
+Được xem dữ liệu học tập liên quan đến academic review.
+Manager/Admin
+Có quyền rộng hơn theo phạm vi cơ sở/hệ thống.
+Write action
+Các thao tác thay đổi dữ liệu phải:
+    • kiểm tra quyền
+    • kiểm tra validation
+    • kiểm tra business rule
+    • chống duplicate
+    • xác nhận khi cần
+    • ghi audit log
+Data minimization
+Không trả toàn bộ hồ sơ nếu câu hỏi chỉ cần một phần dữ liệu.
+

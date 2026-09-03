@@ -157,7 +157,7 @@ export const MCP_TOOLS: McpToolDefinition[] = [
         amount: { type: "number", description: "Số tiền học phí (VND)" },
         notes: { type: "string", description: "Ghi chú đơn hàng" }
       },
-      required: ["parentName", "parentPhone", "courseId", "facilityId"]
+      required: ["courseId"]
     },
     sampleArguments: {
       parentName: "Trần Thị Mai",
@@ -239,6 +239,62 @@ export const MCP_TOOLS: McpToolDefinition[] = [
         "Tỷ lệ đạt chuẩn: 100% | Điểm Giỏi: 85%"
       ]
     },
+  },
+  {
+    name: "get_promotions",
+    aliases: ["get_recommended_products", "list_campaign_courses"],
+    description: "Tra cứu danh sách các chiến dịch khuyến mãi, sự kiện giảm giá và danh sách khóa học/sản phẩm đề xuất ưu đãi (chuẩn định dạng Product Carousel Rich Card cho Orchexa AI Agent).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        campaignCode: { type: "string", description: "Mã chiến dịch cụ thể (VD: CAMP-BACK2SCHOOL-2025, CAMP-RETENTION-MBA)" },
+        targetAudience: { type: "string", enum: ["KIDS", "TEEN", "ADULT_MBA", "ALL"], description: "Đối tượng học viên cần tư vấn ưu đãi (KIDS, TEEN, ADULT_MBA, ALL)" },
+        facilityId: { type: "string", description: "ID hoặc tên cơ sở (VD: Cầu Giấy, Bình Thạnh, Quận 7)" },
+        limit: { type: "number", description: "Số lượng sản phẩm tối đa trả về (mặc định 6)" }
+      }
+    },
+    sampleArguments: {
+      targetAudience: "KIDS"
+    },
+    sampleResponse: {
+      success: true,
+      campaign: {
+        code: "CAMP-BACK2SCHOOL-2025",
+        title: "Mùa Tựu Trường 2025 - Bứt Phá Cambridge",
+        badge: "HOT EVENT 20%"
+      },
+      count: 2,
+      products: [
+        {
+          id: "cmtg...",
+          name: "Cambridge Movers Chuẩn Quốc Tế",
+          title: "Lớp Movers (7-9 tuổi)",
+          course_name: "Cambridge Movers Chuẩn Quốc Tế",
+          product_code: "ENG-CAM-MOVERS-PROMO",
+          description: "Tặng ngay học bổng 20% học phí + Bộ giáo trình bản quyền và balo phản quang.",
+          list_price: 4500000,
+          sale_price: 3600000,
+          price: 3600000,
+          price_numeric: 3600000,
+          discount_percent: 20,
+          image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&auto=format&fit=crop&q=80",
+          image_url: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&auto=format&fit=crop&q=80",
+          stock: 8,
+          inventory_count: 8,
+          featured: true,
+          primary_button: {
+            label: "Nhận voucher",
+            action: "Chat message",
+            message: "Tôi muốn nhận ưu đãi 20% cho khóa Cambridge Movers Chuẩn Quốc Tế"
+          },
+          secondary_button: {
+            label: "Xem chi tiết",
+            action: "Chat message",
+            message: "Tư vấn thêm cho tôi về khóa Cambridge Movers Chuẩn Quốc Tế"
+          }
+        }
+      ]
+    }
   }
 ];
 
@@ -269,6 +325,7 @@ export async function executeMcpTool(
     if (name === "request_makeup_class") toolName = "create_makeup_request";
     if (name === "create_lead_or_order") toolName = "create_order";
     if (name === "export_student_report" || name === "get_student_report" || name === "view_student_report") toolName = "generate_student_report";
+    if (name === "get_recommended_products" || name === "list_campaign_courses") toolName = "get_promotions";
 
     // 1. search_students
     if (toolName === "search_students") {
@@ -507,10 +564,24 @@ export async function executeMcpTool(
 
     // 6. create_order
     if (toolName === "create_order") {
-      const { parentName, parentPhone, courseId: courseIdent, facilityId: facilityIdent, amount, notes } = args as any;
+      let { parentName, parentPhone, courseId: courseIdent, facilityId: facilityIdent, amount, notes } = args as any;
 
-      if (!parentName || !parentPhone || !courseIdent || !facilityIdent) {
-        throw new Error("Missing required arguments: parentName, parentPhone, courseId, facilityId");
+      if (!courseIdent) {
+        throw new Error("Missing required argument: courseId (ID, code hoặc tên khóa học)");
+      }
+
+      // Extract phone from context if omitted
+      if (!parentPhone && context.parentPhone) {
+        parentPhone = context.parentPhone;
+      }
+      if (!parentPhone) {
+        parentPhone = "0900000000";
+      }
+
+      // Try finding parent to autofill name if omitted
+      if (!parentName) {
+        const existingParent = await prisma.parent.findUnique({ where: { phone: parentPhone } });
+        parentName = existingParent ? existingParent.name : "Phụ huynh (Đăng ký qua Orchexa AI)";
       }
 
       // Resolve course
@@ -519,11 +590,17 @@ export async function executeMcpTool(
       });
       if (!course) throw new Error(`Course not found: ${courseIdent}`);
 
-      // Resolve facility
-      const facility = await prisma.facility.findFirst({
-        where: { OR: [{ id: facilityIdent }, { name: { contains: facilityIdent } }] },
-      });
-      if (!facility) throw new Error(`Facility not found: ${facilityIdent}`);
+      // Resolve facility with fallback
+      let facility = null;
+      if (facilityIdent) {
+        facility = await prisma.facility.findFirst({
+          where: { OR: [{ id: facilityIdent }, { name: { contains: facilityIdent } }] },
+        });
+      }
+      if (!facility) {
+        facility = await prisma.facility.findFirst();
+      }
+      if (!facility) throw new Error("No active facility found in system.");
 
       const code = `ORD-${Date.now().toString().slice(-6)}`;
       const parsedAmount = typeof amount === "number" ? amount : parseFloat(amount) || course.fee || 0;
@@ -663,6 +740,130 @@ export async function executeMcpTool(
       return {
         content: [{ type: "text", text: formattedText }],
         data: report,
+      };
+    }
+
+    // 9. get_promotions
+    if (toolName === "get_promotions") {
+      const campaignCode = (args?.campaignCode as string) || "";
+      const targetAudience = (args?.targetAudience as string) || "";
+      const facilityIdent = (args?.facilityId as string) || "";
+      const limit = typeof args?.limit === "number" ? args.limit : 6;
+
+      // Find active campaigns or specific campaign
+      const whereCondition: any = { status: "ACTIVE" };
+      if (campaignCode) {
+        whereCondition.code = campaignCode;
+      }
+
+      if (facilityIdent) {
+        const facility = await prisma.facility.findFirst({
+          where: { OR: [{ id: facilityIdent }, { name: { contains: facilityIdent } }] }
+        });
+        if (facility) {
+          whereCondition.OR = [{ facilityId: facility.id }, { facilityId: null }];
+        }
+      }
+
+      const campaigns = await prisma.campaign.findMany({
+        where: whereCondition,
+        include: {
+          facility: true,
+          items: {
+            include: { course: true },
+            orderBy: [{ featured: "desc" }, { orderIndex: "asc" }]
+          }
+        },
+        orderBy: { createdAt: "desc" }
+      });
+
+      if (!campaigns || campaigns.length === 0) {
+        return {
+          content: [{ type: "text", text: "Hiện tại không có chương trình khuyến mãi nào đang kích hoạt phù hợp với tiêu chí tra cứu." }],
+          data: { count: 0, products: [], message: "Không tìm thấy chương trình khuyến mãi phù hợp." }
+        };
+      }
+
+      // Collect items from campaigns
+      let allItems: any[] = [];
+      const primaryCampaign = campaigns[0];
+
+      for (const camp of campaigns) {
+        for (const item of camp.items) {
+          if (targetAudience && targetAudience !== "ALL") {
+            if (item.targetAudience && item.targetAudience !== targetAudience && item.targetAudience !== "ALL") {
+              continue;
+            }
+          }
+          allItems.push({
+            campaignCode: camp.code,
+            campaignTitle: camp.title,
+            campaignBadge: camp.badge,
+            ...item
+          });
+        }
+      }
+
+      if (limit && allItems.length > limit) {
+        allItems = allItems.slice(0, limit);
+      }
+
+      // Map to Orchexa Rich Card Carousel specification
+      const products = allItems.map((item) => ({
+        id: item.id,
+        name: item.name,
+        title: item.title || item.name,
+        course_name: item.course?.name || item.name,
+        product_code: item.productCode,
+        description: item.description,
+        list_price: item.listPrice,
+        sale_price: item.salePrice,
+        price: item.salePrice,
+        price_numeric: item.salePrice,
+        discount_percent: item.discountPercent,
+        image: item.imageUrl,
+        image_url: item.imageUrl,
+        stock: item.stock,
+        inventory_count: item.stock,
+        featured: item.featured,
+        campaign_id: item.campaignId,
+        campaign_name: item.campaignTitle,
+        badge: item.campaignBadge,
+        primary_button: {
+          label: item.primaryBtnLabel || "Nhận voucher",
+          action: "Chat message",
+          message: (item.primaryBtnMsg || "Tôi muốn nhận ưu đãi cho khóa {name}").replace("{name}", item.name).replace("{price}", item.salePrice.toLocaleString("vi-VN") + "đ")
+        },
+        secondary_button: {
+          label: item.secondaryBtnLabel || "Xem chi tiết",
+          action: "Chat message",
+          message: (item.secondaryBtnMsg || "Tư vấn thêm cho tôi về khóa {name}").replace("{name}", item.name)
+        }
+      }));
+
+      // Construct readable markdown text for agent response
+      let markdownText = `### 🎁 ${primaryCampaign.title} (${primaryCampaign.badge || "Ưu Đãi Đặc Biệt"})\n\n`;
+      markdownText += `${primaryCampaign.description || ""}\n\n`;
+      markdownText += `**Danh sách các khóa học & ưu đãi đang áp dụng (${products.length} khóa):**\n\n`;
+      products.forEach((p, idx) => {
+        markdownText += `${idx + 1}. **${p.name}**\n`;
+        markdownText += `   - Giá gốc: ~~${p.list_price.toLocaleString("vi-VN")}đ~~ ➔ **Ưu đãi: ${p.sale_price.toLocaleString("vi-VN")}đ** (${p.discount_percent ? `Giảm ${p.discount_percent}%` : "Giá sốc"})\n`;
+        markdownText += `   - Quyền lợi: ${p.description}\n`;
+        markdownText += `   - Số suất còn lại: **${p.stock} suất**\n\n`;
+      });
+
+      return {
+        content: [{ type: "text", text: markdownText }],
+        data: {
+          success: true,
+          campaign: {
+            code: primaryCampaign.code,
+            title: primaryCampaign.title,
+            badge: primaryCampaign.badge
+          },
+          count: products.length,
+          products
+        }
       };
     }
 

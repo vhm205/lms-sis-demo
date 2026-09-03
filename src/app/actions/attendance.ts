@@ -7,7 +7,7 @@ export async function submitAttendance(scheduleId: string, attendances: { studen
   try {
     const schedule = await prisma.schedule.findUnique({
       where: { id: scheduleId },
-      select: { classId: true }
+      select: { classId: true, status: true, date: true }
     });
 
     if (!schedule) {
@@ -15,6 +15,17 @@ export async function submitAttendance(scheduleId: string, attendances: { studen
     }
 
     for (const record of attendances) {
+      // If UNMARKED or empty, remove existing attendance record so it reflects unmarked
+      if (!record.status || record.status === "UNMARKED") {
+        const existing = await prisma.attendance.findFirst({
+          where: { scheduleId, studentId: record.studentId }
+        });
+        if (existing) {
+          await prisma.attendance.delete({ where: { id: existing.id } });
+        }
+        continue;
+      }
+
       const existing = await prisma.attendance.findFirst({
         where: { scheduleId, studentId: record.studentId }
       });
@@ -35,6 +46,20 @@ export async function submitAttendance(scheduleId: string, attendances: { studen
         });
       }
     }
+
+    // Check remaining attendances
+    const totalMarked = await prisma.attendance.count({
+      where: { scheduleId }
+    });
+
+    // If attendance has been recorded and schedule was SCHEDULED, update to COMPLETED
+    if (totalMarked > 0 && schedule.status === "SCHEDULED") {
+      await prisma.schedule.update({
+        where: { id: scheduleId },
+        data: { status: "COMPLETED" }
+      });
+    }
+
     revalidatePath("/schedule");
     return { success: true };
   } catch (error: any) {

@@ -364,6 +364,72 @@ const APIS: ApiDefinition[] = [
         "Tỷ lệ đạt chuẩn: 100%"
       ]
     }
+  },
+  {
+    id: "get_campaigns",
+    method: "GET",
+    path: "/api/campaigns",
+    title: "Danh sách Chiến dịch & Sự kiện Khuyến Mãi",
+    desc: "Lấy danh sách các chiến dịch, sự kiện ưu đãi đang hoạt động hoặc toàn hệ thống.",
+    headers: [
+      { name: "Content-Type", value: "application/json", required: false, desc: "Định dạng JSON" }
+    ],
+    params: [
+      { name: "status", type: "string", required: false, desc: "Trạng thái chiến dịch (ACTIVE, PAUSED, ALL)", defaultVal: "ACTIVE" }
+    ],
+    sampleResponse: {
+      success: true,
+      count: 3,
+      data: [
+        {
+          id: "camp_001",
+          code: "CAMP-BACK2SCHOOL-2025",
+          title: "Mùa Tựu Trường 2025 - Bứt Phá Cambridge",
+          badge: "HOT EVENT 20%",
+          status: "ACTIVE",
+          itemsCount: 2
+        }
+      ]
+    }
+  },
+  {
+    id: "get_campaign_products",
+    method: "GET",
+    path: "/api/campaigns/products",
+    title: "Sản phẩm Ưu đãi Đề xuất (Rich Card Carousel Feed)",
+    desc: "API công khai trả về danh sách các khóa học / sản phẩm ưu đãi theo đúng đặc tả mapping trường của Orchexa Rich Card Carousel.",
+    headers: [
+      { name: "Content-Type", value: "application/json", required: false, desc: "Định dạng JSON" }
+    ],
+    params: [
+      { name: "targetAudience", type: "string", required: false, desc: "Lọc đối tượng: KIDS, TEEN, ADULT_MBA, ALL", defaultVal: "KIDS" },
+      { name: "limit", type: "number", required: false, desc: "Số lượng sản phẩm đề xuất tối đa", defaultVal: "6" }
+    ],
+    sampleResponse: {
+      success: true,
+      campaign: {
+        code: "CAMP-BACK2SCHOOL-2025",
+        title: "Mùa Tựu Trường 2025 - Bứt Phá Cambridge",
+        badge: "HOT EVENT 20%"
+      },
+      count: 2,
+      products: [
+        {
+          id: "prod_001",
+          name: "Cambridge Movers Chuẩn Quốc Tế",
+          title: "Lớp Movers (7-9 tuổi)",
+          course_name: "Cambridge Movers Chuẩn Quốc Tế",
+          product_code: "ENG-CAM-MOVERS-PROMO",
+          description: "Tặng ngay học bổng 20% học phí + Bộ giáo trình bản quyền và balo phản quang.",
+          list_price: 4500000,
+          sale_price: 3600000,
+          price: 3600000,
+          discount_percent: 20,
+          stock: 8,
+          featured: true
+        }
+      ]
+    }
   }
 ];
 
@@ -509,6 +575,23 @@ const MCP_TOOLS_CATALOG: McpTool[] = [
     defaultArgs: {
       studentId: "HV0001",
       type: "ACADEMIC_RESULTS"
+    }
+  },
+  {
+    name: "get_promotions",
+    aliases: ["get_recommended_products", "list_campaign_courses"],
+    desc: "Tra cứu danh sách các chiến dịch khuyến mãi, sự kiện giảm giá và danh sách khóa học/sản phẩm đề xuất ưu đãi (chuẩn định dạng Product Carousel Rich Card cho Orchexa AI Agent).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        campaignCode: { type: "string", description: "Mã chiến dịch cụ thể (VD: CAMP-BACK2SCHOOL-2025, CAMP-RETENTION-MBA)" },
+        targetAudience: { type: "string", enum: ["KIDS", "TEEN", "ADULT_MBA", "ALL"], description: "Đối tượng học viên cần tư vấn ưu đãi (KIDS, TEEN, ADULT_MBA, ALL)" },
+        facilityId: { type: "string", description: "ID hoặc tên cơ sở (VD: Cầu Giấy, Bình Thạnh, Quận 7)" },
+        limit: { type: "number", description: "Số lượng sản phẩm tối đa trả về (mặc định 6)" }
+      }
+    },
+    defaultArgs: {
+      targetAudience: "KIDS"
     }
   }
 ];
