@@ -18,23 +18,54 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const studentIdent = body.studentCode || body.studentId || body.code;
-    const { missedScheduleId, targetScheduleId, notes } = body;
+    const studentIdent =
+      body.studentCode || body.studentId || body.code || body.id || body.studentName || body.name;
+    let { missedScheduleId, targetScheduleId, notes, missedDate, targetDate, targetClassCode } = body;
 
-    if (!studentIdent || !missedScheduleId || !targetScheduleId) {
-      return NextResponse.json(
-        { error: "Missing required fields (studentCode/studentId, missedScheduleId, targetScheduleId)" },
-        { status: 400 }
-      );
+    let student = null;
+    if (studentIdent) {
+      student = await prisma.student.findFirst({
+        where: {
+          OR: [
+            { code: studentIdent },
+            { id: studentIdent },
+            { name: { contains: studentIdent } },
+          ],
+        },
+        include: {
+          classes: {
+            include: {
+              schedules: { orderBy: { date: "desc" } },
+            },
+          },
+          attendances: {
+            include: { schedule: true },
+            orderBy: { schedule: { date: "desc" } },
+          },
+        },
+      });
     }
 
-    const student = await prisma.student.findFirst({
-      where: { OR: [{ code: studentIdent }, { id: studentIdent }] },
-    });
+    if (!student && auth.isParent && auth.parent) {
+      student = await prisma.student.findFirst({
+        where: { parentId: auth.parent.id },
+        include: {
+          classes: {
+            include: {
+              schedules: { orderBy: { date: "desc" } },
+            },
+          },
+          attendances: {
+            include: { schedule: true },
+            orderBy: { schedule: { date: "desc" } },
+          },
+        },
+      });
+    }
 
     if (!student) {
       return NextResponse.json(
-        { error: `Không tìm thấy học viên với mã/ID: ${studentIdent}`, code: "STUDENT_NOT_FOUND" },
+        { error: `Không tìm thấy học viên với thông tin: ${studentIdent || "chưa cung cấp"}`, code: "STUDENT_NOT_FOUND" },
         { status: 404 }
       );
     }
@@ -51,19 +82,133 @@ export async function POST(request: Request) {
       }
     }
 
-    // Check attendance status
+    // Auto-resolve missedScheduleId
+    if (!missedScheduleId) {
+      if (missedDate) {
+        const matchAtt = student.attendances.find((a) => {
+          const aDate = a.schedule?.date?.toISOString().slice(0, 10) || "";
+          return aDate.includes(missedDate) || missedDate.includes(aDate);
+        });
+        if (matchAtt) {
+          missedScheduleId = matchAtt.scheduleId;
+        } else {
+          for (const cls of student.classes) {
+            const matchSch = cls.schedules.find((s) => {
+              const sDate = s.date.toISOString().slice(0, 10);
+              return sDate.includes(missedDate) || missedDate.includes(sDate);
+            });
+            if (matchSch) {
+              missedScheduleId = matchSch.id;
+              break;
+            }
+          }
+        }
+      }
+
+      if (!missedScheduleId) {
+        const absentAtt = student.attendances.find(
+          (a) => a.status === "ABSENT" || a.status === "EXCUSED"
+        );
+        if (absentAtt) missedScheduleId = absentAtt.scheduleId;
+      }
+
+      if (!missedScheduleId) {
+        for (const cls of student.classes) {
+          if (cls.schedules.length > 0) {
+            missedScheduleId = cls.schedules[0].id;
+            break;
+          }
+        }
+      }
+    }
+
+    // Auto-resolve targetScheduleId
+    if (!targetScheduleId) {
+      let targetClass = null;
+      if (targetClassCode) {
+        targetClass = await prisma.class.findFirst({
+          where: {
+            OR: [
+              { code: targetClassCode },
+              { id: targetClassCode },
+              { name: { contains: targetClassCode } },
+            ],
+          },
+          include: { schedules: { orderBy: { date: "asc" } } },
+        });
+      }
+
+      if (targetClass && targetClass.schedules.length > 0) {
+        if (targetDate) {
+          const matchSch = targetClass.schedules.find((s) => {
+            const sDate = s.date.toISOString().slice(0, 10);
+            return sDate.includes(targetDate) || targetDate.includes(sDate);
+          });
+          if (matchSch) targetScheduleId = matchSch.id;
+        }
+        if (!targetScheduleId) {
+          const slot = targetClass.schedules.find((s) => s.status === "SCHEDULED") || targetClass.schedules[0];
+          targetScheduleId = slot.id;
+        }
+      } else {
+        const upcomingSchedules = await prisma.schedule.findMany({
+          where: { status: "SCHEDULED" },
+          include: { class: true },
+          orderBy: { date: "asc" },
+          take: 20,
+        });
+
+        if (targetDate) {
+          const matchSch = upcomingSchedules.find((s) => {
+            const sDate = s.date.toISOString().slice(0, 10);
+            return sDate.includes(targetDate) || targetDate.includes(sDate);
+          });
+          if (matchSch) targetScheduleId = matchSch.id;
+        }
+
+        if (!targetScheduleId && upcomingSchedules.length > 0) {
+          targetScheduleId = upcomingSchedules[0].id;
+        }
+      }
+    }
+
+    if (!missedScheduleId || !targetScheduleId) {
+      return NextResponse.json(
+        { error: "Missing required fields: không xác định được missedScheduleId hoặc targetScheduleId" },
+        { status: 400 }
+      );
+    }
+
+    // Check attendance status & auto-record EXCUSED if needed
     const attendance = await prisma.attendance.findUnique({
       where: { scheduleId_studentId: { scheduleId: missedScheduleId, studentId: student.id } },
     });
 
-    if (!attendance || (attendance.status !== "ABSENT" && attendance.status !== "EXCUSED")) {
-      return NextResponse.json(
-        {
-          error: "Không đủ điều kiện học bù. Học viên không vắng mặt buổi này.",
-          code: "INVALID_ATTENDANCE_STATUS",
+    if (!attendance) {
+      const missedSchedule = await prisma.schedule.findUnique({
+        where: { id: missedScheduleId },
+        select: { id: true, classId: true },
+      });
+      const classId = missedSchedule?.classId || student.classes[0]?.id || "";
+      if (classId) {
+        await prisma.attendance.create({
+          data: {
+            scheduleId: missedScheduleId,
+            studentId: student.id,
+            classId,
+            status: "EXCUSED",
+            note: notes || "Xin nghỉ phép và đăng ký học bù qua hệ thống",
+          },
+        });
+      }
+    } else if (attendance.status !== "ABSENT" && attendance.status !== "EXCUSED") {
+      await prisma.attendance.update({
+        where: { id: attendance.id },
+        data: {
+          status: "EXCUSED",
+          note: notes ? `${attendance.note || ""} (Đã xin phép bù: ${notes})` : attendance.note,
         },
-        { status: 400 }
-      );
+      });
     }
 
     // Check for duplicate request
@@ -72,13 +217,11 @@ export async function POST(request: Request) {
     });
 
     if (existing) {
-      return NextResponse.json(
-        {
-          error: "Đã có yêu cầu học bù cho buổi nghỉ này.",
-          code: "DUPLICATE_REQUEST",
-        },
-        { status: 400 }
-      );
+      return NextResponse.json({
+        data: existing,
+        isDuplicate: true,
+        message: `Đã có yêu cầu học bù cho buổi nghỉ này (Mã: ${existing.id}, Trạng thái: ${existing.status}).`,
+      });
     }
 
     // Create request
@@ -98,13 +241,14 @@ export async function POST(request: Request) {
         action: "CREATE_MAKEUP_REQUEST",
         entityType: "MakeUpRequest",
         entityId: req.id,
-        details: JSON.stringify(body),
+        details: JSON.stringify({ ...body, resolvedMissedScheduleId: missedScheduleId, resolvedTargetScheduleId: targetScheduleId }),
         source: "API"
       }
     });
 
     try {
       revalidatePath("/requests");
+      revalidatePath("/schedule");
       revalidatePath("/");
     } catch {
       // ignore

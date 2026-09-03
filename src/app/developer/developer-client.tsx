@@ -484,36 +484,41 @@ const MCP_TOOLS_CATALOG: McpTool[] = [
   },
   {
     name: "find_available_classes",
-    desc: "Tìm các lớp học đang mở và còn chỗ trống cho một khóa học cụ thể.",
+    aliases: ["list_available_classes", "list_makeup_slots", "get_classes_schedule"],
+    desc: "Tìm các lớp học đang mở và còn chỗ trống cho một khóa học cụ thể, bao gồm lịch học chi tiết các buổi sắp tới (scheduleId, date, time) để chọn xếp lịch học bù.",
     inputSchema: {
       type: "object",
       properties: {
         courseCode: { type: "string", description: "Mã khóa học (VD: ENG-CAM-MOVERS, ENG-KID-01, IELTS-INT)" },
-        courseId: { type: "string", description: "ID khóa học trong CSDL (cuid, tùy chọn thay thế cho courseCode)" }
+        courseId: { type: "string", description: "ID khóa học trong CSDL (cuid, tùy chọn thay thế cho courseCode)" },
+        facilityName: { type: "string", description: "Tên cơ sở học cần lọc (VD: Bình Thạnh, Cầu Giấy)" }
       }
     },
     defaultArgs: { courseCode: "ENG-CAM-MOVERS" }
   },
   {
     name: "create_makeup_request",
-    aliases: ["request_makeup_class"],
-    desc: "Đăng ký xếp lịch học bù cho học viên đã nghỉ có phép (tự động kiểm tra tính hợp lệ buổi nghỉ).",
+    aliases: ["request_makeup_class", "request_makeup", "create_makeup", "register_makeup_class", "create_makeup_class_request"],
+    desc: "Tạo yêu cầu xếp lịch học bù cho học viên (hệ thống tự động kiểm tra và khớp buổi nghỉ cũng như lịch học bù theo ngày/lớp nếu không có sẵn CUID). Hỗ trợ truyền studentCode, missedDate, targetDate, targetClassCode, targetScheduleId, missedScheduleId.",
     inputSchema: {
       type: "object",
       properties: {
-        studentCode: { type: "string", description: "Mã học viên (VD: HV0001)" },
+        studentCode: { type: "string", description: "Mã học viên (VD: HV0001, HV0006) hoặc ID học viên" },
         studentId: { type: "string", description: "ID học viên trong CSDL (tùy chọn thay thế cho studentCode)" },
-        missedScheduleId: { type: "string", description: "ID buổi học đã nghỉ (trạng thái ABSENT)" },
-        targetScheduleId: { type: "string", description: "ID buổi học mục tiêu muốn học bù" },
-        notes: { type: "string", description: "Lý do học bù" }
-      },
-      required: ["missedScheduleId", "targetScheduleId"]
+        studentName: { type: "string", description: "Họ tên học sinh (VD: Gia Huy, Đặng Gia Huy)" },
+        missedScheduleId: { type: "string", description: "ID buổi học đã nghỉ (tùy chọn nếu truyền missedDate hoặc để hệ thống tự động tìm)" },
+        missedDate: { type: "string", description: "Ngày nghỉ của học viên (VD: 2026-09-03, 2026-09-01, 03/09) nếu chưa có missedScheduleId" },
+        targetScheduleId: { type: "string", description: "ID buổi học mục tiêu muốn học bù (lấy từ find_available_classes)" },
+        targetDate: { type: "string", description: "Ngày muốn học bù (VD: 2026-09-08, 08/09) nếu chưa có targetScheduleId" },
+        targetClassCode: { type: "string", description: "Mã hoặc tên lớp muốn học bù (VD: HCM-MOV-BT-WK, HCM-MOV-BT01, hoặc Cambridge Movers Bù)" },
+        notes: { type: "string", description: "Lý do học bù hoặc ghi chú của phụ huynh" }
+      }
     },
     defaultArgs: {
-      studentCode: "HV0001",
-      missedScheduleId: "cmtgpg6vr0012p6z8r16vxfuu",
-      targetScheduleId: "cmtgpg6vr0014p6z8ig04sa86",
-      notes: "Xin học bù buổi ngày 03/10"
+      studentCode: "HV0006",
+      targetDate: "2026-09-08",
+      targetClassCode: "HCM-MOV-BT01",
+      notes: "Xin học bù buổi ngày 03/09"
     }
   },
   {

@@ -93,12 +93,14 @@ export const MCP_TOOLS: McpToolDefinition[] = [
   },
   {
     name: "find_available_classes",
-    description: "Tìm các lớp học đang mở và còn chỗ trống cho một khóa học cụ thể.",
+    aliases: ["list_available_classes", "list_makeup_slots", "get_classes_schedule"],
+    description: "Tìm các lớp học đang mở và còn chỗ trống cho một khóa học cụ thể, bao gồm lịch học chi tiết các buổi sắp tới (scheduleId, date, time) để chọn xếp lịch học bù.",
     inputSchema: {
       type: "object",
       properties: {
         courseCode: { type: "string", description: "Mã khóa học (VD: ENG-CAM-MOVERS, ENG-KID-01, IELTS-INT)" },
         courseId: { type: "string", description: "ID khóa học trong CSDL (cuid, tùy chọn thay thế cho courseCode)" },
+        facilityName: { type: "string", description: "Tên cơ sở học cần lọc (VD: Bình Thạnh, Cầu Giấy)" },
       },
     },
     sampleArguments: {
@@ -115,37 +117,53 @@ export const MCP_TOOLS: McpToolDefinition[] = [
           capacity: 15,
           enrolled: 3,
           availableSlots: 12,
-          status: "ONGOING"
+          status: "ONGOING",
+          schedules: [
+            {
+              scheduleId: "cmtl0ys9x0021p6yw6e7v8aqp",
+              date: "2026-09-08T11:00:00.000Z",
+              status: "SCHEDULED"
+            }
+          ]
         }
       ]
     }
   },
   {
     name: "create_makeup_request",
-    aliases: ["request_makeup_class"],
-    description: "Tạo yêu cầu xếp lịch học bù cho học viên đã nghỉ có phép (tự động kiểm tra tính hợp lệ của buổi vắng).",
+    aliases: [
+      "request_makeup_class",
+      "request_makeup",
+      "create_makeup",
+      "register_makeup_class",
+      "create_makeup_class_request"
+    ],
+    description: "Tạo yêu cầu xếp lịch học bù cho học viên (hỗ trợ tự động tra cứu buổi nghỉ và buổi học bù mục tiêu theo ngày/lớp nếu không có sẵn CUID). Hỗ trợ truyền studentCode, missedDate, targetDate, targetClassCode, targetScheduleId, missedScheduleId.",
     inputSchema: {
       type: "object",
       properties: {
-        studentCode: { type: "string", description: "Mã học viên (VD: HV0001)" },
+        studentCode: { type: "string", description: "Mã học viên (VD: HV0001, HV0006) hoặc ID học viên" },
         studentId: { type: "string", description: "ID học viên trong CSDL (cuid, tùy chọn thay thế cho studentCode)" },
-        missedScheduleId: { type: "string", description: "ID buổi học đã nghỉ (trạng thái ABSENT hoặc EXCUSED)" },
-        targetScheduleId: { type: "string", description: "ID buổi học mục tiêu muốn học bù" },
+        studentName: { type: "string", description: "Họ tên học sinh (VD: Gia Huy, Đặng Gia Huy)" },
+        missedScheduleId: { type: "string", description: "ID buổi học đã nghỉ (tùy chọn nếu truyền missedDate hoặc để hệ thống tự động tìm)" },
+        missedDate: { type: "string", description: "Ngày nghỉ của học viên (VD: 2026-09-03, 2026-09-01, 03/09) nếu chưa có missedScheduleId" },
+        targetScheduleId: { type: "string", description: "ID buổi học mục tiêu muốn học bù (lấy từ find_available_classes)" },
+        targetDate: { type: "string", description: "Ngày muốn học bù (VD: 2026-09-08, 08/09) nếu chưa có targetScheduleId" },
+        targetClassCode: { type: "string", description: "Mã hoặc tên lớp muốn học bù (VD: HCM-MOV-BT-WK, HCM-MOV-BT01, hoặc Cambridge Movers Bù)" },
         notes: { type: "string", description: "Lý do học bù hoặc ghi chú của phụ huynh" },
       },
-      required: ["missedScheduleId", "targetScheduleId"],
     },
     sampleArguments: {
-      studentCode: "HV0001",
-      missedScheduleId: "cmtgpg6vr0012p6z8r16vxfuu",
-      targetScheduleId: "cmtgpg6vr0014p6z8ig04sa86",
-      notes: "Xin học bù buổi nghỉ ngày 03/10 do bận việc gia đình"
+      studentCode: "HV0006",
+      targetDate: "2026-09-08",
+      targetClassCode: "HCM-MOV-BT01",
+      notes: "Xin học bù buổi ngày 03/09"
     },
     sampleResponse: {
       success: true,
       requestId: "cmtgpg6vx001ep6z8req01",
       status: "PENDING",
-      message: "Đã tạo yêu cầu học bù thành công."
+      message: "Đã tạo yêu cầu học bù thành công cho học viên Đặng Gia Huy (HV0006)."
     }
   },
   {
@@ -335,7 +353,18 @@ export async function executeMcpTool(
     // Resolve alias
     let toolName = name;
     if (name === "get_student_profile") toolName = "get_student_info";
-    if (name === "request_makeup_class") toolName = "create_makeup_request";
+    if (
+      name === "request_makeup_class" ||
+      name === "request_makeup" ||
+      name === "create_makeup" ||
+      name === "register_makeup_class" ||
+      name === "create_makeup_class_request"
+    ) toolName = "create_makeup_request";
+    if (
+      name === "list_available_classes" ||
+      name === "list_makeup_slots" ||
+      name === "get_classes_schedule"
+    ) toolName = "find_available_classes";
     if (name === "create_lead_or_order") toolName = "create_order";
     if (name === "export_student_report" || name === "get_student_report" || name === "view_student_report") toolName = "generate_student_report";
     if (name === "get_recommended_products" || name === "list_campaign_courses") toolName = "get_promotions";
@@ -455,20 +484,40 @@ export async function executeMcpTool(
     if (toolName === "find_available_classes") {
       const courseIdent =
         ((args?.courseCode || args?.courseId || args?.code || args?.course) as string) || "";
-      if (!courseIdent) throw new Error("Missing required argument: courseCode (hoặc courseId)");
+      const facilityFilter =
+        ((args?.facilityName || args?.facility || args?.facilityCode) as string) || "";
 
-      // Find course by code, ID, or name
-      const course = await prisma.course.findFirst({
-        where: {
-          OR: [{ code: courseIdent }, { id: courseIdent }, { name: { contains: courseIdent } }],
-        },
-      });
+      let courseId = "";
+      if (courseIdent) {
+        // Find course by code, ID, or name
+        const course = await prisma.course.findFirst({
+          where: {
+            OR: [{ code: courseIdent }, { id: courseIdent }, { name: { contains: courseIdent } }],
+          },
+        });
+        courseId = course ? course.id : courseIdent;
+      }
 
-      const courseId = course ? course.id : courseIdent;
+      const whereClause: any = { status: "ONGOING" };
+      if (courseId) {
+        whereClause.courseId = courseId;
+      }
+      if (facilityFilter) {
+        whereClause.facility = {
+          name: { contains: facilityFilter },
+        };
+      }
 
       const classes = await prisma.class.findMany({
-        where: { courseId, status: "ONGOING" },
-        include: { students: true, schedules: true, facility: true, course: true },
+        where: whereClause,
+        include: {
+          students: true,
+          schedules: {
+            orderBy: { date: "asc" },
+          },
+          facility: true,
+          course: true,
+        },
       });
 
       const availableClasses = classes.map((c) => ({
@@ -481,6 +530,15 @@ export async function executeMcpTool(
         enrolled: c.students.length,
         availableSlots: Math.max(0, c.capacity - c.students.length),
         status: c.status,
+        schedules: c.schedules
+          .filter((s) => s.status !== "CANCELLED")
+          .map((s) => ({
+            scheduleId: s.id,
+            id: s.id,
+            date: s.date.toISOString(),
+            status: s.status,
+            duration: s.duration,
+          })),
       }));
 
       return {
@@ -492,62 +550,256 @@ export async function executeMcpTool(
     // 5. create_makeup_request
     if (toolName === "create_makeup_request") {
       const studentIdent =
-        ((args?.studentCode || args?.studentId || args?.code || args?.id) as string) || "";
-      const missedScheduleId = (args?.missedScheduleId as string) || "";
-      const targetScheduleId = (args?.targetScheduleId as string) || "";
-      const notes = (args?.notes as string) || "";
+        ((args?.studentCode || args?.studentId || args?.code || args?.id || args?.studentName || args?.name || args?.student) as string) || "";
+      let missedScheduleId = (args?.missedScheduleId as string) || "";
+      let targetScheduleId = (args?.targetScheduleId as string) || "";
+      const missedDate = (args?.missedDate as string) || "";
+      const targetDate = (args?.targetDate as string) || "";
+      const targetClassIdent =
+        ((args?.targetClassCode || args?.targetClassName || args?.targetClassId || args?.className || args?.classCode || args?.classId) as string) || "";
+      const notes = ((args?.notes || args?.reason || args?.content) as string) || "";
 
-      if (!studentIdent || !missedScheduleId || !targetScheduleId) {
-        throw new Error("Missing required arguments: studentCode (hoặc studentId), missedScheduleId, targetScheduleId");
+      // 1. Resolve Student
+      let student = null;
+      if (studentIdent) {
+        student = await prisma.student.findFirst({
+          where: {
+            OR: [
+              { code: studentIdent },
+              { id: studentIdent },
+              { name: { contains: studentIdent } },
+            ],
+          },
+          include: {
+            parent: true,
+            classes: {
+              include: {
+                schedules: {
+                  orderBy: { date: "desc" },
+                },
+              },
+            },
+            attendances: {
+              include: { schedule: true },
+              orderBy: { schedule: { date: "desc" } },
+            },
+          },
+        });
       }
 
-      const student = await prisma.student.findFirst({
-        where: { OR: [{ code: studentIdent }, { id: studentIdent }] },
-      });
+      // If student not found by ident, check context parent
+      if (!student && (context.parentPhone || context.parentId)) {
+        student = await prisma.student.findFirst({
+          where: {
+            parent: {
+              OR: [
+                ...(context.parentPhone ? [{ phone: context.parentPhone }] : []),
+                ...(context.parentId ? [{ id: context.parentId }] : []),
+              ],
+            },
+          },
+          include: {
+            parent: true,
+            classes: {
+              include: {
+                schedules: { orderBy: { date: "desc" } },
+              },
+            },
+            attendances: {
+              include: { schedule: true },
+              orderBy: { schedule: { date: "desc" } },
+            },
+          },
+        });
+      }
 
-      if (!student) throw new Error(`Student not found with code/id: ${studentIdent}`);
+      if (!student) {
+        throw new Error(`Không tìm thấy học viên với thông tin: ${studentIdent || "chưa cung cấp"}`);
+      }
 
-      // Check attendance
+      // 2. Resolve missedScheduleId if not provided
+      if (!missedScheduleId) {
+        if (missedDate) {
+          // Check student attendances matching missedDate
+          const matchAtt = student.attendances.find((a) => {
+            const aDate = a.schedule?.date?.toISOString().slice(0, 10) || "";
+            return aDate.includes(missedDate) || missedDate.includes(aDate);
+          });
+          if (matchAtt) {
+            missedScheduleId = matchAtt.scheduleId;
+          } else {
+            // Check student classes schedules matching missedDate
+            for (const cls of student.classes) {
+              const matchSch = cls.schedules.find((s) => {
+                const sDate = s.date.toISOString().slice(0, 10);
+                return sDate.includes(missedDate) || missedDate.includes(sDate);
+              });
+              if (matchSch) {
+                missedScheduleId = matchSch.id;
+                break;
+              }
+            }
+          }
+        }
+
+        // Look for attendance marked ABSENT or EXCUSED
+        if (!missedScheduleId) {
+          const absentAtt = student.attendances.find(
+            (a) => a.status === "ABSENT" || a.status === "EXCUSED"
+          );
+          if (absentAtt) {
+            missedScheduleId = absentAtt.scheduleId;
+          }
+        }
+
+        // Fallback to latest schedule in student classes
+        if (!missedScheduleId) {
+          for (const cls of student.classes) {
+            if (cls.schedules.length > 0) {
+              missedScheduleId = cls.schedules[0].id;
+              break;
+            }
+          }
+        }
+      }
+
+      if (!missedScheduleId) {
+        // Find any schedule in the system for this student
+        const anySchedule = await prisma.schedule.findFirst({
+          where: {
+            class: {
+              students: { some: { id: student.id } },
+            },
+          },
+          orderBy: { date: "desc" },
+        });
+        if (anySchedule) missedScheduleId = anySchedule.id;
+      }
+
+      // 3. Resolve targetScheduleId if not provided
+      if (!targetScheduleId) {
+        let targetClass = null;
+        if (targetClassIdent) {
+          targetClass = await prisma.class.findFirst({
+            where: {
+              OR: [
+                { code: targetClassIdent },
+                { id: targetClassIdent },
+                { name: { contains: targetClassIdent } },
+              ],
+            },
+            include: {
+              schedules: {
+                orderBy: { date: "asc" },
+              },
+            },
+          });
+        }
+
+        if (targetClass && targetClass.schedules.length > 0) {
+          if (targetDate) {
+            const matchSch = targetClass.schedules.find((s) => {
+              const sDate = s.date.toISOString().slice(0, 10);
+              return sDate.includes(targetDate) || targetDate.includes(sDate);
+            });
+            if (matchSch) targetScheduleId = matchSch.id;
+          }
+          if (!targetScheduleId) {
+            const scheduledSlot = targetClass.schedules.find((s) => s.status === "SCHEDULED") || targetClass.schedules[0];
+            targetScheduleId = scheduledSlot.id;
+          }
+        } else {
+          // Look across upcoming schedules
+          const upcomingSchedules = await prisma.schedule.findMany({
+            where: {
+              status: "SCHEDULED",
+            },
+            include: { class: true },
+            orderBy: { date: "asc" },
+            take: 20,
+          });
+
+          if (targetDate) {
+            const matchSch = upcomingSchedules.find((s) => {
+              const sDate = s.date.toISOString().slice(0, 10);
+              return sDate.includes(targetDate) || targetDate.includes(sDate);
+            });
+            if (matchSch) targetScheduleId = matchSch.id;
+          }
+
+          if (!targetScheduleId && targetClassIdent) {
+            const matchClassSch = upcomingSchedules.find(
+              (s) => s.class?.name.includes(targetClassIdent) || s.class?.code.includes(targetClassIdent)
+            );
+            if (matchClassSch) targetScheduleId = matchClassSch.id;
+          }
+
+          if (!targetScheduleId && upcomingSchedules.length > 0) {
+            targetScheduleId = upcomingSchedules[0].id;
+          }
+        }
+      }
+
+      if (!missedScheduleId || !targetScheduleId) {
+        throw new Error(
+          "Không thể xác định buổi học nghỉ hoặc buổi học bù. Vui lòng cung cấp thêm thông tin lớp học hoặc ngày học bù."
+        );
+      }
+
+      // 4. Ensure attendance status is eligible (ABSENT / EXCUSED)
       const attendance = await prisma.attendance.findUnique({
         where: { scheduleId_studentId: { scheduleId: missedScheduleId, studentId: student.id } },
       });
 
-      if (!attendance || (attendance.status !== "ABSENT" && attendance.status !== "EXCUSED")) {
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify({
-                error: "Học viên không vắng mặt buổi này (hoặc chưa được ghi nhận vắng), không thể đăng ký học bù.",
-                code: "INVALID_ATTENDANCE_STATUS",
-              }),
+      if (!attendance) {
+        const missedSchedule = await prisma.schedule.findUnique({
+          where: { id: missedScheduleId },
+          select: { id: true, classId: true },
+        });
+        const classId = missedSchedule?.classId || student.classes[0]?.id || "";
+        if (classId) {
+          // Create attendance record as EXCUSED
+          await prisma.attendance.create({
+            data: {
+              scheduleId: missedScheduleId,
+              studentId: student.id,
+              classId,
+              status: "EXCUSED",
+              note: notes || "Xin nghỉ phép và đăng ký học bù qua AI Agent",
             },
-          ],
-          isError: true,
-        };
+          });
+        }
+      } else if (attendance.status !== "ABSENT" && attendance.status !== "EXCUSED") {
+        // Update to EXCUSED so that the student is valid for makeup
+        await prisma.attendance.update({
+          where: { id: attendance.id },
+          data: {
+            status: "EXCUSED",
+            note: notes ? `${attendance.note || ""} (Đã xin phép bù: ${notes})` : attendance.note,
+          },
+        });
       }
 
-      // Check for duplicate request
+      // 5. Check for duplicate request
       const existing = await prisma.makeUpRequest.findFirst({
         where: { studentId: student.id, missedScheduleId },
       });
 
       if (existing) {
+        const resObj = {
+          success: true,
+          requestId: existing.id,
+          status: existing.status,
+          message: `Yêu cầu học bù cho học viên ${student.name} đã được tạo trước đó trên hệ thống (Mã: ${existing.id}, Trạng thái: ${existing.status}).`,
+          isDuplicate: true,
+        };
         return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify({
-                error: "Đã có yêu cầu học bù cho buổi nghỉ này.",
-                code: "DUPLICATE_REQUEST",
-                existingRequestId: existing.id,
-              }),
-            },
-          ],
-          isError: true,
+          content: [{ type: "text", text: JSON.stringify(resObj, null, 2) }],
+          data: resObj,
         };
       }
 
+      // 6. Create MakeUpRequest
       const req = await prisma.makeUpRequest.create({
         data: {
           studentId: student.id,
@@ -563,16 +815,28 @@ export async function executeMcpTool(
           action: "CREATE_MAKEUP_REQUEST_MCP",
           entityType: "MakeUpRequest",
           entityId: req.id,
-          details: JSON.stringify(args),
+          details: JSON.stringify({ ...args, resolvedMissedScheduleId: missedScheduleId, resolvedTargetScheduleId: targetScheduleId }),
           source: "MCP_ORCHEXA",
         },
+      });
+
+      // Target schedule details
+      const targetSchedule = await prisma.schedule.findUnique({
+        where: { id: targetScheduleId },
+        include: { class: { include: { facility: true } }, room: true },
       });
 
       const resObj = {
         success: true,
         requestId: req.id,
         status: req.status,
-        message: `Đã tạo yêu cầu học bù thành công cho học viên ${student.name} (${student.code})`,
+        studentName: student.name,
+        studentCode: student.code,
+        targetClass: targetSchedule?.class?.name,
+        targetFacility: targetSchedule?.class?.facility?.name,
+        targetDate: targetSchedule?.date,
+        targetRoom: targetSchedule?.room?.name,
+        message: `Đã tạo yêu cầu học bù thành công cho học viên ${student.name} (${student.code}) vào ${targetSchedule?.class?.name || "lớp học bù mục tiêu"}.`,
       };
 
       return {
