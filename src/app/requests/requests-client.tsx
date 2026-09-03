@@ -43,6 +43,7 @@ import {
   Sparkles,
   MessageSquareQuote,
   Flame,
+  Layers,
 } from "lucide-react";
 import { useFacility } from "@/components/facility-provider";
 import { RefreshButton } from "@/components/refresh-button";
@@ -89,6 +90,9 @@ export function RequestsClient({
 }) {
   const { selectedFacilityId, selectedFacility } = useFacility();
   const [isPending, startTransition] = useTransition();
+
+  // Active view tab
+  const [activeTab, setActiveTab] = useState<"all" | "support" | "makeup">("all");
 
   // Search and status filter states
   const [supportSearch, setSupportSearch] = useState("");
@@ -503,10 +507,60 @@ export function RequestsClient({
         </div>
       </div>
 
+      {/* View Mode Switcher / Tab Bar */}
+      <div className="flex items-center justify-between flex-wrap gap-3 p-1.5 rounded-2xl bg-card border-2 border-border/80 shadow-2xs">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <Button
+            size="sm"
+            variant={activeTab === "all" ? "default" : "ghost"}
+            onClick={() => setActiveTab("all")}
+            className={`h-8 px-3 rounded-xl text-xs font-bold gap-1.5 transition-all ${
+              activeTab === "all" ? "clay-btn-primary shadow-xs" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Layers className="h-3.5 w-3.5" />
+            Tất cả ({filteredSupport.length + filteredMakeup.length})
+          </Button>
+          <Button
+            size="sm"
+            variant={activeTab === "support" ? "default" : "ghost"}
+            onClick={() => setActiveTab("support")}
+            className={`h-8 px-3 rounded-xl text-xs font-bold gap-1.5 transition-all ${
+              activeTab === "support" ? "clay-btn-primary shadow-xs" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <FileText className="h-3.5 w-3.5 text-[#DB2777]" />
+            Yêu cầu chung & Nghỉ phép
+            <Badge variant="pink" className="text-[10px] px-1.5 py-0 h-4 font-mono font-black ml-0.5">
+              {filteredSupport.length}
+            </Badge>
+          </Button>
+          <Button
+            size="sm"
+            variant={activeTab === "makeup" ? "default" : "ghost"}
+            onClick={() => setActiveTab("makeup")}
+            className={`h-8 px-3 rounded-xl text-xs font-bold gap-1.5 transition-all ${
+              activeTab === "makeup" ? "clay-btn-primary shadow-xs" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Calendar className="h-3.5 w-3.5 text-[#D97736]" />
+            Đăng ký ca học bù
+            <Badge variant="orange" className="text-[10px] px-1.5 py-0 h-4 font-mono font-black ml-0.5">
+              {filteredMakeup.length}
+            </Badge>
+          </Button>
+        </div>
+
+        <div className="text-[11px] font-semibold text-muted-foreground px-2 hidden sm:block">
+          {activeTab === "all" ? "Chế độ xem 2 bảng song song" : "Chế độ xem chi tiết toàn màn hình"}
+        </div>
+      </div>
+
       {/* Split Grid for Support vs Makeup */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className={`grid gap-6 ${activeTab === "all" ? "grid-cols-1 xl:grid-cols-2" : "grid-cols-1"}`}>
         {/* ================= CARD 1: GENERAL & LEAVE SUPPORT REQUESTS ================= */}
-        <Card className="clay-card p-0 overflow-hidden flex flex-col border-2">
+        {(activeTab === "all" || activeTab === "support") && (
+          <Card className="clay-card p-0 overflow-hidden flex flex-col border-2">
           <CardHeader className="border-b-2 border-border/70 pb-3 bg-muted/30">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2.5">
@@ -746,8 +800,10 @@ export function RequestsClient({
             </div>
           </CardContent>
         </Card>
+        )}
 
         {/* ================= CARD 2: MAKE-UP REQUESTS ================= */}
+        {(activeTab === "all" || activeTab === "makeup") && (
         <Card className="clay-card p-0 overflow-hidden flex flex-col border-2">
           <CardHeader className="border-b-2 border-border/70 pb-3 bg-muted/30">
             <div className="flex items-center justify-between gap-2">
@@ -805,7 +861,7 @@ export function RequestsClient({
 
           <CardContent className="p-0 flex-1 flex flex-col justify-between">
             <div className="overflow-x-auto">
-              <Table className="min-w-[560px]">
+              <Table className="min-w-[540px]">
                 <TableHeader className="bg-muted/50 border-b-2 border-border/70">
                   <TableRow className="hover:bg-transparent">
                     <TableHead className="font-heading font-extrabold text-xs w-[130px]">Học Viên</TableHead>
@@ -840,10 +896,10 @@ export function RequestsClient({
                         </TableCell>
 
                         {/* Schedule Info */}
-                        <TableCell className="space-y-1.5 py-1.5">
-                          <div className="text-xs text-muted-foreground flex items-center gap-1.5 flex-wrap">
-                            <span className="font-semibold text-[#DC2626] dark:text-[#EF4444]">Buổi vắng:</span>
-                            <span className="font-bold text-foreground bg-muted/60 px-2 py-0.5 rounded-md text-[11px]">
+                        <TableCell className="space-y-1.5 py-2">
+                          <div className="text-xs text-muted-foreground flex items-start gap-1.5 flex-wrap">
+                            <span className="font-semibold text-[#DC2626] dark:text-[#EF4444] shrink-0 mt-0.5">Buổi vắng:</span>
+                            <span className="font-bold text-foreground bg-muted/60 px-2 py-0.5 rounded-md text-[11px] break-words whitespace-normal line-clamp-2 max-w-[280px]">
                               {req.missedSchedule
                                 ? `${req.missedSchedule.class?.name || req.missedSchedule.class?.code || "Lớp học"} (${new Date(
                                     req.missedSchedule.date
@@ -859,9 +915,9 @@ export function RequestsClient({
                             </span>
                           </div>
 
-                          <div className="text-xs text-muted-foreground flex items-center gap-1.5 flex-wrap">
-                            <span className="font-semibold text-primary">Đăng ký bù:</span>
-                            <span className="font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md text-[11px]">
+                          <div className="text-xs text-muted-foreground flex items-start gap-1.5 flex-wrap">
+                            <span className="font-semibold text-primary shrink-0 mt-0.5">Đăng ký bù:</span>
+                            <span className="font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md text-[11px] break-words whitespace-normal line-clamp-2 max-w-[280px]">
                               {req.targetSchedule
                                 ? `${req.targetSchedule.class?.name || req.targetSchedule.class?.code || "Lớp học"} (${new Date(
                                     req.targetSchedule.date
@@ -878,7 +934,7 @@ export function RequestsClient({
                           </div>
 
                           {req.notes && (
-                            <div className="text-[11px] text-muted-foreground italic truncate max-w-sm">
+                            <div className="text-[11px] text-muted-foreground italic truncate max-w-[280px]">
                               Ghi chú: {req.notes}
                             </div>
                           )}
@@ -979,6 +1035,7 @@ export function RequestsClient({
             </div>
           </CardContent>
         </Card>
+        )}
       </div>
 
       {/* ================= MODAL 1: SUPPORT REQUEST DETAIL & PROCESS ================= */}
@@ -1003,24 +1060,24 @@ export function RequestsClient({
           </DialogHeader>
 
           {selectedSupport && (
-            <form onSubmit={handleSaveSupportDetail} className="grid gap-4 py-2">
+            <form onSubmit={handleSaveSupportDetail} className="grid gap-4 py-2 w-full max-w-full min-w-0">
               {/* Student Summary Box */}
-              <div className="p-3 rounded-2xl bg-muted/40 border-2 border-border/70 space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <div className="font-extrabold text-sm text-foreground font-heading">
+              <div className="p-3 rounded-2xl bg-muted/40 border-2 border-border/70 space-y-1.5 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="font-extrabold text-sm text-foreground font-heading truncate">
                     {selectedSupport.student?.name}
                   </div>
-                  <Badge variant="outline" className="text-[11px] font-mono">
+                  <Badge variant="outline" className="text-[11px] font-mono shrink-0">
                     {selectedSupport.student?.code}
                   </Badge>
                 </div>
-                <div className="text-xs text-muted-foreground grid grid-cols-2 gap-2">
+                <div className="text-xs text-muted-foreground grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div>
                     <span className="font-semibold">Cơ sở:</span>{" "}
                     {selectedSupport.student?.facility?.name || "Chưa gán"}
                   </div>
                   {selectedSupport.student?.parent && (
-                    <div>
+                    <div className="truncate">
                       <span className="font-semibold">Phụ huynh:</span>{" "}
                       {selectedSupport.student.parent.name} ({selectedSupport.student.parent.phone})
                     </div>
@@ -1029,31 +1086,31 @@ export function RequestsClient({
               </div>
 
               {/* Request Content Box */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
+              <div className="space-y-1.5 min-w-0">
+                <div className="flex items-center justify-between gap-2">
                   <Label className="text-xs font-bold font-heading text-muted-foreground uppercase tracking-wider">
                     Nội dung yêu cầu
                   </Label>
                   <Badge
                     variant={SUPPORT_TYPE_MAP[selectedSupport.type]?.badgeVariant || "aqua"}
-                    className="text-[10px] px-2 py-0.5"
+                    className="text-[10px] px-2 py-0.5 shrink-0"
                   >
                     {getSupportTypeLabel(selectedSupport.type)}
                   </Badge>
                 </div>
-                <div className="p-3 rounded-xl bg-card border-2 border-border/80 text-xs text-foreground leading-relaxed">
+                <div className="p-3 rounded-xl bg-card border-2 border-border/80 text-xs text-foreground leading-relaxed break-words">
                   {selectedSupport.content}
                 </div>
               </div>
 
               {/* Processing Controls */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="grid gap-1.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-0">
+                <div className="grid gap-1.5 min-w-0">
                   <Label className="text-xs font-bold font-heading">Trạng thái xử lý *</Label>
                   <select
                     name="status"
                     defaultValue={selectedSupport.status}
-                    className="h-10 rounded-xl border-2 text-xs font-bold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
+                    className="h-10 w-full max-w-full truncate min-w-0 rounded-xl border-2 text-xs font-bold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
                   >
                     {SUPPORT_STATUS_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -1063,12 +1120,12 @@ export function RequestsClient({
                   </select>
                 </div>
 
-                <div className="grid gap-1.5">
+                <div className="grid gap-1.5 min-w-0">
                   <Label className="text-xs font-bold font-heading">Mức độ ưu tiên *</Label>
                   <select
                     name="priority"
                     defaultValue={selectedSupport.priority || "NORMAL"}
-                    className="h-10 rounded-xl border-2 text-xs font-bold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
+                    className="h-10 w-full max-w-full truncate min-w-0 rounded-xl border-2 text-xs font-bold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
                   >
                     {PRIORITY_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -1080,12 +1137,12 @@ export function RequestsClient({
               </div>
 
               {/* Assignee Selection */}
-              <div className="grid gap-1.5">
+              <div className="grid gap-1.5 min-w-0">
                 <Label className="text-xs font-bold font-heading">Nhân sự phụ trách / CS</Label>
                 <select
                   name="assigneeId"
                   defaultValue={selectedSupport.assigneeId || ""}
-                  className="h-10 rounded-xl border-2 text-xs font-semibold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
+                  className="h-10 w-full max-w-full truncate min-w-0 rounded-xl border-2 text-xs font-semibold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
                 >
                   <option value="">-- Chưa chỉ định nhân viên --</option>
                   {users.map((u) => (
@@ -1097,13 +1154,13 @@ export function RequestsClient({
               </div>
 
               {/* Internal Notes */}
-              <div className="grid gap-1.5">
+              <div className="grid gap-1.5 min-w-0">
                 <Label className="text-xs font-bold font-heading">Ghi chú xử lý / Phản hồi nội bộ</Label>
                 <Textarea
                   name="notes"
                   defaultValue={selectedSupport.notes || ""}
                   placeholder="Ghi lại tiến trình xử lý, phương án đã trao đổi với phụ huynh..."
-                  className="min-h-[80px] text-xs font-medium rounded-xl border-2"
+                  className="w-full max-w-full min-w-0 min-h-[80px] text-xs font-medium rounded-xl border-2"
                 />
               </div>
 
@@ -1150,13 +1207,13 @@ export function RequestsClient({
             </div>
           </DialogHeader>
 
-          <form onSubmit={handleCreateSupport} className="grid gap-4 py-2">
-            <div className="grid gap-1.5">
+          <form onSubmit={handleCreateSupport} className="grid gap-4 py-2 w-full max-w-full min-w-0">
+            <div className="grid gap-1.5 min-w-0">
               <Label className="text-xs font-bold font-heading">Học viên *</Label>
               <select
                 name="studentId"
                 required
-                className="h-10 rounded-xl border-2 text-xs font-semibold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
+                className="h-10 w-full max-w-full truncate min-w-0 rounded-xl border-2 text-xs font-semibold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
               >
                 <option value="">-- Chọn học viên --</option>
                 {availableStudents.map((s) => (
@@ -1167,14 +1224,14 @@ export function RequestsClient({
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="grid gap-1.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-0">
+              <div className="grid gap-1.5 min-w-0">
                 <Label className="text-xs font-bold font-heading">Loại yêu cầu *</Label>
                 <select
                   name="type"
                   defaultValue="LEAVE"
                   required
-                  className="h-10 rounded-xl border-2 text-xs font-bold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
+                  className="h-10 w-full max-w-full truncate min-w-0 rounded-xl border-2 text-xs font-bold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
                 >
                   {SUPPORT_TYPE_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -1184,13 +1241,13 @@ export function RequestsClient({
                 </select>
               </div>
 
-              <div className="grid gap-1.5">
+              <div className="grid gap-1.5 min-w-0">
                 <Label className="text-xs font-bold font-heading">Độ ưu tiên *</Label>
                 <select
                   name="priority"
                   defaultValue="NORMAL"
                   required
-                  className="h-10 rounded-xl border-2 text-xs font-bold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
+                  className="h-10 w-full max-w-full truncate min-w-0 rounded-xl border-2 text-xs font-bold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
                 >
                   {PRIORITY_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -1201,11 +1258,11 @@ export function RequestsClient({
               </div>
             </div>
 
-            <div className="grid gap-1.5">
+            <div className="grid gap-1.5 min-w-0">
               <Label className="text-xs font-bold font-heading">Người tiếp nhận / Phụ trách</Label>
               <select
                 name="assigneeId"
-                className="h-10 rounded-xl border-2 text-xs font-semibold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
+                className="h-10 w-full max-w-full truncate min-w-0 rounded-xl border-2 text-xs font-semibold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
               >
                 <option value="">-- Tự động phân công / Tiếp nhận sau --</option>
                 {users.map((u) => (
@@ -1216,22 +1273,22 @@ export function RequestsClient({
               </select>
             </div>
 
-            <div className="grid gap-1.5">
+            <div className="grid gap-1.5 min-w-0">
               <Label className="text-xs font-bold font-heading">Nội dung yêu cầu *</Label>
               <Textarea
                 name="content"
                 required
                 placeholder="Ví dụ: Xin nghỉ buổi học thứ 4 ngày 15/10 do bị sốt xuất huyết..."
-                className="min-h-[80px] text-xs font-medium rounded-xl border-2"
+                className="w-full max-w-full min-w-0 min-h-[80px] text-xs font-medium rounded-xl border-2"
               />
             </div>
 
-            <div className="grid gap-1.5">
+            <div className="grid gap-1.5 min-w-0">
               <Label className="text-xs font-bold font-heading">Ghi chú nội bộ</Label>
               <Input
                 name="notes"
                 placeholder="Ghi chú thêm từ nhân viên tư vấn..."
-                className="h-10 text-xs font-medium rounded-xl border-2"
+                className="h-10 w-full max-w-full min-w-0 text-xs font-medium rounded-xl border-2"
               />
             </div>
 
@@ -1280,26 +1337,26 @@ export function RequestsClient({
           </DialogHeader>
 
           {selectedMakeup && (
-            <form onSubmit={handleSaveMakeupDetail} className="grid gap-4 py-2">
+            <form onSubmit={handleSaveMakeupDetail} className="grid gap-4 py-2 w-full max-w-full min-w-0">
               {/* Student Summary Box */}
-              <div className="p-3 rounded-2xl bg-muted/40 border-2 border-border/70 space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <div className="font-extrabold text-sm text-foreground font-heading">
+              <div className="p-3 rounded-2xl bg-muted/40 border-2 border-border/70 space-y-1.5 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="font-extrabold text-sm text-foreground font-heading truncate">
                     {selectedMakeup.student?.name}
                   </div>
-                  <Badge variant="outline" className="text-[11px] font-mono">
+                  <Badge variant="outline" className="text-[11px] font-mono shrink-0">
                     {selectedMakeup.student?.code}
                   </Badge>
                 </div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-xs text-muted-foreground truncate">
                   <span className="font-semibold">Cơ sở:</span>{" "}
                   {selectedMakeup.student?.facility?.name || "Chưa gán"}
                 </div>
               </div>
 
               {/* Missed vs Target Schedule info */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 rounded-xl bg-rose-50/50 dark:bg-rose-950/20 border-2 border-rose-200 dark:border-rose-900/50 space-y-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-0">
+                <div className="p-3 rounded-xl bg-rose-50/50 dark:bg-rose-950/20 border-2 border-rose-200 dark:border-rose-900/50 space-y-1 min-w-0 break-words">
                   <div className="text-[11px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
                     Buổi học vắng
                   </div>
@@ -1318,7 +1375,7 @@ export function RequestsClient({
                   </div>
                 </div>
 
-                <div className="p-3 rounded-xl bg-amber-50/50 dark:bg-amber-950/20 border-2 border-amber-200 dark:border-amber-900/50 space-y-1">
+                <div className="p-3 rounded-xl bg-amber-50/50 dark:bg-amber-950/20 border-2 border-amber-200 dark:border-amber-900/50 space-y-1 min-w-0 break-words">
                   <div className="text-[11px] font-bold text-[#D97736] uppercase tracking-wider">
                     Ca bù dự kiến
                   </div>
@@ -1339,12 +1396,12 @@ export function RequestsClient({
               </div>
 
               {/* Change target schedule dropdown */}
-              <div className="grid gap-1.5">
+              <div className="grid gap-1.5 min-w-0">
                 <Label className="text-xs font-bold font-heading">Đổi ca học bù sang lịch khác</Label>
                 <select
                   name="targetScheduleId"
                   defaultValue={selectedMakeup.targetScheduleId}
-                  className="h-10 rounded-xl border-2 text-xs font-semibold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
+                  className="h-10 w-full max-w-full truncate min-w-0 rounded-xl border-2 text-xs font-semibold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
                 >
                   <option value={selectedMakeup.targetScheduleId}>
                     Giữ nguyên: {selectedMakeup.targetSchedule?.class?.name} (
@@ -1371,12 +1428,12 @@ export function RequestsClient({
               </div>
 
               {/* Status Select */}
-              <div className="grid gap-1.5">
+              <div className="grid gap-1.5 min-w-0">
                 <Label className="text-xs font-bold font-heading">Trạng thái phê duyệt *</Label>
                 <select
                   name="status"
                   defaultValue={selectedMakeup.status}
-                  className="h-10 rounded-xl border-2 text-xs font-bold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
+                  className="h-10 w-full max-w-full truncate min-w-0 rounded-xl border-2 text-xs font-bold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
                 >
                   {REQUEST_STATUS_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -1387,13 +1444,13 @@ export function RequestsClient({
               </div>
 
               {/* Notes */}
-              <div className="grid gap-1.5">
+              <div className="grid gap-1.5 min-w-0">
                 <Label className="text-xs font-bold font-heading">Ghi chú ca bù</Label>
                 <Textarea
                   name="notes"
                   defaultValue={selectedMakeup.notes || ""}
                   placeholder="Lý do bù hoặc thông tin ghi chú cho giáo viên..."
-                  className="min-h-[70px] text-xs font-medium rounded-xl border-2"
+                  className="w-full max-w-full min-w-0 min-h-[70px] text-xs font-medium rounded-xl border-2"
                 />
               </div>
 
@@ -1440,16 +1497,16 @@ export function RequestsClient({
             </div>
           </DialogHeader>
 
-          <form onSubmit={handleCreateMakeup} className="grid gap-4 py-2">
+          <form onSubmit={handleCreateMakeup} className="grid gap-4 py-2 w-full max-w-full min-w-0">
             {/* Student selection */}
-            <div className="grid gap-1.5">
+            <div className="grid gap-1.5 min-w-0">
               <Label className="text-xs font-bold font-heading">Học viên cần học bù *</Label>
               <select
                 name="studentId"
                 value={newMakeupStudentId}
                 onChange={(e) => setNewMakeupStudentId(e.target.value)}
                 required
-                className="h-10 rounded-xl border-2 text-xs font-semibold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
+                className="h-10 w-full max-w-full truncate min-w-0 rounded-xl border-2 text-xs font-semibold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
               >
                 <option value="">-- Chọn học viên --</option>
                 {availableStudents.map((s) => (
@@ -1461,12 +1518,12 @@ export function RequestsClient({
             </div>
 
             {/* Missed schedule selection */}
-            <div className="grid gap-1.5">
+            <div className="grid gap-1.5 min-w-0">
               <Label className="text-xs font-bold font-heading">Ca học đã vắng *</Label>
               <select
                 name="missedScheduleId"
                 required
-                className="h-10 rounded-xl border-2 text-xs font-semibold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
+                className="h-10 w-full max-w-full truncate min-w-0 rounded-xl border-2 text-xs font-semibold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
               >
                 <option value="">-- Chọn ca học đã nghỉ --</option>
                 {studentPastSchedules.length > 0 ? (
@@ -1500,12 +1557,12 @@ export function RequestsClient({
             </div>
 
             {/* Target schedule selection */}
-            <div className="grid gap-1.5">
+            <div className="grid gap-1.5 min-w-0">
               <Label className="text-xs font-bold font-heading">Ca học bù mong muốn *</Label>
               <select
                 name="targetScheduleId"
                 required
-                className="h-10 rounded-xl border-2 text-xs font-semibold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
+                className="h-10 w-full max-w-full truncate min-w-0 rounded-xl border-2 text-xs font-semibold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
               >
                 <option value="">-- Chọn ca bù sắp tới --</option>
                 {upcomingSchedules.map((sch) => (
@@ -1524,25 +1581,25 @@ export function RequestsClient({
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="grid gap-1.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-0">
+              <div className="grid gap-1.5 min-w-0">
                 <Label className="text-xs font-bold font-heading">Trạng thái phê duyệt</Label>
                 <select
                   name="status"
                   defaultValue="APPROVED"
-                  className="h-10 rounded-xl border-2 text-xs font-bold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
+                  className="h-10 w-full max-w-full truncate min-w-0 rounded-xl border-2 text-xs font-bold px-3 py-1 bg-card text-foreground cursor-pointer focus:outline-hidden"
                 >
                   <option value="APPROVED">Duyệt ngay (Xếp vào lớp)</option>
                   <option value="PENDING">Chờ duyệt</option>
                 </select>
               </div>
 
-              <div className="grid gap-1.5">
+              <div className="grid gap-1.5 min-w-0">
                 <Label className="text-xs font-bold font-heading">Lý do / Ghi chú</Label>
                 <Input
                   name="notes"
                   placeholder="Lý do học bù..."
-                  className="h-10 text-xs font-medium rounded-xl border-2"
+                  className="h-10 w-full max-w-full min-w-0 text-xs font-medium rounded-xl border-2"
                 />
               </div>
             </div>
