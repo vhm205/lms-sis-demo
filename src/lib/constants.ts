@@ -162,6 +162,23 @@ export function getSupportStatusLabel(status?: string): string {
   return SUPPORT_STATUS_MAP[status]?.label || status;
 }
 
+export const PRIORITY_MAP: Record<string, { label: string; badgeVariant: "default" | "secondary" | "outline" | "green" | "aqua" | "pink" | "amber" | "orange" }> = {
+  LOW: { label: "Thấp", badgeVariant: "outline" },
+  NORMAL: { label: "Bình thường", badgeVariant: "aqua" },
+  HIGH: { label: "Khẩn cấp", badgeVariant: "pink" },
+};
+
+export const PRIORITY_OPTIONS = [
+  { value: "LOW", label: "Thấp" },
+  { value: "NORMAL", label: "Bình thường" },
+  { value: "HIGH", label: "Khẩn cấp" },
+];
+
+export function getPriorityLabel(priority?: string): string {
+  if (!priority) return "Bình thường";
+  return PRIORITY_MAP[priority]?.label || priority;
+}
+
 export const REQUEST_STATUS_MAP: Record<string, { label: string; badgeVariant: "default" | "secondary" | "outline" | "green" | "aqua" | "pink" | "amber" | "orange" }> = {
   PENDING: { label: "Chờ duyệt", badgeVariant: "amber" },
   APPROVED: { label: "Đã duyệt", badgeVariant: "green" },

@@ -258,26 +258,28 @@ const APIS: ApiDefinition[] = [
     method: "POST",
     path: "/api/requests/makeup",
     title: "Đăng ký xếp lịch học bù",
-    desc: "Tạo yêu cầu học bù có tự động kiểm tra buổi học nghỉ trước đó (trạng thái ABSENT hoặc EXCUSED). Hỗ trợ studentCode (HV0001) hoặc studentId.",
+    desc: "Tạo yêu cầu xếp lịch học bù cho học viên (hệ thống tự động tra cứu buổi nghỉ và buổi học bù mục tiêu theo ngày/lớp nếu không có sẵn CUID). Hỗ trợ truyền studentCode, missedDate, targetDate, targetClassCode, targetScheduleId, missedScheduleId.",
     headers: [
       { name: "Content-Type", value: "application/json", required: true, desc: "Định dạng payload JSON" },
       { name: "Authorization", value: "Bearer 0901234567", required: false, desc: "Xác thực phụ huynh để chống gửi yêu cầu trái phép" }
     ],
     bodyTemplate: {
-      studentCode: "HV0001",
-      missedScheduleId: "cmtgpg6vr0012p6z8r16vxfuu",
-      targetScheduleId: "cmtgpg6vr0014p6z8ig04sa86",
-      notes: "Xin học bù buổi ngày 03/10 do bận thi ở trường"
+      studentCode: "HV0006",
+      targetDate: "2026-09-08",
+      targetClassCode: "HCM-MOV-BT01",
+      notes: "Xin học bù buổi ngày 03/09"
     },
     sampleResponse: {
-      data: {
-        id: "cmtgpg6vx001ep6z8req01",
-        studentId: "cmtgpg6vo000up6z8a3fnbb5n",
-        missedScheduleId: "cmtgpg6vr0012p6z8r16vxfuu",
-        targetScheduleId: "cmtgpg6vr0014p6z8ig04sa86",
-        status: "PENDING",
-        notes: "Xin học bù buổi ngày 03/10 do bận thi ở trường"
-      }
+      success: true,
+      requestId: "cmtgpg6vx001ep6z8req01",
+      status: "PENDING",
+      studentName: "Đặng Gia Huy",
+      studentCode: "HV0006",
+      targetClass: "Lớp Tiếng Anh Cambridge Movers 01 (HCM-MOV-BT01)",
+      targetFacility: "Cơ sở Bình Thạnh",
+      targetDate: "2026-09-08T18:00:00.000Z",
+      targetRoom: "Phòng BT-101 (Movers Class)",
+      message: "Đã tạo yêu cầu học bù thành công cho học viên Đặng Gia Huy (HV0006) vào Lớp Tiếng Anh Cambridge Movers 01 (HCM-MOV-BT01)."
     }
   },
   {
@@ -616,7 +618,12 @@ export function DeveloperClient() {
   const [isBootstrapping, setIsBootstrapping] = useState<boolean>(false);
   const [testLatency, setTestLatency] = useState<number | null>(null);
 
-  // Webhook Tab Dedicated State
+  // Webhook Tab Dedicated State & Collapse Controls
+  const [openWebhookGuide, setOpenWebhookGuide] = useState<boolean>(true);
+  const [openWebhooks, setOpenWebhooks] = useState<Record<string, boolean>>({
+    "lead-created": true,
+    "order-created": true,
+  });
   const [leadWebhookPayload, setLeadWebhookPayload] = useState<string>(JSON.stringify({
     customer_name: "Nguyễn Văn A",
     phone: "0901234567",
@@ -830,10 +837,14 @@ export function DeveloperClient() {
       "Content-Type": "application/json"
     };
 
-    if (state.authMode === "bearer_parent_a") {
+    if (state.authMode === "bearer_system") {
+      headers["Authorization"] = "Bearer ocx_sys_educenter_9f3b8a1c7e6d4205bb9910f8";
+    } else if (state.authMode === "bearer_parent_a") {
       headers["Authorization"] = "Bearer 0901234567";
     } else if (state.authMode === "bearer_parent_b") {
       headers["Authorization"] = "Bearer 0912345678";
+    } else if (state.authMode === "bearer_parent_nga") {
+      headers["Authorization"] = "Bearer 0945678901";
     } else if (state.authMode === "header_parent_phone") {
       headers["x-parent-phone"] = "0901234567";
     } else if (state.authMode === "custom" && state.customAuth) {
@@ -1237,73 +1248,133 @@ export function DeveloperClient() {
          ========================================================= */}
       {activeTab === "webhooks" && (
         <div className="flex flex-col gap-6">
+          {/* Webhook Collapse Toolbar */}
+          <div className="flex items-center justify-between flex-wrap gap-3 p-3.5 rounded-2xl bg-card border-2 border-border/80 shadow-2xs">
+            <div className="flex items-center gap-2">
+              <Webhook className="h-4 w-4 text-[#DB2777]" />
+              <span className="text-xs font-black font-heading text-foreground">
+                Danh sách Event Trigger Webhooks (2)
+              </span>
+              <Badge variant="aqua" className="text-[10px] font-mono font-bold">
+                {Object.values(openWebhooks).filter(Boolean).length}/2 đang mở
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setOpenWebhooks({ "lead-created": false, "order-created": false });
+                  setOpenWebhookGuide(false);
+                }}
+                className="h-7 text-[11px] font-bold px-2.5 rounded-xl text-muted-foreground hover:text-foreground"
+              >
+                <ChevronUp className="h-3.5 w-3.5 mr-1" />
+                Thu gọn tất cả
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setOpenWebhooks({ "lead-created": true, "order-created": true });
+                  setOpenWebhookGuide(true);
+                }}
+                className="h-7 text-[11px] font-bold px-2.5 rounded-xl text-primary hover:text-primary"
+              >
+                <ChevronDown className="h-3.5 w-3.5 mr-1" />
+                Mở rộng tất cả
+              </Button>
+            </div>
+          </div>
+
           {/* Webhook Configuration Guide Banner */}
           <Card className="clay-card border-2 border-[#FBCFE8] dark:border-[#5C1D3E] bg-gradient-to-br from-[#FFF5F8] via-[#FAF6F0] to-[#E6F8FB] dark:from-[#2B101E] dark:via-[#211D1A] dark:to-[#0D242C] overflow-hidden">
-            <CardHeader className="pb-3 border-b border-border/60">
-              <div className="flex items-center gap-3">
-                <div className="clay-icon-tile h-10 w-10 bg-[#FDF2F8] text-[#DB2777]">
-                  <Webhook className="h-5 w-5" />
+            <CardHeader
+              onClick={() => setOpenWebhookGuide(prev => !prev)}
+              className={`pb-3 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors select-none ${openWebhookGuide ? "border-b border-border/60" : ""}`}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="clay-icon-tile h-10 w-10 bg-[#FDF2F8] text-[#DB2777]">
+                    <Webhook className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base sm:text-lg font-black font-heading">
+                      Cấu hình Event Trigger Webhooks trên Orchexa
+                    </CardTitle>
+                    <CardDescription className="text-xs font-semibold text-muted-foreground">
+                      Orchexa tự động phát sự kiện (Auto-fire) đến các endpoint dưới đây khi AI Agent hoàn tất thu thập khách hàng hoặc tạo đơn hàng.
+                    </CardDescription>
+                  </div>
                 </div>
-                <div>
-                  <CardTitle className="text-base sm:text-lg font-black font-heading">
-                    Cấu hình Event Trigger Webhooks trên Orchexa
-                  </CardTitle>
-                  <CardDescription className="text-xs font-semibold text-muted-foreground">
-                    Orchexa tự động phát sự kiện (Auto-fire) đến các endpoint dưới đây khi AI Agent hoàn tất thu thập khách hàng hoặc tạo đơn hàng.
-                  </CardDescription>
-                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenWebhookGuide(prev => !prev);
+                  }}
+                  className="h-7 px-2 text-xs text-muted-foreground rounded-lg"
+                >
+                  {openWebhookGuide ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </Button>
               </div>
             </CardHeader>
-            <CardContent className="p-4 sm:p-6 space-y-4">
-              <div className="grid gap-3.5 sm:grid-cols-2">
-                <div className="p-3.5 rounded-2xl bg-card border-2 border-border/80 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold font-heading text-foreground flex items-center gap-1.5">
-                      <UserPlus className="h-4 w-4 text-[#D97736]" /> Event Trigger: Lead Created
-                    </span>
-                    <Badge variant="orange" className="text-[10px]">POST</Badge>
+            {openWebhookGuide && (
+              <CardContent className="p-4 sm:p-6 space-y-4">
+                <div className="grid gap-3.5 sm:grid-cols-2">
+                  <div className="p-3.5 rounded-2xl bg-card border-2 border-border/80 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold font-heading text-foreground flex items-center gap-1.5">
+                        <UserPlus className="h-4 w-4 text-[#D97736]" /> Event Trigger: Lead Created
+                      </span>
+                      <Badge variant="orange" className="text-[10px]">POST</Badge>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <code className="px-2.5 py-1.5 rounded-xl bg-slate-950 text-slate-100 font-mono text-xs flex-1 truncate">
+                        {`${baseUrl}/api/webhooks/orchexa/lead-created`}
+                      </code>
+                      <button
+                        onClick={() => copyToClipboard(`${baseUrl}/api/webhooks/orchexa/lead-created`, "wh-lead-url")}
+                        className="p-1.5 rounded-xl bg-muted hover:bg-muted/80 text-foreground"
+                        title="Sao chép URL"
+                      >
+                        {copiedKey === "wh-lead-url" ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <code className="px-2.5 py-1.5 rounded-xl bg-slate-950 text-slate-100 font-mono text-xs flex-1 truncate">
-                      {`${baseUrl}/api/webhooks/orchexa/lead-created`}
-                    </code>
-                    <button
-                      onClick={() => copyToClipboard(`${baseUrl}/api/webhooks/orchexa/lead-created`, "wh-lead-url")}
-                      className="p-1.5 rounded-xl bg-muted hover:bg-muted/80 text-foreground"
-                      title="Sao chép URL"
-                    >
-                      {copiedKey === "wh-lead-url" ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
-                    </button>
-                  </div>
-                </div>
 
-                <div className="p-3.5 rounded-2xl bg-card border-2 border-border/80 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold font-heading text-foreground flex items-center gap-1.5">
-                      <ShoppingCart className="h-4 w-4 text-[#16A34A]" /> Event Trigger: Order Created
-                    </span>
-                    <Badge variant="green" className="text-[10px]">POST</Badge>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <code className="px-2.5 py-1.5 rounded-xl bg-slate-950 text-slate-100 font-mono text-xs flex-1 truncate">
-                      {`${baseUrl}/api/webhooks/orchexa/order-created`}
-                    </code>
-                    <button
-                      onClick={() => copyToClipboard(`${baseUrl}/api/webhooks/orchexa/order-created`, "wh-order-url")}
-                      className="p-1.5 rounded-xl bg-muted hover:bg-muted/80 text-foreground"
-                      title="Sao chép URL"
-                    >
-                      {copiedKey === "wh-order-url" ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
-                    </button>
+                  <div className="p-3.5 rounded-2xl bg-card border-2 border-border/80 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold font-heading text-foreground flex items-center gap-1.5">
+                        <ShoppingCart className="h-4 w-4 text-[#16A34A]" /> Event Trigger: Order Created
+                      </span>
+                      <Badge variant="green" className="text-[10px]">POST</Badge>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <code className="px-2.5 py-1.5 rounded-xl bg-slate-950 text-slate-100 font-mono text-xs flex-1 truncate">
+                        {`${baseUrl}/api/webhooks/orchexa/order-created`}
+                      </code>
+                      <button
+                        onClick={() => copyToClipboard(`${baseUrl}/api/webhooks/orchexa/order-created`, "wh-order-url")}
+                        className="p-1.5 rounded-xl bg-muted hover:bg-muted/80 text-foreground"
+                        title="Sao chép URL"
+                      >
+                        {copiedKey === "wh-order-url" ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
+              </CardContent>
+            )}
           </Card>
 
           {/* Webhook 1: Lead Created */}
           <Card className="clay-card overflow-hidden border-2 border-border/80">
-            <CardHeader className="pb-3 border-b-2 border-border/70 bg-muted/20">
+            <CardHeader
+              onClick={() => setOpenWebhooks(prev => ({ ...prev, "lead-created": !prev["lead-created"] }))}
+              className={`pb-3 bg-muted/20 cursor-pointer hover:bg-muted/30 transition-colors select-none ${openWebhooks["lead-created"] ? "border-b-2 border-border/70" : ""}`}
+            >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <Badge variant="orange" className="text-xs font-mono font-black px-3 py-1">
@@ -1313,14 +1384,28 @@ export function DeveloperClient() {
                     /api/webhooks/orchexa/lead-created
                   </code>
                 </div>
-                <Badge variant="aqua" className="text-xs font-bold">Event: lead_created</Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="aqua" className="text-xs font-bold">Event: lead_created</Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenWebhooks(prev => ({ ...prev, "lead-created": !prev["lead-created"] }));
+                    }}
+                    className="h-7 px-2 text-xs text-muted-foreground rounded-lg"
+                  >
+                    {openWebhooks["lead-created"] ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  </Button>
+                </div>
               </div>
               <CardDescription className="text-xs text-muted-foreground pt-1 font-medium">
                 Tự động tiếp nhận và ghi nhận khách hàng tiềm năng vào cơ sở dữ liệu CRM EduCenter kèm lịch sử đàm thoại.
               </CardDescription>
             </CardHeader>
 
-            <CardContent className="p-4 sm:p-6 space-y-4">
+            {openWebhooks["lead-created"] && (
+              <CardContent className="p-4 sm:p-6 space-y-4">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold text-foreground font-heading flex items-center gap-1.5">
@@ -1414,11 +1499,15 @@ export function DeveloperClient() {
                 </div>
               )}
             </CardContent>
+            )}
           </Card>
 
           {/* Webhook 2: Order Created */}
           <Card className="clay-card overflow-hidden border-2 border-border/80">
-            <CardHeader className="pb-3 border-b-2 border-border/70 bg-muted/20">
+            <CardHeader
+              onClick={() => setOpenWebhooks(prev => ({ ...prev, "order-created": !prev["order-created"] }))}
+              className={`pb-3 bg-muted/20 cursor-pointer hover:bg-muted/30 transition-colors select-none ${openWebhooks["order-created"] ? "border-b-2 border-border/70" : ""}`}
+            >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <Badge variant="green" className="text-xs font-mono font-black px-3 py-1">
@@ -1428,118 +1517,133 @@ export function DeveloperClient() {
                     /api/webhooks/orchexa/order-created
                   </code>
                 </div>
-                <Badge variant="aqua" className="text-xs font-bold">Event: order_created</Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="aqua" className="text-xs font-bold">Event: order_created</Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenWebhooks(prev => ({ ...prev, "order-created": !prev["order-created"] }));
+                    }}
+                    className="h-7 px-2 text-xs text-muted-foreground rounded-lg"
+                  >
+                    {openWebhooks["order-created"] ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  </Button>
+                </div>
               </div>
               <CardDescription className="text-xs text-muted-foreground pt-1 font-medium">
                 Tự động tạo đơn hàng, đăng ký khóa học, tính toán tổng tiền từ danh sách items và lưu Activity Log.
               </CardDescription>
             </CardHeader>
 
-            <CardContent className="p-4 sm:p-6 space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-foreground font-heading flex items-center gap-1.5">
-                    <FileCode2 className="h-4 w-4 text-primary" /> Request Body (JSON Template):
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setOrderWebhookPayload(JSON.stringify({
-                        order_id: "ORD-" + Date.now().toString().slice(-6),
-                        customer_name: "Nguyễn Văn A",
-                        phone: "0901234567",
-                        items: [
-                          {
-                            name: "Khóa học IELTS Intermediate",
-                            quantity: 1,
-                            price: 8000000
-                          },
-                          {
-                            name: "Giáo trình trọn bộ",
-                            quantity: 1,
-                            price: 500000
-                          }
-                        ],
-                        total: 8500000,
-                        notes: "Khách cần báo giá gấp & xếp lớp tối 2-4-6",
-                        conversation_id: "a1b2c3d4-0000",
-                        agent_id: "a1b2c3d4-0000",
-                        agent_name: "Nguyễn Văn A",
-                        channel: "Ví dụ channel",
-                        timestamp: "2026-08-29T10:30:00+07:00",
-                        dedup_key: "order_dedup_" + Date.now()
-                      }, null, 2));
-                    }}
-                    className="text-[11px] font-bold text-primary hover:underline"
+            {openWebhooks["order-created"] && (
+              <CardContent className="p-4 sm:p-6 space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-foreground font-heading flex items-center gap-1.5">
+                      <FileCode2 className="h-4 w-4 text-primary" /> Request Body (JSON Template):
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOrderWebhookPayload(JSON.stringify({
+                          order_id: "ORD-" + Date.now().toString().slice(-6),
+                          customer_name: "Nguyễn Văn A",
+                          phone: "0901234567",
+                          items: [
+                            {
+                              name: "Khóa học IELTS Intermediate",
+                              quantity: 1,
+                              price: 8000000
+                            },
+                            {
+                              name: "Giáo trình trọn bộ",
+                              quantity: 1,
+                              price: 500000
+                            }
+                          ],
+                          total: 8500000,
+                          notes: "Khách cần báo giá gấp & xếp lớp tối 2-4-6",
+                          conversation_id: "a1b2c3d4-0000",
+                          agent_id: "a1b2c3d4-0000",
+                          agent_name: "Nguyễn Văn A",
+                          channel: "Ví dụ channel",
+                          timestamp: "2026-08-29T10:30:00+07:00",
+                          dedup_key: "order_dedup_" + Date.now()
+                        }, null, 2));
+                      }}
+                      className="text-[11px] font-bold text-primary hover:underline"
+                    >
+                      Tạo payload mới (New Dedup Key)
+                    </button>
+                  </div>
+                  <Textarea
+                    rows={11}
+                    value={orderWebhookPayload}
+                    onChange={(e) => setOrderWebhookPayload(e.target.value)}
+                    className="font-mono text-xs p-3.5 rounded-2xl bg-card border-border/80"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between pt-2">
+                  <div className="text-xs text-muted-foreground">
+                    Headers gửi kèm: <code>Content-Type: application/json</code>
+                  </div>
+                  <Button
+                    size="default"
+                    disabled={orderWebhookLoading}
+                    onClick={handleTestOrderWebhook}
+                    className="clay-btn-primary gap-2 h-9 px-5 rounded-2xl text-xs font-extrabold"
                   >
-                    Tạo payload mới (New Dedup Key)
-                  </button>
+                    {orderWebhookLoading ? (
+                      <>
+                        <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Đang gửi...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="h-3.5 w-3.5" /> Gửi Webhook Order
+                      </>
+                    )}
+                  </Button>
                 </div>
-                <Textarea
-                  rows={11}
-                  value={orderWebhookPayload}
-                  onChange={(e) => setOrderWebhookPayload(e.target.value)}
-                  className="font-mono text-xs p-3.5 rounded-2xl bg-card border-border/80"
-                />
-              </div>
 
-              <div className="flex items-center justify-between pt-2">
-                <div className="text-xs text-muted-foreground">
-                  Headers gửi kèm: <code>Content-Type: application/json</code>
-                </div>
-                <Button
-                  size="default"
-                  disabled={orderWebhookLoading}
-                  onClick={handleTestOrderWebhook}
-                  className="clay-btn-primary gap-2 h-9 px-5 rounded-2xl text-xs font-extrabold"
-                >
-                  {orderWebhookLoading ? (
-                    <>
-                      <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Đang gửi...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="h-3.5 w-3.5" /> Gửi Webhook Order
-                    </>
-                  )}
-                </Button>
-              </div>
+                {orderWebhookResult !== null && (
+                  <div className="space-y-2 pt-3 border-t border-border/70">
+                    <div className="flex items-center justify-between gap-2 text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-foreground font-heading">Kết quả phản hồi (Response):</span>
+                        <Badge 
+                          variant={orderWebhookStatus === 200 ? "green" : "destructive"}
+                          className="font-mono text-xs"
+                        >
+                          HTTP {orderWebhookStatus} {orderWebhookStatus === 200 ? "OK" : "Error"}
+                        </Badge>
+                        {orderWebhookLatency !== null && (
+                          <span className="text-muted-foreground font-mono text-[11px] font-bold">
+                            Độ trễ: <strong className="text-[#D97736] font-mono">{orderWebhookLatency}ms</strong>
+                          </span>
+                        )}
+                      </div>
 
-              {orderWebhookResult !== null && (
-                <div className="space-y-2 pt-3 border-t border-border/70">
-                  <div className="flex items-center justify-between gap-2 text-xs">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-foreground font-heading">Kết quả phản hồi (Response):</span>
-                      <Badge 
-                        variant={orderWebhookStatus === 200 ? "green" : "destructive"}
-                        className="font-mono text-xs"
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground font-bold hover:bg-[#FFF0E6] rounded-xl"
+                        onClick={() => copyToClipboard(JSON.stringify(orderWebhookResult, null, 2), "wh-order-res")}
                       >
-                        HTTP {orderWebhookStatus} {orderWebhookStatus === 200 ? "OK" : "Error"}
-                      </Badge>
-                      {orderWebhookLatency !== null && (
-                        <span className="text-muted-foreground font-mono text-[11px] font-bold">
-                          Độ trễ: <strong className="text-[#D97736] font-mono">{orderWebhookLatency}ms</strong>
-                        </span>
-                      )}
+                        {copiedKey === "wh-order-res" ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+                        Copy JSON
+                      </Button>
                     </div>
 
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground font-bold hover:bg-[#FFF0E6] rounded-xl"
-                      onClick={() => copyToClipboard(JSON.stringify(orderWebhookResult, null, 2), "wh-order-res")}
-                    >
-                      {copiedKey === "wh-order-res" ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
-                      Copy JSON
-                    </Button>
+                    <pre className="p-3.5 rounded-2xl bg-slate-950 text-slate-100 font-mono text-xs overflow-x-auto max-h-52 border border-slate-800 leading-relaxed shadow-inner">
+                      {JSON.stringify(orderWebhookResult, null, 2)}
+                    </pre>
                   </div>
-
-                  <pre className="p-3.5 rounded-2xl bg-slate-950 text-slate-100 font-mono text-xs overflow-x-auto max-h-52 border border-slate-800 leading-relaxed shadow-inner">
-                    {JSON.stringify(orderWebhookResult, null, 2)}
-                  </pre>
-                </div>
-              )}
-            </CardContent>
+                )}
+              </CardContent>
+            )}
           </Card>
         </div>
       )}
@@ -1571,6 +1675,55 @@ export function DeveloperClient() {
             </div>
           </div>
 
+          {/* REST API Collapse Toolbar */}
+          <div className="flex items-center justify-between flex-wrap gap-3 p-3.5 rounded-2xl bg-card border-2 border-border/80 shadow-2xs">
+            <div className="flex items-center gap-2">
+              <Layers className="h-4 w-4 text-primary" />
+              <span className="text-xs font-black font-heading text-foreground">
+                Danh sách REST Endpoints ({APIS.length})
+              </span>
+              <Badge variant="aqua" className="text-[10px] font-mono font-bold">
+                {Object.values(apiStates).filter(s => s.openTester).length}/{APIS.length} đang mở
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setApiStates(prev => {
+                    const next = { ...prev };
+                    APIS.forEach(a => {
+                      if (next[a.id]) next[a.id] = { ...next[a.id], openTester: false };
+                    });
+                    return next;
+                  });
+                }}
+                className="h-7 text-[11px] font-bold px-2.5 rounded-xl text-muted-foreground hover:text-foreground"
+              >
+                <ChevronUp className="h-3.5 w-3.5 mr-1" />
+                Thu gọn tất cả
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setApiStates(prev => {
+                    const next = { ...prev };
+                    APIS.forEach(a => {
+                      if (next[a.id]) next[a.id] = { ...next[a.id], openTester: true };
+                    });
+                    return next;
+                  });
+                }}
+                className="h-7 text-[11px] font-bold px-2.5 rounded-xl text-primary hover:text-primary"
+              >
+                <ChevronDown className="h-3.5 w-3.5 mr-1" />
+                Mở rộng tất cả
+              </Button>
+            </div>
+          </div>
+
           {/* List of APIs */}
           <div className="grid gap-6">
             {APIS.map((api) => {
@@ -1589,7 +1742,15 @@ export function DeveloperClient() {
               return (
                 <Card key={api.id} className="clay-card overflow-hidden border-2 border-border/80">
                   {/* API Header Bar */}
-                  <CardHeader className="pb-3 border-b-2 border-border/70 bg-muted/20">
+                  <CardHeader
+                    onClick={() => {
+                      setApiStates(prev => ({
+                        ...prev,
+                        [api.id]: { ...prev[api.id], openTester: !prev[api.id].openTester }
+                      }));
+                    }}
+                    className={`pb-3 bg-muted/20 cursor-pointer hover:bg-muted/30 transition-colors select-none ${state.openTester ? "border-b-2 border-border/70" : ""}`}
+                  >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div className="flex items-center gap-3 flex-wrap">
                         <Badge 
@@ -1607,7 +1768,8 @@ export function DeveloperClient() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setApiStates(prev => ({
                               ...prev,
                               [api.id]: { ...prev[api.id], openTester: !prev[api.id].openTester }
@@ -1624,7 +1786,8 @@ export function DeveloperClient() {
                     </CardDescription>
                   </CardHeader>
 
-                  <CardContent className="p-4 sm:p-6 space-y-6">
+                  {state.openTester && (
+                    <CardContent className="p-4 sm:p-6 space-y-6">
                     {/* Headers & Specs View */}
                     <div className="grid gap-4 md:grid-cols-2">
                       {/* Left: Headers Spec */}
@@ -1711,58 +1874,59 @@ export function DeveloperClient() {
                     </div>
 
                     {/* Interactive Live Tester Panel */}
-                    {state.openTester && (
-                      <div className="p-4 sm:p-5 rounded-3xl bg-card border-2 border-primary/20 dark:border-primary/30 space-y-4 shadow-sm">
-                        <div className="flex items-center justify-between gap-2 border-b border-border/70 pb-3">
-                          <div className="flex items-center gap-2">
-                            <div className="h-7 w-7 rounded-xl bg-[#FFF0E6] text-[#D97736] flex items-center justify-center font-bold">
-                              <Sparkles className="h-4 w-4" />
-                            </div>
-                            <span className="text-xs font-black font-heading text-foreground">
-                              Kiểm thử trực tiếp trên Website (Live Test Call)
-                            </span>
+                    <div className="p-4 sm:p-5 rounded-3xl bg-card border-2 border-primary/20 dark:border-primary/30 space-y-4 shadow-sm">
+                      <div className="flex items-center justify-between gap-2 border-b border-border/70 pb-3">
+                        <div className="flex items-center gap-2">
+                          <div className="h-7 w-7 rounded-xl bg-[#FFF0E6] text-[#D97736] flex items-center justify-center font-bold">
+                            <Sparkles className="h-4 w-4" />
                           </div>
-
-                          <Button
-                            size="sm"
-                            disabled={state.loading}
-                            onClick={() => handleExecuteApi(api)}
-                            className="clay-btn-primary gap-1.5 h-8 px-4 text-xs font-bold shrink-0"
-                          >
-                            {state.loading ? (
-                              <>
-                                <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Đang gửi...
-                              </>
-                            ) : (
-                              <>
-                                <Send className="h-3.5 w-3.5" /> Gửi Request
-                              </>
-                            )}
-                          </Button>
+                          <span className="text-xs font-black font-heading text-foreground">
+                            Kiểm thử trực tiếp trên Website (Live Test Call)
+                          </span>
                         </div>
 
-                        {/* Controls: Headers & Inputs */}
-                        <div className="grid gap-3 sm:grid-cols-2">
-                          {/* Auth Selection */}
-                          <div className="space-y-1.5">
-                            <label className="text-[11px] font-bold text-muted-foreground">Chọn Header Xác thực (Auth Mode):</label>
-                            <select
-                              value={state.authMode}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                setApiStates(prev => ({
-                                  ...prev,
-                                  [api.id]: { ...prev[api.id], authMode: val }
-                                }));
-                              }}
-                              className="w-full text-xs rounded-xl border border-border/80 bg-background px-3 py-2 font-medium focus:ring-2 focus:ring-primary/20 outline-none"
-                            >
-                              <option value="none">Không xác thực (No Auth / Public)</option>
-                              <option value="bearer_parent_a">Bearer Token (Phụ huynh A: 0901234567 - HV0001, HV0002)</option>
-                              <option value="bearer_parent_b">Bearer Token (Phụ huynh B: 0912345678 - HV0003)</option>
-                              <option value="header_parent_phone">Custom Header: x-parent-phone: 0901234567</option>
-                              <option value="custom">Nhập Token tuỳ chỉnh (Custom Token)</option>
-                            </select>
+                        <Button
+                          size="sm"
+                          disabled={state.loading}
+                          onClick={() => handleExecuteApi(api)}
+                          className="clay-btn-primary gap-1.5 h-8 px-4 text-xs font-bold shrink-0"
+                        >
+                          {state.loading ? (
+                            <>
+                              <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Đang gửi...
+                            </>
+                          ) : (
+                            <>
+                              <Send className="h-3.5 w-3.5" /> Gửi Request
+                            </>
+                          )}
+                        </Button>
+                      </div>
+
+                      {/* Controls: Headers & Inputs */}
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {/* Auth Selection */}
+                        <div className="space-y-1.5">
+                          <label className="text-[11px] font-bold text-muted-foreground">Chọn Header Xác thực (Auth Mode):</label>
+                          <select
+                            value={state.authMode}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setApiStates(prev => ({
+                                ...prev,
+                                [api.id]: { ...prev[api.id], authMode: val }
+                              }));
+                            }}
+                            className="w-full text-xs rounded-xl border border-border/80 bg-background px-3 py-2 font-medium focus:ring-2 focus:ring-primary/20 outline-none"
+                          >
+                            <option value="none">Không xác thực (No Auth / Public / AI Agent)</option>
+                            <option value="bearer_system">System Admin Key (Bearer ocx_sys_educenter_...)</option>
+                            <option value="bearer_parent_a">Bearer Token (Phụ huynh A: 0901234567 - HV0001, HV0002)</option>
+                            <option value="bearer_parent_b">Bearer Token (Phụ huynh B: 0912345678 - HV0003)</option>
+                            <option value="bearer_parent_nga">Bearer Token (Phụ huynh Nga: 0945678901 - HV0006, HV0007)</option>
+                            <option value="header_parent_phone">Custom Header: x-parent-phone: 0901234567</option>
+                            <option value="custom">Nhập Token tuỳ chỉnh (Custom Token)</option>
+                          </select>
 
                             {state.authMode === "custom" && (
                               <Input
@@ -1879,8 +2043,8 @@ export function DeveloperClient() {
                           </div>
                         )}
                       </div>
-                    )}
-                  </CardContent>
+                    </CardContent>
+                  )}
                 </Card>
               );
             })}

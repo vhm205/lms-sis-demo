@@ -7,20 +7,28 @@ export async function POST(request: Request) {
   try {
     const auth = await getAuthContext(request);
 
-    if (auth.role === "ANONYMOUS") {
-      return NextResponse.json(
-        {
-          error: "Unauthorized: Yêu cầu quyền Quản trị viên (Admin API Key) hoặc Phụ huynh đã xác thực để đăng ký học bù.",
-          code: "UNAUTHORIZED",
-        },
-        { status: 401 }
-      );
-    }
-
     const body = await request.json();
     const studentIdent =
-      body.studentCode || body.studentId || body.code || body.id || body.studentName || body.name;
-    let { missedScheduleId, targetScheduleId, notes, missedDate, targetDate, targetClassCode } = body;
+      body.studentCode || body.studentId || body.code || body.id || body.studentName || body.name || body.student;
+    let {
+      missedScheduleId,
+      targetScheduleId,
+      notes,
+      missedDate,
+      targetDate,
+      targetClassCode,
+      targetClassName,
+      targetClassId,
+      className,
+      classCode,
+      classId,
+      reason,
+      content,
+    } = body;
+
+    const targetClassIdent =
+      targetClassCode || targetClassName || targetClassId || className || classCode || classId || "";
+    const effectiveNotes = notes || reason || content || "";
 
     let student = null;
     if (studentIdent) {
@@ -33,6 +41,7 @@ export async function POST(request: Request) {
           ],
         },
         include: {
+          parent: true,
           classes: {
             include: {
               schedules: { orderBy: { date: "desc" } },
@@ -50,6 +59,7 @@ export async function POST(request: Request) {
       student = await prisma.student.findFirst({
         where: { parentId: auth.parent.id },
         include: {
+          parent: true,
           classes: {
             include: {
               schedules: { orderBy: { date: "desc" } },
@@ -120,18 +130,30 @@ export async function POST(request: Request) {
           }
         }
       }
+
+      if (!missedScheduleId) {
+        const anySchedule = await prisma.schedule.findFirst({
+          where: {
+            class: {
+              students: { some: { id: student.id } },
+            },
+          },
+          orderBy: { date: "desc" },
+        });
+        if (anySchedule) missedScheduleId = anySchedule.id;
+      }
     }
 
     // Auto-resolve targetScheduleId
     if (!targetScheduleId) {
       let targetClass = null;
-      if (targetClassCode) {
+      if (targetClassIdent) {
         targetClass = await prisma.class.findFirst({
           where: {
             OR: [
-              { code: targetClassCode },
-              { id: targetClassCode },
-              { name: { contains: targetClassCode } },
+              { code: targetClassIdent },
+              { id: targetClassIdent },
+              { name: { contains: targetClassIdent } },
             ],
           },
           include: { schedules: { orderBy: { date: "asc" } } },
@@ -153,7 +175,7 @@ export async function POST(request: Request) {
       } else {
         const upcomingSchedules = await prisma.schedule.findMany({
           where: { status: "SCHEDULED" },
-          include: { class: true },
+          include: { class: { include: { facility: true } }, room: true },
           orderBy: { date: "asc" },
           take: 20,
         });
@@ -166,6 +188,13 @@ export async function POST(request: Request) {
           if (matchSch) targetScheduleId = matchSch.id;
         }
 
+        if (!targetScheduleId && targetClassIdent) {
+          const matchClassSch = upcomingSchedules.find(
+            (s) => s.class?.name.includes(targetClassIdent) || s.class?.code.includes(targetClassIdent)
+          );
+          if (matchClassSch) targetScheduleId = matchClassSch.id;
+        }
+
         if (!targetScheduleId && upcomingSchedules.length > 0) {
           targetScheduleId = upcomingSchedules[0].id;
         }
@@ -174,7 +203,7 @@ export async function POST(request: Request) {
 
     if (!missedScheduleId || !targetScheduleId) {
       return NextResponse.json(
-        { error: "Missing required fields: không xác định được missedScheduleId hoặc targetScheduleId" },
+        { error: "Missing required fields: không xác định được missedScheduleId hoặc targetScheduleId. Vui lòng cung cấp ngày học bù (targetDate) hoặc mã lớp (targetClassCode)." },
         { status: 400 }
       );
     }
@@ -197,7 +226,7 @@ export async function POST(request: Request) {
             studentId: student.id,
             classId,
             status: "EXCUSED",
-            note: notes || "Xin nghỉ phép và đăng ký học bù qua hệ thống",
+            note: effectiveNotes || "Xin nghỉ phép và đăng ký học bù qua hệ thống",
           },
         });
       }
@@ -206,7 +235,7 @@ export async function POST(request: Request) {
         where: { id: attendance.id },
         data: {
           status: "EXCUSED",
-          note: notes ? `${attendance.note || ""} (Đã xin phép bù: ${notes})` : attendance.note,
+          note: effectiveNotes ? `${attendance.note || ""} (Đã xin phép bù: ${effectiveNotes})` : attendance.note,
         },
       });
     }
@@ -214,13 +243,27 @@ export async function POST(request: Request) {
     // Check for duplicate request
     const existing = await prisma.makeUpRequest.findFirst({
       where: { studentId: student.id, missedScheduleId },
+      include: {
+        student: true,
+        missedSchedule: { include: { class: true } },
+        targetSchedule: { include: { class: { include: { facility: true } }, room: true } },
+      },
     });
 
     if (existing) {
       return NextResponse.json({
+        success: true,
         data: existing,
         isDuplicate: true,
-        message: `Đã có yêu cầu học bù cho buổi nghỉ này (Mã: ${existing.id}, Trạng thái: ${existing.status}).`,
+        requestId: existing.id,
+        status: existing.status,
+        studentName: student.name,
+        studentCode: student.code,
+        targetClass: existing.targetSchedule?.class?.name,
+        targetFacility: existing.targetSchedule?.class?.facility?.name,
+        targetDate: existing.targetSchedule?.date,
+        targetRoom: existing.targetSchedule?.room?.name,
+        message: `Yêu cầu học bù cho học viên ${student.name} (${student.code}) đã được tạo trước đó trên hệ thống (Mã: ${existing.id}, Trạng thái: ${existing.status}).`,
       });
     }
 
@@ -230,7 +273,7 @@ export async function POST(request: Request) {
         studentId: student.id,
         missedScheduleId,
         targetScheduleId,
-        notes: notes || "",
+        notes: effectiveNotes,
         status: "PENDING",
       },
     });
@@ -242,7 +285,7 @@ export async function POST(request: Request) {
         entityType: "MakeUpRequest",
         entityId: req.id,
         details: JSON.stringify({ ...body, resolvedMissedScheduleId: missedScheduleId, resolvedTargetScheduleId: targetScheduleId }),
-        source: "API"
+        source: auth.role === "ADMIN" ? "ADMIN_API" : auth.isParent ? "PARENT_PORTAL" : "AI_AGENT"
       }
     });
 
@@ -254,7 +297,24 @@ export async function POST(request: Request) {
       // ignore
     }
 
-    return NextResponse.json({ data: req });
+    const targetSchedule = await prisma.schedule.findUnique({
+      where: { id: targetScheduleId },
+      include: { class: { include: { facility: true } }, room: true },
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: req,
+      requestId: req.id,
+      status: req.status,
+      studentName: student.name,
+      studentCode: student.code,
+      targetClass: targetSchedule?.class?.name,
+      targetFacility: targetSchedule?.class?.facility?.name,
+      targetDate: targetSchedule?.date,
+      targetRoom: targetSchedule?.room?.name,
+      message: `Đã tạo yêu cầu học bù thành công cho học viên ${student.name} (${student.code}) vào ${targetSchedule?.class?.name || "lớp học bù mục tiêu"}.`,
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
