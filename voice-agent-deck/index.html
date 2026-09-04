@@ -1,0 +1,941 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>OrchEdu — Trợ lý giọng nói AI cho Student Success</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --bg: #f5f7fa;
+        --surface: #ffffff;
+        --ink: #0a1b33;
+        --muted: #5a6b84;
+        --primary: #2e5bff;
+        --primary-deep: #1b3fd6;
+        --primary-soft: #e9efff;
+        --emerald: #0ba678;
+        --emerald-soft: #e4f6f0;
+        --amber: #f59f00;
+        --amber-soft: #fff4de;
+        --red: #e5484d;
+        --red-soft: #fdecec;
+        --violet: #7c5cfc;
+        --violet-soft: #f0ecff;
+        --border: #e4e9f2;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        background: var(--bg);
+        overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        color: var(--ink);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ---------- Root wrapper ---------- */
+      #deck {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--bg);
+      }
+
+      /* ---------- Scene frames ---------- */
+      .scene {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--bg);
+      }
+
+      .slide {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        padding: 84px 120px 72px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* ---------- Chrome: wordmark + slide number ---------- */
+      .chrome {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 40px;
+      }
+      .wordmark {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 34px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        color: var(--ink);
+      }
+      .wordmark .dot {
+        width: 18px;
+        height: 18px;
+        border-radius: 6px;
+        background: var(--primary);
+        display: inline-block;
+      }
+      .wordmark .tag {
+        font-size: 26px;
+        font-weight: 600;
+        color: var(--muted);
+        letter-spacing: 0;
+      }
+      .slide-num {
+        font-size: 30px;
+        font-weight: 700;
+        color: var(--muted);
+        letter-spacing: 1px;
+      }
+      .slide-num b {
+        color: var(--ink);
+      }
+
+      /* ---------- Typography ---------- */
+      .kicker {
+        font-size: 30px;
+        font-weight: 800;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: var(--primary);
+        margin-bottom: 22px;
+      }
+      .headline {
+        font-size: 70px;
+        font-weight: 800;
+        line-height: 1.08;
+        letter-spacing: -1.5px;
+        color: var(--ink);
+        max-width: 1560px;
+      }
+      .sub {
+        font-size: 44px;
+        font-weight: 400;
+        line-height: 1.35;
+        color: var(--muted);
+        max-width: 1300px;
+        margin-top: 26px;
+      }
+
+      /* ---------- Cards / chips / bubbles ---------- */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 34px 38px;
+      }
+      .card h3 {
+        font-size: 42px;
+        font-weight: 800;
+        color: var(--ink);
+        letter-spacing: -0.5px;
+        margin-bottom: 14px;
+      }
+      .card p {
+        font-size: 36px;
+        font-weight: 400;
+        line-height: 1.4;
+        color: var(--muted);
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 22px;
+        border-radius: 999px;
+        font-size: 34px;
+        font-weight: 700;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--ink);
+      }
+      .chip .ico {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        flex: none;
+      }
+
+      /* ---------- Vision 3-step ---------- */
+      .steps {
+        display: flex;
+        align-items: stretch;
+        gap: 28px;
+        margin-top: 56px;
+      }
+      .step {
+        flex: 1;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 38px 36px;
+        position: relative;
+      }
+      .step .n {
+        font-size: 30px;
+        font-weight: 800;
+        color: var(--primary);
+        margin-bottom: 14px;
+      }
+      .step h3 {
+        font-size: 42px;
+        font-weight: 800;
+        color: var(--ink);
+        letter-spacing: -0.5px;
+        margin-bottom: 12px;
+      }
+      .step p {
+        font-size: 34px;
+        color: var(--muted);
+        line-height: 1.4;
+      }
+      .step-arrow {
+        align-self: center;
+        font-size: 52px;
+        color: var(--primary);
+        flex: none;
+      }
+
+      /* ---------- Role diagram ---------- */
+      .role-cols {
+        display: flex;
+        align-items: stretch;
+        gap: 40px;
+        margin-top: 60px;
+      }
+      .role-side {
+        flex: 1;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 44px 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+      .role-side .lbl {
+        font-size: 40px;
+        font-weight: 800;
+        color: var(--ink);
+        line-height: 1.3;
+      }
+      .role-side .lbl small {
+        display: block;
+        font-size: 32px;
+        font-weight: 600;
+        color: var(--muted);
+        margin-top: 10px;
+      }
+      .role-agent {
+        flex: 1.5;
+        background: linear-gradient(160deg, var(--primary) 0%, var(--primary-deep) 100%);
+        border-radius: 22px;
+        padding: 44px 44px;
+        color: #fff;
+        box-shadow: 0 24px 60px rgba(46, 91, 255, 0.28);
+      }
+      .role-agent .lbl {
+        font-size: 44px;
+        font-weight: 800;
+        margin-bottom: 26px;
+      }
+      .cap {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.22);
+      }
+      .cap .dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #7ee0c0;
+        flex: none;
+      }
+      .cap span {
+        font-size: 36px;
+        font-weight: 600;
+        line-height: 1.3;
+      }
+      .role-connector {
+        align-self: center;
+        font-size: 52px;
+        color: var(--muted);
+        flex: none;
+      }
+
+      /* ---------- Journey ---------- */
+      .journey {
+        display: flex;
+        align-items: center;
+        margin-top: 64px;
+        flex-wrap: wrap;
+      }
+      .jnode {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 26px 30px;
+        font-size: 34px;
+        font-weight: 700;
+        color: var(--ink);
+        white-space: nowrap;
+      }
+      .jnode.hot {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #fff;
+      }
+      .jarrow {
+        font-size: 40px;
+        color: var(--primary);
+        padding: 0 8px;
+        flex: none;
+      }
+      .journey-strip {
+        margin-top: 30px;
+        background: var(--primary-soft);
+        border: 1px solid #d6e0ff;
+        border-radius: 999px;
+        padding: 22px 40px;
+        font-size: 36px;
+        font-weight: 700;
+        color: var(--primary-deep);
+        text-align: center;
+        width: fit-content;
+      }
+
+      /* ---------- Questions bubbles ---------- */
+      .bubble-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: repeat(4, auto);
+        gap: 22px;
+        margin-top: 46px;
+      }
+      .bubble {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 22px 28px;
+      }
+      .bubble .who {
+        flex: none;
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--primary);
+        background: var(--primary-soft);
+        border-radius: 12px;
+        padding: 10px 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .bubble .q {
+        font-size: 38px;
+        font-weight: 600;
+        color: var(--ink);
+        line-height: 1.3;
+      }
+
+      /* ---------- Flow (how it works) ---------- */
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 28px;
+        margin-top: 56px;
+      }
+      .fnode {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 34px 34px;
+        position: relative;
+      }
+      .fnode .n {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--primary);
+        margin-bottom: 10px;
+      }
+      .fnode .t {
+        font-size: 38px;
+        font-weight: 800;
+        color: var(--ink);
+        letter-spacing: -0.5px;
+      }
+      .fnode.final {
+        background: var(--emerald-soft);
+        border-color: #bfe9da;
+      }
+      .fnode.final .t {
+        color: #0a7d5c;
+      }
+
+      /* ---------- Scenarios ---------- */
+      .scen-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: 30px;
+        margin-top: 50px;
+        flex: 1;
+      }
+      .scen-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 36px 40px;
+        display: flex;
+        flex-direction: column;
+      }
+      .scen-card .tag {
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+      }
+      .scen-card h3 {
+        font-size: 44px;
+        font-weight: 800;
+        color: var(--ink);
+        letter-spacing: -0.5px;
+        margin-bottom: 14px;
+      }
+      .scen-card p {
+        font-size: 34px;
+        line-height: 1.45;
+        color: var(--muted);
+      }
+      .tag.t1 { color: var(--primary); }
+      .tag.t2 { color: var(--emerald); }
+      .tag.t3 { color: var(--amber); }
+      .tag.t4 { color: var(--red); }
+
+      /* ---------- Retention loop ---------- */
+      .loop-row {
+        display: flex;
+        align-items: center;
+        margin-top: 50px;
+        flex-wrap: wrap;
+      }
+      .lnode {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 24px 28px;
+        font-size: 33px;
+        font-weight: 700;
+        color: var(--ink);
+      }
+      .lnode.key {
+        background: var(--emerald);
+        border-color: var(--emerald);
+        color: #fff;
+      }
+      .larrow {
+        font-size: 38px;
+        color: #087a56;
+        padding: 0 7px;
+        flex: none;
+      }
+      .signals {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+        margin-top: 46px;
+      }
+      .callout {
+        margin-top: 44px;
+        background: var(--amber-soft);
+        border: 1px solid #ffe2ad;
+        border-radius: 18px;
+        padding: 28px 36px;
+        font-size: 38px;
+        font-weight: 700;
+        color: #6b4700;
+        line-height: 1.4;
+      }
+
+      /* ---------- Next path ---------- */
+      .next-grid {
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        gap: 40px;
+        margin-top: 50px;
+        flex: 1;
+      }
+      .next-inputs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+        align-content: flex-start;
+      }
+      .next-output {
+        background: var(--emerald-soft);
+        border: 1px solid #bfe9da;
+        border-radius: 22px;
+        padding: 40px 42px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .next-output h3 {
+        font-size: 42px;
+        font-weight: 800;
+        color: #0a7d5c;
+        margin-bottom: 16px;
+      }
+      .next-output p {
+        font-size: 36px;
+        color: #0a7d5c;
+        line-height: 1.45;
+      }
+
+      /* ---------- Aha ---------- */
+      .aha-lead {
+        margin-top: 30px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-left: 6px solid var(--primary);
+        border-radius: 16px;
+        padding: 28px 38px;
+        font-size: 44px;
+        font-weight: 600;
+        color: var(--ink);
+        width: fit-content;
+      }
+      .aha-lead .speaker {
+        color: var(--primary);
+        font-weight: 800;
+      }
+      .chain {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        margin-top: 44px;
+      }
+      .cnode {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 18px 22px;
+        font-size: 31px;
+        font-weight: 700;
+        color: var(--ink);
+      }
+      .carrow {
+        font-size: 30px;
+        color: var(--primary);
+      }
+      .final-msg {
+        margin-top: 50px;
+        font-size: 62px;
+        font-weight: 800;
+        line-height: 1.15;
+        letter-spacing: -1px;
+        color: var(--ink);
+      }
+      .final-msg .em {
+        color: var(--primary);
+      }
+
+      /* ---------- Footer strip ---------- */
+      .foot {
+        margin-top: auto;
+        padding-top: 24px;
+        font-size: 32px;
+        color: var(--muted);
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ==================== ISLAND ==================== -->
+    <script type="application/hyperframes-slideshow+json">
+      {
+        "slides": [
+          { "sceneId": "vision", "notes": "Mở bằng tầm nhìn: đây không phải chatbot FAQ mà là trợ lý Student Success. Nhấn mạnh ba bước chuyển hoá: câu hỏi → hỗ trợ cá nhân hoá → can thiệp và giữ chân." },
+          { "sceneId": "problem", "notes": "Đọc lần lượt 4 điểm đau. Kết bằng thanh đỏ: chậm, thiếu nhất quán, bỏ lỡ can thiệp sớm." },
+          { "sceneId": "role", "notes": "Agent đứng giữa phụ huynh và hệ thống. Nêu 4 năng lực: hiểu ngữ cảnh, trả lời, hành động an toàn, phối hợp người thật khi cần." },
+          { "sceneId": "journey", "notes": "Đi qua 7 giai đoạn. Nhấn mạnh Agent đồng hành xuyên suốt, không chỉ lúc có sự cố." },
+          { "sceneId": "questions", "notes": "Slide hội thoại. Đọc vài câu tiêu biểu để khán giả thấy tính thực tế." },
+          { "sceneId": "how-it-works", "notes": "Giải thích chuỗi xử lý ở mức nghiệp vụ, không đi vào kỹ thuật." },
+          { "sceneId": "scenarios", "notes": "Bốn kịch bản cốt lõi. Nhấn Next để lộ từng thẻ.", "fragments": [88, 91, 94, 97] },
+          { "sceneId": "risk-retention", "notes": "Vòng lặp giữ chân. Nhấn mạnh: giữ chân đến từ giải quyết đúng vấn đề." },
+          { "sceneId": "next-path", "notes": "Agent kết hợp 6 yếu tố, đề xuất 2–3 chương trình kèm lý do." },
+          { "sceneId": "aha", "notes": "Kết bằng câu chuyện Minh. Một cuộc gọi duy nhất → trọn ngữ cảnh → hành động đúng." }
+        ],
+        "slideSequences": []
+      }
+    </script>
+
+    <!-- ==================== ROOT WRAPPER ==================== -->
+    <div id="deck" data-composition-id="deck" data-root="true" data-start="0" data-duration="144" data-width="1920" data-height="1080">
+
+      <!-- ==================== SLIDE 1 — VISION ==================== -->
+      <div class="scene" id="scene-vision" data-composition-id="vision" data-start="0" data-duration="14" data-label="Tầm nhìn" data-width="1920" data-height="1080">
+        <div class="slide">
+          <div class="chrome">
+            <div class="wordmark"><span class="dot"></span>OrchEdu<span class="tag"> · Voice Agent</span></div>
+            <div class="slide-num"><b>01</b> / 10</div>
+          </div>
+          <div class="kicker" data-anim>OrchEdu · Voice Agent</div>
+          <h1 class="headline" data-anim>Trợ lý giọng nói AI cho Student Success</h1>
+          <p class="sub" data-anim>Từ câu hỏi của phụ huynh, đến hỗ trợ học tập cá nhân hoá, can thiệp kịp thời và giữ chân học viên.</p>
+          <div class="steps" data-anim>
+            <div class="step">
+              <div class="n">01</div>
+              <h3>Câu hỏi của phụ huynh</h3>
+              <p>Mọi thắc mắc, mọi lúc, qua giọng nói tự nhiên.</p>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step">
+              <div class="n">02</div>
+              <h3>Hỗ trợ cá nhân hoá</h3>
+              <p>Trả lời đúng ngữ cảnh học tập của từng học viên.</p>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step">
+              <div class="n">03</div>
+              <h3>Can thiệp &amp; giữ chân</h3>
+              <p>Phát hiện rủi ro sớm, hành động đúng, giữ học viên ở lại.</p>
+            </div>
+          </div>
+          <div class="foot" data-anim>Phục vụ phụ huynh và học viên sau khi ghi danh — suốt hành trình học.</div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 2 — PROBLEM ==================== -->
+      <div class="scene" id="scene-problem" data-composition-id="problem" data-start="14" data-duration="14" data-label="Vấn đề" data-width="1920" data-height="1080">
+        <div class="slide">
+          <div class="chrome">
+            <div class="wordmark"><span class="dot"></span>OrchEdu</div>
+            <div class="slide-num"><b>02</b> / 10</div>
+          </div>
+          <div class="kicker" data-anim>Vấn đề hiện tại</div>
+          <h1 class="headline" data-anim>Trải nghiệm bị phân mảnh từ đầu đến cuối</h1>
+          <div class="steps" style="margin-top: 48px" data-anim>
+            <div class="step">
+              <h3>Nhiều kênh hỏi</h3>
+              <p>Phụ huynh hỏi qua web, PWA, Zalo — mỗi nơi một câu trả lời.</p>
+            </div>
+            <div class="step">
+              <h3>Dữ liệu phân tán</h3>
+              <p>Thông tin học viên nằm rải rác ở SIS, LMS và hệ thống nội bộ.</p>
+            </div>
+            <div class="step">
+              <h3>Tra cứu thủ công</h3>
+              <p>CSKH phải tự dò ngữ cảnh của từng học viên để trả lời.</p>
+            </div>
+            <div class="step">
+              <h3>Phát hiện muộn</h3>
+              <p>Vấn đề chỉ lộ ra khi có khiếu nại hoặc khi học viên muốn nghỉ.</p>
+            </div>
+          </div>
+          <div class="callout" style="background: var(--red-soft); border-color: #f6c9ca; color: #a22c30; margin-top: 44px" data-anim>
+            Kết quả: phản hồi chậm, thiếu nhất quán, và bỏ lỡ cơ hội can thiệp sớm.
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 3 — ROLE ==================== -->
+      <div class="scene" id="scene-role" data-composition-id="role" data-start="28" data-duration="14" data-label="Vai trò" data-width="1920" data-height="1080">
+        <div class="slide">
+          <div class="chrome">
+            <div class="wordmark"><span class="dot"></span>OrchEdu</div>
+            <div class="slide-num"><b>03</b> / 10</div>
+          </div>
+          <div class="kicker" data-anim>Vai trò</div>
+          <h1 class="headline" data-anim>Agent đứng giữa, hiểu ngữ cảnh, hành động an toàn</h1>
+          <div class="role-cols" data-anim>
+            <div class="role-side">
+              <div class="lbl">Phụ huynh<br />/ Học viên<small>hỏi, yêu cầu, báo sự cố</small></div>
+            </div>
+            <div class="role-connector">⇄</div>
+            <div class="role-agent">
+              <div class="lbl">Voice Agent</div>
+              <div class="cap"><span class="dot"></span><span>Hiểu ngữ cảnh học viên</span></div>
+              <div class="cap"><span class="dot"></span><span>Trả lời câu hỏi</span></div>
+              <div class="cap"><span class="dot"></span><span>Thực hiện hành động an toàn</span></div>
+              <div class="cap"><span class="dot"></span><span>Phối hợp đội ngũ người thật khi cần</span></div>
+            </div>
+            <div class="role-connector">⇄</div>
+            <div class="role-side">
+              <div class="lbl">SIS · LMS<br />· Vận hành đào tạo<small>dữ liệu, chính sách, nghiệp vụ</small></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 4 — JOURNEY ==================== -->
+      <div class="scene" id="scene-journey" data-composition-id="journey" data-start="42" data-duration="14" data-label="Hành trình" data-width="1920" data-height="1080">
+        <div class="slide">
+          <div class="chrome">
+            <div class="wordmark"><span class="dot"></span>OrchEdu</div>
+            <div class="slide-num"><b>04</b> / 10</div>
+          </div>
+          <div class="kicker" data-anim>Hành trình học viên</div>
+          <h1 class="headline" data-anim>Đồng hành ở mọi giai đoạn của hành trình</h1>
+          <div class="journey" data-anim>
+            <div class="jnode">Trong khóa học</div>
+            <div class="jarrow">→</div>
+            <div class="jnode">Hỗ trợ học tập</div>
+            <div class="jarrow">→</div>
+            <div class="jnode">Giải quyết vấn đề</div>
+            <div class="jarrow">→</div>
+            <div class="jnode">Đánh giá tiến độ</div>
+            <div class="jarrow">→</div>
+            <div class="jnode hot">Can thiệp</div>
+            <div class="jarrow">→</div>
+            <div class="jnode">Hoàn thành</div>
+            <div class="jarrow">→</div>
+            <div class="jnode">Lộ trình tiếp theo</div>
+          </div>
+          <div class="journey-strip" data-anim>Voice Agent đồng hành xuyên suốt — không chỉ khi có sự cố</div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 5 — QUESTIONS ==================== -->
+      <div class="scene" id="scene-questions" data-composition-id="questions" data-start="56" data-duration="16" data-label="Câu hỏi" data-width="1920" data-height="1080">
+        <div class="slide">
+          <div class="chrome">
+            <div class="wordmark"><span class="dot"></span>OrchEdu</div>
+            <div class="slide-num"><b>05</b> / 10</div>
+          </div>
+          <div class="kicker" data-anim>Câu hỏi thực tế</div>
+          <h1 class="headline" data-anim>Những câu phụ huynh và học viên thật sự hỏi</h1>
+          <div class="bubble-grid" data-anim>
+            <div class="bubble"><span class="who">PH</span><span class="q">“Dạo này cháu học thế nào?”</span></div>
+            <div class="bubble"><span class="who">PH</span><span class="q">“Buổi học tiếp theo là khi nào?”</span></div>
+            <div class="bubble"><span class="who">PH</span><span class="q">“Tháng này cháu nghỉ mấy buổi?”</span></div>
+            <div class="bubble"><span class="who">PH</span><span class="q">“Cuối tuần cháu học bù được không?”</span></div>
+            <div class="bubble"><span class="who">HV</span><span class="q">“Còn bài tập nào chưa nộp không?”</span></div>
+            <div class="bubble"><span class="who">PH</span><span class="q">“Cô giáo nhận xét gì về tiến độ gần đây?”</span></div>
+            <div class="bubble"><span class="who">PH</span><span class="q">“Đổi sang lớp khác được không?”</span></div>
+            <div class="bubble"><span class="who">PH</span><span class="q">“Học xong khóa này cháu học gì tiếp?”</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 6 — HOW IT WORKS ==================== -->
+      <div class="scene" id="scene-how-it-works" data-composition-id="how-it-works" data-start="72" data-duration="14" data-label="Cách hoạt động" data-width="1920" data-height="1080">
+        <div class="slide">
+          <div class="chrome">
+            <div class="wordmark"><span class="dot"></span>OrchEdu</div>
+            <div class="slide-num"><b>06</b> / 10</div>
+          </div>
+          <div class="kicker" data-anim>Cách hoạt động</div>
+          <h1 class="headline" data-anim>Một cuộc hội thoại, một chuỗi xử lý</h1>
+          <div class="flow" data-anim>
+            <div class="fnode"><div class="n">1</div><div class="t">Hội thoại giọng nói</div></div>
+            <div class="fnode"><div class="n">2</div><div class="t">Hiểu ý định</div></div>
+            <div class="fnode"><div class="n">3</div><div class="t">Xác định học viên</div></div>
+            <div class="fnode"><div class="n">4</div><div class="t">Lấy ngữ cảnh SIS / LMS</div></div>
+            <div class="fnode"><div class="n">5</div><div class="t">Áp dụng chính sách</div></div>
+            <div class="fnode final"><div class="n">6</div><div class="t">Trả lời · Đề xuất · Hành động · Chuyển người thật</div></div>
+          </div>
+          <div class="foot" data-anim>Không cần hiểu kỹ thuật — Agent lo phần phức tạp phía sau.</div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 7 — SCENARIOS (fragments) ==================== -->
+      <div class="scene" id="scene-scenarios" data-composition-id="scenarios" data-start="86" data-duration="16" data-label="Kịch bản" data-width="1920" data-height="1080">
+        <div class="slide">
+          <div class="chrome">
+            <div class="wordmark"><span class="dot"></span>OrchEdu</div>
+            <div class="slide-num"><b>07</b> / 10</div>
+          </div>
+          <div class="kicker" data-anim>Kịch bản Student Success</div>
+          <h1 class="headline" data-anim>Bốn kịch bản cốt lõi</h1>
+          <div class="scen-grid" id="scen-cards">
+            <div class="scen-card" id="card1">
+              <div class="tag t1">Tiến độ học tập</div>
+              <h3>Trả lời cá nhân hoá</h3>
+              <p>Kết hợp điểm danh, bài tập, điểm số và nhận xét giáo viên thành một câu trả lời đúng ngữ cảnh.</p>
+            </div>
+            <div class="scen-card" id="card2">
+              <div class="tag t2">Học bù</div>
+              <h3>Luồng đầy đủ, an toàn</h3>
+              <p>Nghỉ → điều kiện → lớp trống → sức chứa → phụ huynh xác nhận → tạo yêu cầu học bù.</p>
+            </div>
+            <div class="scen-card" id="card3">
+              <div class="tag t3">Điểm danh &amp; rủi ro</div>
+              <h3>Phát hiện sớm</h3>
+              <p>Nghỉ liên tiếp, điểm giảm, bài chưa hoàn thành → đề xuất can thiệp kịp thời.</p>
+            </div>
+            <div class="scen-card" id="card4">
+              <div class="tag t4">Hỗ trợ học viên</div>
+              <h3>Giải quyết &amp; chuyển đúng người</h3>
+              <p>Xử lý lịch, lớp, khiếu nại → chuyển đúng đội ngũ người thật kèm đầy đủ ngữ cảnh.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 8 — RISK → RETENTION ==================== -->
+      <div class="scene" id="scene-risk-retention" data-composition-id="risk-retention" data-start="102" data-duration="14" data-label="Giữ chân" data-width="1920" data-height="1080">
+        <div class="slide">
+          <div class="chrome">
+            <div class="wordmark"><span class="dot"></span>OrchEdu</div>
+            <div class="slide-num"><b>08</b> / 10</div>
+          </div>
+          <div class="kicker" data-anim>Giữ chân</div>
+          <h1 class="headline" data-anim>Giữ chân đến từ việc giải quyết đúng vấn đề</h1>
+          <div class="loop-row" data-anim>
+            <div class="lnode">Phát hiện tín hiệu</div>
+            <div class="larrow">→</div>
+            <div class="lnode">Hiểu nguyên nhân gốc</div>
+            <div class="larrow">→</div>
+            <div class="lnode">Đề xuất can thiệp</div>
+            <div class="larrow">→</div>
+            <div class="lnode">Gỡ điểm nghẽn</div>
+            <div class="larrow">→</div>
+            <div class="lnode">Theo dõi kết quả</div>
+            <div class="larrow">→</div>
+            <div class="lnode key">Cải thiện retention</div>
+          </div>
+          <div class="signals" data-anim>
+            <span class="chip"><span class="ico" style="background: var(--amber)"></span>nghỉ liên tiếp</span>
+            <span class="chip"><span class="ico" style="background: var(--red)"></span>điểm giảm</span>
+            <span class="chip"><span class="ico" style="background: var(--violet)"></span>bài chưa hoàn thành</span>
+            <span class="chip"><span class="ico" style="background: var(--amber)"></span>đổi lịch nhiều lần</span>
+            <span class="chip"><span class="ico" style="background: var(--red)"></span>yêu cầu tồn đọng</span>
+            <span class="chip"><span class="ico" style="background: var(--amber)"></span>phụ huynh phàn nàn</span>
+          </div>
+          <div class="callout" data-anim>Không ép mua, không giảm giá vô lý. Giữ chân = giải quyết vấn đề thật của học viên.</div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 9 — NEXT PATH ==================== -->
+      <div class="scene" id="scene-next-path" data-composition-id="next-path" data-start="116" data-duration="14" data-label="Lộ trình" data-width="1920" data-height="1080">
+        <div class="slide">
+          <div class="chrome">
+            <div class="wordmark"><span class="dot"></span>OrchEdu</div>
+            <div class="slide-num"><b>09</b> / 10</div>
+          </div>
+          <div class="kicker" data-anim>Lộ trình tiếp theo</div>
+          <h1 class="headline" data-anim>Đề xuất chương trình phù hợp — không phải bán thêm</h1>
+          <div class="next-grid" data-anim>
+            <div>
+              <div class="next-inputs">
+                <span class="chip"><span class="ico" style="background: var(--primary)"></span>Khóa hiện tại</span>
+                <span class="chip"><span class="ico" style="background: var(--primary)"></span>Level</span>
+                <span class="chip"><span class="ico" style="background: var(--primary)"></span>Tiến độ học tập</span>
+                <span class="chip"><span class="ico" style="background: var(--violet)"></span>Điểm mạnh &amp; yếu</span>
+                <span class="chip"><span class="ico" style="background: var(--emerald)"></span>Mục tiêu học</span>
+                <span class="chip"><span class="ico" style="background: var(--primary)"></span>Lịch &amp; cơ sở</span>
+              </div>
+            </div>
+            <div class="next-output">
+              <h3>Agent kết hợp &amp; đề xuất</h3>
+              <p>2–3 chương trình phù hợp kèm lý do cụ thể — vì sao mỗi lựa chọn hợp với học viên.</p>
+            </div>
+          </div>
+          <div class="foot" data-anim style="color: var(--emerald); font-weight: 800">Tính liên tục học tập cá nhân hoá — không phải upsell.</div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 10 — AHA ==================== -->
+      <div class="scene" id="scene-aha" data-composition-id="aha" data-start="130" data-duration="14" data-label="Khoảnh khắc" data-width="1920" data-height="1080">
+        <div class="slide">
+          <div class="chrome">
+            <div class="wordmark"><span class="dot"></span>OrchEdu</div>
+            <div class="slide-num"><b>10</b> / 10</div>
+          </div>
+          <div class="kicker" data-anim>Khoảnh khắc aha</div>
+          <h1 class="headline" data-anim>Một cuộc gọi, trọn ngữ cảnh</h1>
+          <div class="aha-lead" data-anim><span class="speaker">Phụ huynh gọi:</span> “Dạo này Minh học thế nào?”</div>
+          <div class="chain" data-anim>
+            <span class="cnode">Xác định Minh</span><span class="carrow">→</span>
+            <span class="cnode">Hiểu điểm danh gần đây</span><span class="carrow">→</span>
+            <span class="cnode">Kiểm tra bài tập</span><span class="carrow">→</span>
+            <span class="cnode">Xem xu hướng điểm</span><span class="carrow">→</span>
+            <span class="cnode">Giải thích tình hình</span><span class="carrow">→</span>
+            <span class="cnode">Nhận diện rủi ro</span><span class="carrow">→</span>
+            <span class="cnode">Đề xuất hành động</span><span class="carrow">→</span>
+            <span class="cnode">Xếp lịch hỗ trợ</span><span class="carrow">→</span>
+            <span class="cnode">Gợi ý chương trình tiếp theo</span>
+          </div>
+          <div class="final-msg" data-anim>Một cuộc hội thoại. <span class="em">Trọn ngữ cảnh học viên.</span> Hành động đúng kế tiếp.</div>
+        </div>
+      </div>
+
+    </div><!-- /deck -->
+
+    <script>
+      (function () {
+        if (!window.gsap) return;
+        window.__timelines = window.__timelines || {};
+
+        var starts = {
+          vision: 0,
+          problem: 14,
+          role: 28,
+          journey: 42,
+          questions: 56,
+          "how-it-works": 72,
+          scenarios: 86,
+          "risk-retention": 102,
+          "next-path": 116,
+          aha: 130
+        };
+        var TOTAL = 144;
+
+        // Single seekable root timeline spanning the whole deck.
+        var tl = gsap.timeline({ paused: true });
+        tl.to({}, { duration: TOTAL });
+
+        // Entrance animations — absolute composition-time offsets.
+        Object.keys(starts).forEach(function (id) {
+          var scene = document.querySelector('[data-composition-id="' + id + '"]');
+          if (!scene) return;
+          var anims = scene.querySelectorAll("[data-anim]");
+          if (anims.length) {
+            tl.from(anims, {
+              y: 26,
+              opacity: 0,
+              duration: 0.5,
+              stagger: 0.08,
+              ease: "power2.out"
+            }, starts[id] + 0.15);
+          }
+        });
+
+        // Fragment reveals for slide 7 (scenarios), absolute composition times.
+        tl.set("#scen-cards .scen-card", { opacity: 0, y: 22 }, 86.15);
+        tl.to("#card1", { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 87.0);
+        tl.to("#card2", { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 90.0);
+        tl.to("#card3", { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 93.0);
+        tl.to("#card4", { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 96.0);
+
+        window.__timelines["deck"] = tl;
+      })();
+    </script>
+  </body>
+</html>

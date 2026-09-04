@@ -5,6 +5,7 @@ import { OrchexaWidget } from "@/components/OrchexaWidget";
 import { ThemeProvider } from "@/components/theme-provider";
 import { FacilityProvider } from "@/components/facility-provider";
 import { PwaUpdatePrompt } from "@/components/pwa-update-prompt";
+import NextTopLoader from "nextjs-toploader";
 
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-sans",
@@ -31,6 +32,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col font-sans bg-background text-foreground transition-colors duration-200" suppressHydrationWarning>
+        <NextTopLoader
+          color="#F2994A"
+          initialPosition={0.08}
+          crawlSpeed={200}
+          height={3}
+          crawl={true}
+          showSpinner={false}
+          easing="ease"
+          speed={200}
+          shadow="0 0 10px #F2994A,0 0 5px #EA580C"
+          zIndex={99999}
+        />
         <ThemeProvider defaultTheme="light">
           <FacilityProvider>
             {children}

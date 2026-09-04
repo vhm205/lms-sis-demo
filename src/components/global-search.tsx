@@ -22,7 +22,14 @@ import {
   CornerDownLeft
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { getLeadStatusLabel, getOrderStatusLabel, ORDER_STATUS_MAP, getStudentStatusLabel } from "@/lib/constants";
+import { 
+  getLeadStatusLabel, 
+  getOrderStatusLabel, 
+  ORDER_STATUS_MAP, 
+  getStudentStatusLabel,
+  getScheduleStatusLabel,
+  SCHEDULE_STATUS_MAP
+} from "@/lib/constants";
 
 interface SearchResults {
   students: Array<{
@@ -53,6 +60,20 @@ interface SearchResults {
     type?: string;
     duration?: number;
     fee?: number;
+  }>;
+  schedules: Array<{
+    id: string;
+    classId: string;
+    className: string;
+    classCode: string;
+    courseName?: string;
+    teacherName?: string;
+    roomName: string;
+    facilityName?: string;
+    date: string;
+    duration: number;
+    status: string;
+    studentCount?: number;
   }>;
   leads: Array<{
     id: string;
@@ -112,14 +133,15 @@ export function GlobalSearch() {
   // Flattened list of navigable items for keyboard arrow navigation
   const navigableItems = useMemo(() => {
     if (!query.trim() || !results) {
-      return QUICK_LINKS.map(link => ({ type: "link", href: link.href, label: link.name }));
+      return QUICK_LINKS.map(link => ({ type: "link", href: link.href, label: link.name, id: link.href }));
     }
-    const items: Array<{ type: string; href: string; label: string }> = [];
-    results.students.forEach(s => items.push({ type: "student", href: "/students", label: `${s.name} (${s.code})` }));
-    results.classes.forEach(c => items.push({ type: "class", href: "/classes", label: `${c.name} (${c.code})` }));
-    results.courses.forEach(co => items.push({ type: "course", href: "/courses", label: `${co.name} (${co.code})` }));
-    results.leads.forEach(l => items.push({ type: "lead", href: "/leads", label: `${l.name} (${l.phone})` }));
-    results.orders.forEach(o => items.push({ type: "order", href: "/orders", label: `${o.parentName} (${o.code})` }));
+    const items: Array<{ type: string; href: string; label: string; id: string }> = [];
+    results.students.forEach(s => items.push({ type: "student", href: `/students?highlight=${encodeURIComponent(s.id)}`, label: `${s.name} (${s.code})`, id: s.id }));
+    results.classes.forEach(c => items.push({ type: "class", href: `/classes?highlight=${encodeURIComponent(c.id)}`, label: `${c.name} (${c.code})`, id: c.id }));
+    results.schedules.forEach(sc => items.push({ type: "schedule", href: `/schedule?highlight=${encodeURIComponent(sc.id)}`, label: `${sc.className} (${sc.roomName})`, id: sc.id }));
+    results.courses.forEach(co => items.push({ type: "course", href: `/courses?highlight=${encodeURIComponent(co.id)}`, label: `${co.name} (${co.code})`, id: co.id }));
+    results.leads.forEach(l => items.push({ type: "lead", href: `/leads?highlight=${encodeURIComponent(l.id)}`, label: `${l.name} (${l.phone})`, id: l.id }));
+    results.orders.forEach(o => items.push({ type: "order", href: `/orders?highlight=${encodeURIComponent(o.id)}`, label: `${o.parentName} (${o.code})`, id: o.id }));
     return items;
   }, [query, results]);
 
@@ -219,6 +241,7 @@ export function GlobalSearch() {
     results &&
     (results.students.length > 0 ||
       results.classes.length > 0 ||
+      results.schedules.length > 0 ||
       results.courses.length > 0 ||
       results.leads.length > 0 ||
       results.orders.length > 0);
@@ -234,7 +257,7 @@ export function GlobalSearch() {
         >
           <div className="flex items-center gap-2.5 min-w-0 text-muted-foreground group-hover:text-foreground">
             <Search className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
-            <span className="truncate">Tìm nhanh học viên, lớp học, đơn hàng...</span>
+            <span className="truncate">Tìm nhanh học viên, lớp học, lịch học, đơn hàng...</span>
           </div>
           <kbd className="hidden sm:inline-flex items-center gap-0.5 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-lg bg-muted border border-border text-muted-foreground group-hover:border-primary/40 shadow-2xs shrink-0">
             ⌘K
@@ -269,7 +292,7 @@ export function GlobalSearch() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Tìm học viên, lớp học, khóa học, đơn hàng..."
+                placeholder="Tìm học viên, lớp học, lịch học, khóa học..."
                 className="flex-1 bg-transparent text-sm sm:text-base font-bold text-foreground placeholder:text-muted-foreground/70 outline-none border-none"
               />
 
@@ -385,43 +408,59 @@ export function GlobalSearch() {
                         </span>
                         <button
                           type="button"
-                          onClick={() => handleNavigate("/students")}
-                          className="text-[#D97736] hover:underline lowercase font-bold"
+                          onClick={() => handleNavigate(`/students?q=${encodeURIComponent(query.trim())}`)}
+                          className="text-[#D97736] hover:underline lowercase font-bold cursor-pointer"
                         >
                           xem tất cả →
                         </button>
                       </div>
                       <div className="space-y-1">
-                        {results.students.map((s) => (
-                          <div
-                            key={s.id}
-                            onClick={() => handleNavigate("/students")}
-                            className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-[#FAF6F0] dark:hover:bg-[#28221D] border border-border/60 hover:border-primary/40 transition-all cursor-pointer group"
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className="clay-icon-tile h-8 w-8 bg-[#E6F8FB] text-[#0284C7] font-mono font-black text-xs shrink-0">
-                                {s.code.slice(-3)}
+                        {results.students.map((s) => {
+                          const itemIndex = navigableItems.findIndex((item) => item.id === s.id);
+                          const isSelected = selectedIndex === itemIndex;
+                          const href = `/students?highlight=${encodeURIComponent(s.id)}`;
+
+                          return (
+                            <div
+                              key={s.id}
+                              ref={(el) => {
+                                if (isSelected && el) {
+                                  el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+                                }
+                              }}
+                              onMouseEnter={() => itemIndex !== -1 && setSelectedIndex(itemIndex)}
+                              onClick={() => handleNavigate(href)}
+                              className={`flex items-center justify-between p-2.5 rounded-2xl border transition-all cursor-pointer group ${
+                                isSelected
+                                  ? "bg-[#FFF0E6] dark:bg-[#352114] border-primary/80 dark:border-primary/60 ring-2 ring-primary/40 shadow-sm"
+                                  : "hover:bg-[#FAF6F0] dark:hover:bg-[#28221D] border-border/60 hover:border-primary/40"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <div className={`clay-icon-tile h-8 w-8 font-mono font-black text-xs shrink-0 ${isSelected ? "bg-primary text-white" : "bg-[#E6F8FB] text-[#0284C7]"}`}>
+                                  {s.code.slice(-3)}
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className={`text-xs font-extrabold font-heading ${isSelected ? "text-primary" : "text-foreground"}`}>{s.name}</span>
+                                    <Badge variant="secondary" className="text-[9px] h-4.5 px-1.5 font-mono">{s.code}</Badge>
+                                  </div>
+                                  <div className="text-[11px] text-muted-foreground flex items-center gap-2 font-medium">
+                                    {s.phone && <span>{s.phone}</span>}
+                                    {s.parentName && <span>• PH: {s.parentName}</span>}
+                                    {s.facilityName && <span>• {s.facilityName}</span>}
+                                  </div>
+                                </div>
                               </div>
-                              <div className="min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-xs font-extrabold text-foreground font-heading">{s.name}</span>
-                                  <Badge variant="secondary" className="text-[9px] h-4.5 px-1.5 font-mono">{s.code}</Badge>
-                                </div>
-                                <div className="text-[11px] text-muted-foreground flex items-center gap-2 font-medium">
-                                  {s.phone && <span>{s.phone}</span>}
-                                  {s.parentName && <span>• PH: {s.parentName}</span>}
-                                  {s.facilityName && <span>• {s.facilityName}</span>}
-                                </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <Badge variant={s.status === "ACTIVE" ? "green" : "outline"} className="text-[10px]">
+                                  {getStudentStatusLabel(s.status)}
+                                </Badge>
+                                <CornerDownLeft className={`h-3.5 w-3.5 transition-opacity ${isSelected ? "text-primary opacity-100" : "text-muted-foreground opacity-0 group-hover:opacity-100"}`} />
                               </div>
                             </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                              <Badge variant={s.status === "ACTIVE" ? "green" : "outline"} className="text-[10px]">
-                                {getStudentStatusLabel(s.status)}
-                              </Badge>
-                              <CornerDownLeft className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   )}
@@ -435,47 +474,142 @@ export function GlobalSearch() {
                         </span>
                         <button
                           type="button"
-                          onClick={() => handleNavigate("/classes")}
-                          className="text-[#D97736] hover:underline lowercase font-bold"
+                          onClick={() => handleNavigate(`/classes?q=${encodeURIComponent(query.trim())}`)}
+                          className="text-[#D97736] hover:underline lowercase font-bold cursor-pointer"
                         >
                           xem tất cả →
                         </button>
                       </div>
                       <div className="space-y-1">
-                        {results.classes.map((c) => (
-                          <div
-                            key={c.id}
-                            onClick={() => handleNavigate("/classes")}
-                            className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-[#FAF6F0] dark:hover:bg-[#28221D] border border-border/60 hover:border-primary/40 transition-all cursor-pointer group"
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className="clay-icon-tile h-8 w-8 bg-[#FFF0E6] text-[#D97736] font-bold text-xs shrink-0">
-                                <GraduationCap className="h-4 w-4" />
+                        {results.classes.map((c) => {
+                          const itemIndex = navigableItems.findIndex((item) => item.id === c.id);
+                          const isSelected = selectedIndex === itemIndex;
+                          const href = `/classes?highlight=${encodeURIComponent(c.id)}`;
+
+                          return (
+                            <div
+                              key={c.id}
+                              ref={(el) => {
+                                if (isSelected && el) {
+                                  el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+                                }
+                              }}
+                              onMouseEnter={() => itemIndex !== -1 && setSelectedIndex(itemIndex)}
+                              onClick={() => handleNavigate(href)}
+                              className={`flex items-center justify-between p-2.5 rounded-2xl border transition-all cursor-pointer group ${
+                                isSelected
+                                  ? "bg-[#FFF0E6] dark:bg-[#352114] border-primary/80 dark:border-primary/60 ring-2 ring-primary/40 shadow-sm"
+                                  : "hover:bg-[#FAF6F0] dark:hover:bg-[#28221D] border-border/60 hover:border-primary/40"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <div className={`clay-icon-tile h-8 w-8 font-bold text-xs shrink-0 ${isSelected ? "bg-primary text-white" : "bg-[#FFF0E6] text-[#D97736]"}`}>
+                                  <GraduationCap className="h-4 w-4" />
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className={`text-xs font-extrabold font-heading ${isSelected ? "text-primary" : "text-foreground"}`}>{c.name}</span>
+                                    <Badge variant="orange" className="text-[9px] h-4.5 px-1.5 font-mono">{c.code}</Badge>
+                                  </div>
+                                  <div className="text-[11px] text-muted-foreground flex items-center gap-2 font-medium">
+                                    <span>{c.courseName}</span>
+                                    {c.facilityName && <span>• {c.facilityName}</span>}
+                                    {c.teacherName && <span>• GV: {c.teacherName}</span>}
+                                  </div>
+                                </div>
                               </div>
-                              <div className="min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-xs font-extrabold text-foreground font-heading">{c.name}</span>
-                                  <Badge variant="orange" className="text-[9px] h-4.5 px-1.5 font-mono">{c.code}</Badge>
-                                </div>
-                                <div className="text-[11px] text-muted-foreground flex items-center gap-2 font-medium">
-                                  <span>{c.courseName}</span>
-                                  {c.facilityName && <span>• {c.facilityName}</span>}
-                                  {c.teacherName && <span>• GV: {c.teacherName}</span>}
-                                </div>
+                              <div className="flex items-center gap-2 text-right shrink-0">
+                                <span className="text-xs font-extrabold font-mono text-primary">
+                                  {c.studentCount}/{c.capacity}
+                                </span>
+                                <CornerDownLeft className={`h-3.5 w-3.5 transition-opacity ${isSelected ? "text-primary opacity-100" : "text-muted-foreground opacity-0 group-hover:opacity-100"}`} />
                               </div>
                             </div>
-                            <div className="text-right shrink-0">
-                              <span className="text-xs font-extrabold font-mono text-primary">
-                                {c.studentCount}/{c.capacity}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   )}
 
-                  {/* 3. Courses */}
+                  {/* 3. Schedules */}
+                  {results && results.schedules.length > 0 && (
+                    <div className="space-y-1.5 pt-2">
+                      <div className="flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground font-heading">
+                        <span className="flex items-center gap-1.5">
+                          <CalendarDays className="h-3.5 w-3.5 text-indigo-500" /> Lịch học ({results.schedules.length})
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleNavigate(`/schedule?q=${encodeURIComponent(query.trim())}`)}
+                          className="text-[#D97736] hover:underline lowercase font-bold cursor-pointer"
+                        >
+                          xem tất cả →
+                        </button>
+                      </div>
+                      <div className="space-y-1">
+                        {results.schedules.map((sc) => {
+                          const itemIndex = navigableItems.findIndex((item) => item.id === sc.id);
+                          const isSelected = selectedIndex === itemIndex;
+                          const href = `/schedule?highlight=${encodeURIComponent(sc.id)}`;
+
+                          const dateObj = new Date(sc.date);
+                          const dayStr = dateObj.toLocaleDateString("vi-VN", { weekday: "short", day: "2-digit", month: "2-digit" });
+                          const timeStr = dateObj.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+
+                          return (
+                            <div
+                              key={sc.id}
+                              ref={(el) => {
+                                if (isSelected && el) {
+                                  el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+                                }
+                              }}
+                              onMouseEnter={() => itemIndex !== -1 && setSelectedIndex(itemIndex)}
+                              onClick={() => handleNavigate(href)}
+                              className={`flex items-center justify-between p-2.5 rounded-2xl border transition-all cursor-pointer group ${
+                                isSelected
+                                  ? "bg-[#FFF0E6] dark:bg-[#352114] border-primary/80 dark:border-primary/60 ring-2 ring-primary/40 shadow-sm"
+                                  : "hover:bg-[#FAF6F0] dark:hover:bg-[#28221D] border-border/60 hover:border-primary/40"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <div className={`clay-icon-tile h-8 w-8 font-bold text-xs shrink-0 ${isSelected ? "bg-primary text-white" : "bg-[#EEF2FF] text-[#4F46E5] dark:bg-[#2A2440] dark:text-[#A5B4FC]"}`}>
+                                  <CalendarDays className="h-4 w-4" />
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className={`text-xs font-extrabold font-heading ${isSelected ? "text-primary" : "text-foreground"}`}>{sc.className}</span>
+                                    <Badge variant="orange" className="text-[9px] h-4.5 px-1.5 font-mono">{sc.classCode}</Badge>
+                                  </div>
+                                  <div className="text-[11px] text-muted-foreground flex items-center gap-2 font-medium truncate">
+                                    <span>{sc.roomName}</span>
+                                    {sc.teacherName && <span>• GV: {sc.teacherName}</span>}
+                                    {sc.facilityName && <span>• {sc.facilityName}</span>}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <div className="text-right">
+                                  <div className="text-[11px] font-bold font-heading text-foreground">
+                                    {dayStr} • {timeStr}
+                                  </div>
+                                  <div className="flex items-center justify-end gap-1 mt-0.5">
+                                    <span className="text-[10px] text-muted-foreground font-mono font-medium">({sc.duration}p)</span>
+                                    <Badge variant={SCHEDULE_STATUS_MAP[sc.status]?.badgeVariant || 'aqua'} className="text-[9px] px-1.5 py-0 h-4 font-semibold">
+                                      {getScheduleStatusLabel(sc.status)}
+                                    </Badge>
+                                  </div>
+                                </div>
+                                <CornerDownLeft className={`h-3.5 w-3.5 transition-opacity ${isSelected ? "text-primary opacity-100" : "text-muted-foreground opacity-0 group-hover:opacity-100"}`} />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 4. Courses */}
                   {results && results.courses.length > 0 && (
                     <div className="space-y-1.5 pt-2">
                       <div className="flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground font-heading">
@@ -484,40 +618,59 @@ export function GlobalSearch() {
                         </span>
                         <button
                           type="button"
-                          onClick={() => handleNavigate("/courses")}
-                          className="text-[#D97736] hover:underline lowercase font-bold"
+                          onClick={() => handleNavigate(`/courses?q=${encodeURIComponent(query.trim())}`)}
+                          className="text-[#D97736] hover:underline lowercase font-bold cursor-pointer"
                         >
                           xem tất cả →
                         </button>
                       </div>
                       <div className="space-y-1">
-                        {results.courses.map((co) => (
-                          <div
-                            key={co.id}
-                            onClick={() => handleNavigate("/courses")}
-                            className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-[#FAF6F0] dark:hover:bg-[#28221D] border border-border/60 hover:border-primary/40 transition-all cursor-pointer group"
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className="clay-icon-tile h-8 w-8 bg-[#F0FDF4] text-[#16A34A] font-bold text-xs shrink-0">
-                                <BookOpen className="h-4 w-4" />
+                        {results.courses.map((co) => {
+                          const itemIndex = navigableItems.findIndex((item) => item.id === co.id);
+                          const isSelected = selectedIndex === itemIndex;
+                          const href = `/courses?highlight=${encodeURIComponent(co.id)}`;
+
+                          return (
+                            <div
+                              key={co.id}
+                              ref={(el) => {
+                                if (isSelected && el) {
+                                  el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+                                }
+                              }}
+                              onMouseEnter={() => itemIndex !== -1 && setSelectedIndex(itemIndex)}
+                              onClick={() => handleNavigate(href)}
+                              className={`flex items-center justify-between p-2.5 rounded-2xl border transition-all cursor-pointer group ${
+                                isSelected
+                                  ? "bg-[#FFF0E6] dark:bg-[#352114] border-primary/80 dark:border-primary/60 ring-2 ring-primary/40 shadow-sm"
+                                  : "hover:bg-[#FAF6F0] dark:hover:bg-[#28221D] border-border/60 hover:border-primary/40"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <div className={`clay-icon-tile h-8 w-8 font-bold text-xs shrink-0 ${isSelected ? "bg-primary text-white" : "bg-[#F0FDF4] text-[#16A34A]"}`}>
+                                  <BookOpen className="h-4 w-4" />
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className={`text-xs font-extrabold font-heading ${isSelected ? "text-primary" : "text-foreground"}`}>{co.name}</span>
+                                    <Badge variant="green" className="text-[9px] h-4.5 px-1.5 font-mono">{co.code}</Badge>
+                                  </div>
+                                  <div className="text-[11px] text-muted-foreground font-medium">
+                                    {co.type} {co.duration ? `• ${co.duration} buổi` : ""}
+                                  </div>
+                                </div>
                               </div>
-                              <div className="min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-xs font-extrabold text-foreground font-heading">{co.name}</span>
-                                  <Badge variant="green" className="text-[9px] h-4.5 px-1.5 font-mono">{co.code}</Badge>
-                                </div>
-                                <div className="text-[11px] text-muted-foreground font-medium">
-                                  {co.type} {co.duration ? `• ${co.duration} buổi` : ""}
-                                </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                {co.fee && (
+                                  <div className="text-xs font-black font-mono text-[#D97736]">
+                                    {formatVND(co.fee)}
+                                  </div>
+                                )}
+                                <CornerDownLeft className={`h-3.5 w-3.5 transition-opacity ${isSelected ? "text-primary opacity-100" : "text-muted-foreground opacity-0 group-hover:opacity-100"}`} />
                               </div>
                             </div>
-                            {co.fee && (
-                              <div className="text-xs font-black font-mono text-[#D97736] shrink-0">
-                                {formatVND(co.fee)}
-                              </div>
-                            )}
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   )}
@@ -531,35 +684,54 @@ export function GlobalSearch() {
                         </span>
                         <button
                           type="button"
-                          onClick={() => handleNavigate("/leads")}
-                          className="text-[#D97736] hover:underline lowercase font-bold"
+                          onClick={() => handleNavigate(`/leads?q=${encodeURIComponent(query.trim())}`)}
+                          className="text-[#D97736] hover:underline lowercase font-bold cursor-pointer"
                         >
                           xem tất cả →
                         </button>
                       </div>
                       <div className="space-y-1">
-                        {results.leads.map((l) => (
-                          <div
-                            key={l.id}
-                            onClick={() => handleNavigate("/leads")}
-                            className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-[#FAF6F0] dark:hover:bg-[#28221D] border border-border/60 hover:border-primary/40 transition-all cursor-pointer group"
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className="clay-icon-tile h-8 w-8 bg-[#FFFBEB] text-[#D97706] font-bold text-xs shrink-0">
-                                <UserPlus className="h-4 w-4" />
-                              </div>
-                              <div className="min-w-0">
-                                <div className="text-xs font-extrabold text-foreground font-heading">{l.name}</div>
-                                <div className="text-[11px] text-muted-foreground font-medium">
-                                  {l.phone} {l.courseName ? `• ${l.courseName}` : ""}
+                        {results.leads.map((l) => {
+                          const itemIndex = navigableItems.findIndex((item) => item.id === l.id);
+                          const isSelected = selectedIndex === itemIndex;
+                          const href = `/leads?highlight=${encodeURIComponent(l.id)}`;
+
+                          return (
+                            <div
+                              key={l.id}
+                              ref={(el) => {
+                                if (isSelected && el) {
+                                  el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+                                }
+                              }}
+                              onMouseEnter={() => itemIndex !== -1 && setSelectedIndex(itemIndex)}
+                              onClick={() => handleNavigate(href)}
+                              className={`flex items-center justify-between p-2.5 rounded-2xl border transition-all cursor-pointer group ${
+                                isSelected
+                                  ? "bg-[#FFF0E6] dark:bg-[#352114] border-primary/80 dark:border-primary/60 ring-2 ring-primary/40 shadow-sm"
+                                  : "hover:bg-[#FAF6F0] dark:hover:bg-[#28221D] border-border/60 hover:border-primary/40"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <div className={`clay-icon-tile h-8 w-8 font-bold text-xs shrink-0 ${isSelected ? "bg-primary text-white" : "bg-[#FFFBEB] text-[#D97706]"}`}>
+                                  <UserPlus className="h-4 w-4" />
+                                </div>
+                                <div className="min-w-0">
+                                  <div className={`text-xs font-extrabold font-heading ${isSelected ? "text-primary" : "text-foreground"}`}>{l.name}</div>
+                                  <div className="text-[11px] text-muted-foreground font-medium">
+                                    {l.phone} {l.courseName ? `• ${l.courseName}` : ""}
+                                  </div>
                                 </div>
                               </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <Badge variant="outline" className="text-[10px] font-bold">
+                                  {getLeadStatusLabel(l.status)}
+                                </Badge>
+                                <CornerDownLeft className={`h-3.5 w-3.5 transition-opacity ${isSelected ? "text-primary opacity-100" : "text-muted-foreground opacity-0 group-hover:opacity-100"}`} />
+                              </div>
                             </div>
-                            <Badge variant="outline" className="text-[10px] shrink-0 font-bold">
-                              {getLeadStatusLabel(l.status)}
-                            </Badge>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   )}
@@ -573,41 +745,60 @@ export function GlobalSearch() {
                         </span>
                         <button
                           type="button"
-                          onClick={() => handleNavigate("/orders")}
-                          className="text-[#D97736] hover:underline lowercase font-bold"
+                          onClick={() => handleNavigate(`/orders?q=${encodeURIComponent(query.trim())}`)}
+                          className="text-[#D97736] hover:underline lowercase font-bold cursor-pointer"
                         >
                           xem tất cả →
                         </button>
                       </div>
                       <div className="space-y-1">
-                        {results.orders.map((o) => (
-                          <div
-                            key={o.id}
-                            onClick={() => handleNavigate("/orders")}
-                            className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-[#FAF6F0] dark:hover:bg-[#28221D] border border-border/60 hover:border-primary/40 transition-all cursor-pointer group"
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className="clay-icon-tile h-8 w-8 bg-[#FDF2F8] text-[#DB2777] font-bold text-xs shrink-0">
-                                <Receipt className="h-4 w-4" />
+                        {results.orders.map((o) => {
+                          const itemIndex = navigableItems.findIndex((item) => item.id === o.id);
+                          const isSelected = selectedIndex === itemIndex;
+                          const href = `/orders?highlight=${encodeURIComponent(o.id)}`;
+
+                          return (
+                            <div
+                              key={o.id}
+                              ref={(el) => {
+                                if (isSelected && el) {
+                                  el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+                                }
+                              }}
+                              onMouseEnter={() => itemIndex !== -1 && setSelectedIndex(itemIndex)}
+                              onClick={() => handleNavigate(href)}
+                              className={`flex items-center justify-between p-2.5 rounded-2xl border transition-all cursor-pointer group ${
+                                isSelected
+                                  ? "bg-[#FFF0E6] dark:bg-[#352114] border-primary/80 dark:border-primary/60 ring-2 ring-primary/40 shadow-sm"
+                                  : "hover:bg-[#FAF6F0] dark:hover:bg-[#28221D] border-border/60 hover:border-primary/40"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <div className={`clay-icon-tile h-8 w-8 font-bold text-xs shrink-0 ${isSelected ? "bg-primary text-white" : "bg-[#FDF2F8] text-[#DB2777]"}`}>
+                                  <Receipt className="h-4 w-4" />
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className={`text-xs font-extrabold font-heading ${isSelected ? "text-primary" : "text-foreground"}`}>{o.parentName}</span>
+                                    <Badge variant="pink" className="text-[9px] h-4.5 px-1.5 font-mono">{o.code}</Badge>
+                                  </div>
+                                  <div className="text-[11px] text-muted-foreground font-medium">
+                                    {o.parentPhone} {o.courseName ? `• ${o.courseName}` : ""}
+                                  </div>
+                                </div>
                               </div>
-                              <div className="min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-xs font-extrabold text-foreground font-heading">{o.parentName}</span>
-                                  <Badge variant="pink" className="text-[9px] h-4.5 px-1.5 font-mono">{o.code}</Badge>
+                              <div className="flex items-center gap-2 text-right shrink-0">
+                                <div>
+                                  <div className="text-xs font-black font-mono text-foreground">{formatVND(o.amount)}</div>
+                                  <Badge variant={ORDER_STATUS_MAP[o.status]?.badgeVariant || 'amber'} className="text-[9px] mt-0.5">
+                                    {getOrderStatusLabel(o.status)}
+                                  </Badge>
                                 </div>
-                                <div className="text-[11px] text-muted-foreground font-medium">
-                                  {o.parentPhone} {o.courseName ? `• ${o.courseName}` : ""}
-                                </div>
+                                <CornerDownLeft className={`h-3.5 w-3.5 transition-opacity ${isSelected ? "text-primary opacity-100" : "text-muted-foreground opacity-0 group-hover:opacity-100"}`} />
                               </div>
                             </div>
-                            <div className="text-right shrink-0">
-                              <div className="text-xs font-black font-mono text-foreground">{formatVND(o.amount)}</div>
-                              <Badge variant={ORDER_STATUS_MAP[o.status]?.badgeVariant || 'amber'} className="text-[9px] mt-0.5">
-                                {getOrderStatusLabel(o.status)}
-                              </Badge>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   )}

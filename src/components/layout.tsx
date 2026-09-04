@@ -241,6 +241,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     <Link
                       key={item.name}
                       href={item.href}
+                      prefetch={true}
                       className={`group flex items-center justify-between rounded-2xl px-3.5 py-2.5 text-xs font-bold transition-all duration-150 relative ${
                         isActive
                           ? "bg-gradient-to-r from-[#F2994A] to-[#E08E58] text-white shadow-md shadow-[#E08E58]/35 border border-white/20"
@@ -390,22 +391,22 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   className="absolute right-0 mt-2 w-52 rounded-3xl border-2 border-border/80 bg-popover p-2 text-popover-foreground shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100"
                   onClick={() => setIsQuickAddOpen(false)}
                 >
-                  <Link href="/students" className="flex items-center gap-2.5 rounded-2xl px-3 py-2 text-xs hover:bg-[#FFF0E6] hover:text-[#D97736] font-bold transition-colors">
+                  <Link href="/students" prefetch={true} className="flex items-center gap-2.5 rounded-2xl px-3 py-2 text-xs hover:bg-[#FFF0E6] hover:text-[#D97736] font-bold transition-colors">
                     <Users className="h-4 w-4 text-primary" /> Thêm học viên
                   </Link>
-                  <Link href="/classes" className="flex items-center gap-2.5 rounded-2xl px-3 py-2 text-xs hover:bg-[#FFF0E6] hover:text-[#D97736] font-bold transition-colors">
+                  <Link href="/classes" prefetch={true} className="flex items-center gap-2.5 rounded-2xl px-3 py-2 text-xs hover:bg-[#FFF0E6] hover:text-[#D97736] font-bold transition-colors">
                     <GraduationCap className="h-4 w-4 text-primary" /> Mở lớp học
                   </Link>
-                  <Link href="/orders" className="flex items-center gap-2.5 rounded-2xl px-3 py-2 text-xs hover:bg-[#FFF0E6] hover:text-[#D97736] font-bold transition-colors">
+                  <Link href="/orders" prefetch={true} className="flex items-center gap-2.5 rounded-2xl px-3 py-2 text-xs hover:bg-[#FFF0E6] hover:text-[#D97736] font-bold transition-colors">
                     <Receipt className="h-4 w-4 text-primary" /> Tạo đơn đăng ký
                   </Link>
-                  <Link href="/campaigns" className="flex items-center gap-2.5 rounded-2xl px-3 py-2 text-xs hover:bg-[#FFF0E6] hover:text-[#D97736] font-bold transition-colors">
+                  <Link href="/campaigns" prefetch={true} className="flex items-center gap-2.5 rounded-2xl px-3 py-2 text-xs hover:bg-[#FFF0E6] hover:text-[#D97736] font-bold transition-colors">
                     <Sparkles className="h-4 w-4 text-primary" /> Tạo chiến dịch ưu đãi
                   </Link>
-                  <Link href="/leads" className="flex items-center gap-2.5 rounded-2xl px-3 py-2 text-xs hover:bg-[#FFF0E6] hover:text-[#D97736] font-bold transition-colors">
+                  <Link href="/leads" prefetch={true} className="flex items-center gap-2.5 rounded-2xl px-3 py-2 text-xs hover:bg-[#FFF0E6] hover:text-[#D97736] font-bold transition-colors">
                     <UserPlus className="h-4 w-4 text-primary" /> Thêm khách tiềm năng
                   </Link>
-                  <Link href="/schedule" className="flex items-center gap-2.5 rounded-2xl px-3 py-2 text-xs hover:bg-[#FFF0E6] hover:text-[#D97736] font-bold transition-colors">
+                  <Link href="/schedule" prefetch={true} className="flex items-center gap-2.5 rounded-2xl px-3 py-2 text-xs hover:bg-[#FFF0E6] hover:text-[#D97736] font-bold transition-colors">
                     <CalendarDays className="h-4 w-4 text-primary" /> Xếp lịch học
                   </Link>
                 </div>
@@ -472,6 +473,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                       <Link
                         key={item.name}
                         href={item.href}
+                        prefetch={true}
                         onClick={() => setIsMobileMenuOpen(false)}
                         className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-bold transition-colors ${
                           isActive 

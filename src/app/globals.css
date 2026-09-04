@@ -354,3 +354,17 @@
 .animate-soft-bounce {
   animation: soft-bounce 3s ease-in-out infinite;
 }
+
+/* Search selection highlight glow */
+@keyframes highlight-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 2.5px rgba(217, 119, 54, 0.4), inset 0 0 12px rgba(217, 119, 54, 0.08);
+  }
+  50% {
+    box-shadow: 0 0 0 4.5px rgba(217, 119, 54, 0.8), inset 0 0 20px rgba(217, 119, 54, 0.16);
+  }
+}
+
+.row-highlight-active {
+  animation: highlight-glow 2.2s ease-in-out infinite;
+}
