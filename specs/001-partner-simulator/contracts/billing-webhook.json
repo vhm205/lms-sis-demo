@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BillingPaymentWebhookPayload",
+  "type": "object",
+  "required": ["event", "order_code", "transaction_id", "amount"],
+  "properties": {
+    "event": {
+      "type": "string",
+      "enum": ["payment_success", "payment_failed", "refund_processed"]
+    },
+    "order_code": {
+      "type": "string",
+      "description": "Unique code of the order in SIS (e.g. ORD-123456)"
+    },
+    "order_id": {
+      "type": "string",
+      "description": "CUID of the order if available"
+    },
+    "transaction_id": {
+      "type": "string",
+      "description": "Unique payment gateway transaction ID"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Total amount paid or refunded"
+    },
+    "currency": {
+      "type": "string",
+      "default": "VND"
+    },
+    "payment_method": {
+      "type": "string",
+      "default": "BANK_TRANSFER"
+    },
+    "paid_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "dedup_key": {
+      "type": "string",
+      "description": "Deduplication key for idempotency control"
+    },
+    "source": {
+      "type": "string",
+      "default": "BILLING_MOCK"
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

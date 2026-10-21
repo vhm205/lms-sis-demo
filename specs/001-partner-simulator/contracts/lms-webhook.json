@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LmsProgressWebhookPayload",
+  "type": "object",
+  "required": ["event", "learner_id"],
+  "properties": {
+    "event": {
+      "type": "string",
+      "enum": ["lms.first_login", "lms.lesson_completed", "lms.progress_updated"]
+    },
+    "learner_id": {
+      "type": "string",
+      "description": "Student ID or Student Code (e.g. HV0001)"
+    },
+    "course_id": {
+      "type": "string",
+      "description": "Course ID or Course Code"
+    },
+    "lesson_id": {
+      "type": "string",
+      "description": "Lesson ID in the LMS"
+    },
+    "lesson_title": {
+      "type": "string",
+      "description": "Title of the lesson"
+    },
+    "progress_percent": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "external_reference": {
+      "type": "string",
+      "description": "Trace reference ID from external LMS"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "dedup_key": {
+      "type": "string"
+    }
+  }
+}

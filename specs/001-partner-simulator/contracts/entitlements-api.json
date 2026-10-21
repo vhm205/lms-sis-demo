@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EntitlementsApiSpec",
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "object",
+      "properties": {
+        "studentId": { "type": "string" },
+        "studentCode": { "type": "string" },
+        "status": { "type": "string", "enum": ["ACTIVE", "EXPIRED", "SUSPENDED", "ALL"] }
+      }
+    },
+    "response": {
+      "type": "object",
+      "required": ["success", "entitlements"],
+      "properties": {
+        "success": { "type": "boolean" },
+        "entitlements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "studentId": { "type": "string" },
+              "studentName": { "type": "string" },
+              "courseId": { "type": "string" },
+              "courseName": { "type": "string" },
+              "type": { "type": "string" },
+              "status": { "type": "string" },
+              "startsAt": { "type": "string", "format": "date-time" },
+              "expiresAt": { "type": "string", "format": "date-time" },
+              "daysRemaining": { "type": "number" },
+              "isExpiringSoon": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

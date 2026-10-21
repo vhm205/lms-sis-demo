@@ -34,6 +34,7 @@ import {
   UserPlus,
   ShoppingCart
 } from "lucide-react";
+import { PartnerSimulatorPanel } from "./partner-simulator-panel";
 
 // ==========================================
 // REST API Definitions & Test Defaults
@@ -432,6 +433,122 @@ const APIS: ApiDefinition[] = [
         }
       ]
     }
+  },
+  {
+    id: "webhook_billing_payment",
+    method: "POST",
+    path: "/api/webhooks/billing/payment-confirmation",
+    title: "Webhook: Billing Payment Confirmation (Mock Gateway)",
+    desc: "Nhận webhook tự động xác nhận thanh toán (payment_success), hoàn tiền (refund_processed) hoặc lỗi giao dịch từ cổng thanh toán Billing Mock.",
+    headers: [
+      { name: "Content-Type", value: "application/json", required: true, desc: "Định dạng payload JSON" }
+    ],
+    bodyTemplate: {
+      event: "payment_success",
+      order_code: "ORD-2025-0002",
+      transaction_id: "tx_mock_123456",
+      amount: 4500000,
+      currency: "VND",
+      payment_method: "BANK_TRANSFER",
+      dedup_key: "billing_dedup_01",
+      source: "BILLING_MOCK"
+    },
+    sampleResponse: {
+      success: true,
+      message: "Đã xác nhận thanh toán thành công cho đơn hàng ORD-2025-0002. Trạng thái đã chuyển sang PAID.",
+      order: {
+        code: "ORD-2025-0002",
+        status: "PAID",
+        amount: 4500000
+      },
+      entitlement: {
+        status: "ACTIVE"
+      },
+      dedup_key: "billing_dedup_01"
+    }
+  },
+  {
+    id: "webhook_lms_progress",
+    method: "POST",
+    path: "/api/webhooks/lms/progress",
+    title: "Webhook: LMS Progress & Bắt Đầu Học (Mock LMS)",
+    desc: "Nhận webhook tự động ghi nhận sự kiện học viên bắt đầu học (lms.first_login) hoặc hoàn thành bài học (lms.lesson_completed) làm căn cứ KPI cho Orchexa.",
+    headers: [
+      { name: "Content-Type", value: "application/json", required: true, desc: "Định dạng payload JSON" }
+    ],
+    bodyTemplate: {
+      event: "lms.first_login",
+      learner_id: "HV0001",
+      lesson_id: "unit_01",
+      lesson_title: "Unit 1: Phonics and Alphabet",
+      progress_percent: 100,
+      external_reference: "LMS_SYNC_998877",
+      dedup_key: "lms_dedup_01"
+    },
+    sampleResponse: {
+      success: true,
+      message: "Học viên đăng nhập hệ thống LMS lần đầu. Mốc Bắt đầu học (KPI) đã được ghi nhận.",
+      student: {
+        code: "HV0001",
+        name: "Nguyễn Nhật Minh"
+      },
+      dedup_key: "lms_dedup_01"
+    }
+  },
+  {
+    id: "lms_trial_accounts",
+    method: "POST",
+    path: "/api/mock/lms/trial-accounts",
+    title: "API: Cấp Quyền & Tài Khoản Học Thử 7 Ngày (LMS Provisioning)",
+    desc: "Tạo tài khoản và tự động cấp quyền học thử 7 ngày (TRIAL Entitlement) cho Lead hoặc Học viên mới.",
+    headers: [
+      { name: "Content-Type", value: "application/json", required: true, desc: "Định dạng payload JSON" }
+    ],
+    bodyTemplate: {
+      name: "Nguyễn Hoàng Nam",
+      phone: "0988776655",
+      trial_days: 7,
+      notes: "Đăng ký học thử khóa Cambridge Movers"
+    },
+    sampleResponse: {
+      success: true,
+      learner_id: "cmtl...",
+      student_code: "HV0009",
+      username: "HV0009",
+      trial_token: "trial_tok_abc123",
+      access_url: "https://lms-mock.educenter.vn/access?token=trial_tok_abc123",
+      starts_at: "2026-10-21T12:00:00.000Z",
+      expires_at: "2026-10-28T12:00:00.000Z",
+      status: "TRIAL_PROVISIONED"
+    }
+  },
+  {
+    id: "get_entitlements",
+    method: "GET",
+    path: "/api/entitlements",
+    title: "API: Tra cứu & Quản lý Hạn Gói Học (Entitlements / S06 Renewal)",
+    desc: "Tra cứu danh sách quyền sử dụng gói học của học viên, số ngày còn lại (daysRemaining), cảnh báo sắp hết hạn (isExpiringSoon) và thực hiện gia hạn/hết hạn gói.",
+    headers: [
+      { name: "Content-Type", value: "application/json", required: true, desc: "Định dạng payload JSON" }
+    ],
+    params: [
+      { name: "studentCode", type: "string", required: false, desc: "Mã học viên (VD: HV0001)", defaultVal: "HV0001" },
+      { name: "studentId", type: "string", required: false, desc: "ID học viên trong CSDL (cuid)", defaultVal: "" }
+    ],
+    sampleResponse: {
+      success: true,
+      entitlements: [
+        {
+          id: "cmtl...",
+          course: { name: "Cambridge Movers Chuẩn Quốc Tế" },
+          type: "OFFICIAL",
+          status: "ACTIVE",
+          daysRemaining: 96,
+          isExpiringSoon: false,
+          isExpired: false
+        }
+      ]
+    }
   }
 ];
 
@@ -606,11 +723,27 @@ const MCP_TOOLS_CATALOG: McpTool[] = [
     defaultArgs: {
       targetAudience: "KIDS"
     }
+  },
+  {
+    name: "check_entitlement",
+    aliases: ["get_student_entitlement", "check_course_expiry"],
+    desc: "Tra cứu thời hạn quyền sử dụng gói học (Entitlement/Subscription) của học viên, số ngày còn lại và cảnh báo sắp hết hạn để tư vấn gia hạn gói (Hành trình S06).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        studentCode: { type: "string", description: "Mã học viên (VD: HV0001, HV0002)" },
+        studentId: { type: "string", description: "ID học viên trong CSDL (cuid)" },
+        phone: { type: "string", description: "Số điện thoại học viên hoặc phụ huynh" }
+      }
+    },
+    defaultArgs: {
+      studentCode: "HV0001"
+    }
   }
 ];
 
 export function DeveloperClient() {
-  const [activeTab, setActiveTab] = useState<"orchexa" | "api" | "mcp" | "webhooks" | "auth">("orchexa");
+  const [activeTab, setActiveTab] = useState<"orchexa" | "simulator" | "webhooks" | "api" | "mcp" | "auth">("orchexa");
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   // Orchexa Bootstrap Test State
@@ -1045,6 +1178,18 @@ export function DeveloperClient() {
           <Bot className="h-4 w-4" /> Orchexa Embedded AI
         </Button>
         <Button 
+          variant={activeTab === "simulator" ? "default" : "outline"} 
+          size="default"
+          onClick={() => setActiveTab("simulator")}
+          className={`gap-2 rounded-2xl text-xs font-extrabold h-10 px-4 ${
+            activeTab === "simulator" 
+              ? "clay-btn-primary" 
+              : "clay-btn-outline"
+          }`}
+        >
+          <Sparkles className="h-4 w-4" /> Partner Simulator (EDU-02)
+        </Button>
+        <Button 
           variant={activeTab === "webhooks" ? "default" : "outline"} 
           size="default"
           onClick={() => setActiveTab("webhooks")}
@@ -1241,6 +1386,13 @@ export function DeveloperClient() {
             </CardContent>
           </Card>
         </div>
+      )}
+
+      {/* =========================================================
+          Tab: Partner Simulator (EDU-02)
+         ========================================================= */}
+      {activeTab === "simulator" && (
+        <PartnerSimulatorPanel />
       )}
 
       {/* =========================================================

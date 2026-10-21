@@ -24,6 +24,9 @@ import {
   MapPin, 
   Smartphone,
   Sparkles,
+  TrendingUp,
+  ShieldCheck,
+  CreditCard,
   type LucideIcon 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -90,10 +93,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       ]
     },
     {
-      title: "TUYỂN SINH & VẬN HÀNH",
+      title: "KINH DOANH & ĐIỀU HÀNH",
       items: [
+        { name: "Deals & KPI Điều hành", href: "/sales-hub", icon: TrendingUp, badge: "CEO", badgeColor: "clay-badge-aqua" },
         { name: "Khách hàng tiềm năng", href: "/leads", icon: UserPlus, badge: "CRM", badgeColor: "clay-badge-amber" },
-        { name: "Đơn đăng ký", href: "/orders", icon: Receipt },
+        { name: "Billing & Thanh toán", href: "/billing", icon: Receipt, badge: "Thu phí", badgeColor: "clay-badge-green" },
+        { name: "Tài khoản & Tiến độ LMS", href: "/entitlements", icon: ShieldCheck, badge: "LMS", badgeColor: "clay-badge-orange" },
+        { name: "Đơn đăng ký", href: "/orders", icon: CreditCard },
         { name: "Chiến dịch & Ưu đãi", href: "/campaigns", icon: Sparkles, badge: "Sự kiện", badgeColor: "clay-badge-amber" },
         { name: "Yêu cầu hỗ trợ", href: "/requests", icon: Headphones, badge: "1 mới", badgeColor: "clay-badge-pink" },
       ]

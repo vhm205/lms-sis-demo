@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getValidAdminKeys } from "@/lib/auth";
 import { generateStudentReport, normalizeReportType } from "@/lib/report-generator";
+import { getStudentEntitlements } from "@/lib/entitlement";
 
 export interface McpToolDefinition {
   name: string;
@@ -326,6 +327,38 @@ export const MCP_TOOLS: McpToolDefinition[] = [
         }
       ]
     }
+  },
+  {
+    name: "check_entitlement",
+    aliases: ["get_student_entitlement", "check_course_expiry"],
+    description: "Tra cứu thời hạn quyền sử dụng gói học (Entitlement/Subscription) của học viên, số ngày còn lại và cảnh báo sắp hết hạn để tư vấn gia hạn gói (Hành trình S06).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        studentCode: { type: "string", description: "Mã học viên (VD: HV0001, HV0002)" },
+        studentId: { type: "string", description: "ID học viên trong CSDL (cuid)" },
+        phone: { type: "string", description: "Số điện thoại học viên hoặc phụ huynh" }
+      }
+    },
+    sampleArguments: {
+      studentCode: "HV0001"
+    },
+    sampleResponse: {
+      success: true,
+      student: { code: "HV0001", name: "Nguyễn Văn Bé Minh" },
+      count: 1,
+      entitlements: [
+        {
+          id: "cmtl...",
+          courseName: "Cambridge Movers Chuẩn Quốc Tế",
+          type: "OFFICIAL",
+          status: "ACTIVE",
+          expiresAt: "2026-12-31T23:59:59.000Z",
+          daysRemaining: 71,
+          isExpiringSoon: false
+        }
+      ]
+    }
   }
 ];
 
@@ -368,6 +401,7 @@ export async function executeMcpTool(
     if (name === "create_lead_or_order") toolName = "create_order";
     if (name === "export_student_report" || name === "get_student_report" || name === "view_student_report") toolName = "generate_student_report";
     if (name === "get_recommended_products" || name === "list_campaign_courses") toolName = "get_promotions";
+    if (name === "get_student_entitlement" || name === "check_course_expiry") toolName = "check_entitlement";
 
     // 1. search_students
     if (toolName === "search_students") {
@@ -1161,6 +1195,78 @@ export async function executeMcpTool(
           count: products.length,
           products
         }
+      };
+    }
+
+    // 9. check_entitlement
+    if (toolName === "check_entitlement") {
+      const studentCode = (args?.studentCode as string)?.trim();
+      const studentId = (args?.studentId as string)?.trim();
+      const phone = (args?.phone as string)?.trim() || context?.parentPhone;
+
+      const student = await prisma.student.findFirst({
+        where: {
+          OR: [
+            ...(studentCode ? [{ code: studentCode }] : []),
+            ...(studentId ? [{ id: studentId }] : []),
+            ...(phone ? [{ phone }] : []),
+            ...(phone ? [{ parent: { phone } }] : []),
+          ],
+        },
+        include: { parent: true },
+      });
+
+      if (!student) {
+        return {
+          content: [{ type: "text", text: `Không tìm thấy thông tin học viên phù hợp để kiểm tra hạn gói học.` }],
+          data: { success: false, message: "Học viên không tồn tại" }
+        };
+      }
+
+      const rawEntitlements = await getStudentEntitlements(student.id);
+
+      const entitlements = rawEntitlements.map((e) => ({
+        id: e.id,
+        courseName: e.course?.name || "Khóa học",
+        type: e.type,
+        status: e.status,
+        startsAt: e.startsAt.toISOString(),
+        expiresAt: e.expiresAt.toISOString(),
+        daysRemaining: e.daysRemaining,
+        isExpiringSoon: e.isExpiringSoon,
+        isExpired: e.isExpired,
+      }));
+
+      let textSummary = `### 📋 Thời hạn gói học của học viên ${student.name} (${student.code}):\n\n`;
+      if (entitlements.length === 0) {
+        textSummary += `Học viên hiện chưa có quyền truy cập gói học (Entitlement) nào trên hệ thống.\n`;
+      } else {
+        entitlements.forEach((e, idx) => {
+          const statusLabel = e.isExpired ? "🔴 ĐÃ HẾT HẠN" : e.isExpiringSoon ? "⚠️ SẮP HẾT HẠN" : "🟢 ĐANG HOẠT ĐỘNG";
+          textSummary += `${idx + 1}. **${e.courseName}** [${e.type}]\n`;
+          textSummary += `   - Trạng thái: **${statusLabel}**\n`;
+          textSummary += `   - Ngày hết hạn: **${new Date(e.expiresAt).toLocaleDateString("vi-VN")}** (${e.daysRemaining} ngày còn lại)\n`;
+          if (e.isExpiringSoon) {
+            textSummary += `   - 💡 *Gợi ý hành động: Khóa học sắp hết hạn trong ${e.daysRemaining} ngày. Kích hoạt tư vấn gia hạn (S06) kèm ưu đãi retention.*\n`;
+          }
+          textSummary += `\n`;
+        });
+      }
+
+      return {
+        content: [{ type: "text", text: textSummary }],
+        data: {
+          success: true,
+          student: {
+            id: student.id,
+            code: student.code,
+            name: student.name,
+            parentName: student.parent?.name,
+            parentPhone: student.parent?.phone,
+          },
+          count: entitlements.length,
+          entitlements,
+        },
       };
     }
 

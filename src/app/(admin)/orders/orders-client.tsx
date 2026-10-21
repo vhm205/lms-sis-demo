@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -226,6 +227,16 @@ export function OrdersClient({ orders, courses, facilities }: { orders: any[], c
         </div>
         
         <div className="flex items-center gap-2.5 shrink-0">
+          <Link href="/billing">
+            <Button
+              variant="outline"
+              className="gap-2 text-emerald-700 dark:text-emerald-300 border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-xs font-bold rounded-2xl h-10"
+            >
+              <CreditCard className="h-4 w-4" />
+              Cổng Billing & VietQR
+            </Button>
+          </Link>
+
           <RefreshButton 
             variant="outline" 
             size="icon" 

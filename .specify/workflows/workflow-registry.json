@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "workflows": {
+    "speckit": {
+      "name": "Full SDD Cycle",
+      "version": "1.0.0",
+      "description": "Runs specify \u2192 plan \u2192 tasks \u2192 implement with review gates",
+      "source": "bundled",
+      "installed_at": "2026-10-21T04:25:36.610741+00:00",
+      "updated_at": "2026-10-21T04:25:36.610755+00:00"
+    },
+    "aiek-normal": {
+      "name": "AI Engineering Kit: Normal lane",
+      "version": "0.1.0",
+      "description": "specify \u2192 plan \u2192 tasks (READY TO BUILD gate via hook) \u2192 implement (verify + review via hooks). No explicit human gates; requires agent-observed readiness and completion checks.",
+      "source": "/home/vhm205/projects/personal/workspace/skills/ai-engineering-kit/speckit/workflows/aiek-normal",
+      "installed_at": "2026-10-21T04:31:06.085775+00:00",
+      "updated_at": "2026-10-21T04:31:06.085788+00:00"
+    },
+    "aiek-large": {
+      "name": "AI Engineering Kit: Large / Risky lane",
+      "version": "0.1.0",
+      "description": "specify \u2192 clarify \u2192 plan \u2192 human decision gate \u2192 tasks \u2192 analyze \u2192 READY TO BUILD gate \u2192 implement (verify + independent review via hooks).",
+      "source": "/home/vhm205/projects/personal/workspace/skills/ai-engineering-kit/speckit/workflows/aiek-large",
+      "installed_at": "2026-10-21T04:31:09.780840+00:00",
+      "updated_at": "2026-10-21T04:31:09.780857+00:00"
+    }
+  }
+}

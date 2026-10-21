@@ -59,6 +59,7 @@ model Course {
   classes     Class[]
   leads       Lead[]   // Interests
   orders      Order[]
+  entitlements Entitlement[]
   campaignItems CampaignItem[]
 }
 
@@ -106,6 +107,7 @@ model Student {
   makeUpRequests  MakeUpRequest[]
   transferRequests TransferRequest[]
   orders          Order[]
+  entitlements    Entitlement[]
   status      String   @default("ACTIVE") // ACTIVE, INACTIVE
   createdAt   DateTime @default(now())
 }
@@ -234,6 +236,7 @@ model Order {
   amount      Float
   status      String   @default("PENDING") // PENDING, PAID, CANCELLED
   notes       String?
+  entitlements Entitlement[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -280,4 +283,26 @@ model CampaignItem {
   secondaryBtnMsg   String?   @default("Tư vấn thêm cho tôi về khóa {name}")
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
+}
+
+model Entitlement {
+  id          String    @id @default(cuid())
+  studentId   String
+  student     Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  courseId    String
+  course      Course    @relation(fields: [courseId], references: [id])
+  orderId     String?
+  order       Order?    @relation(fields: [orderId], references: [id])
+  type        String    @default("OFFICIAL") // TRIAL, OFFICIAL, RENEWAL
+  status      String    @default("ACTIVE")   // ACTIVE, EXPIRED, SUSPENDED, REVOKED
+  startsAt    DateTime  @default(now())
+  expiresAt   DateTime
+  source      String    @default("BILLING_MOCK") // BILLING_MOCK, MANUAL, LMS_SYNC
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([studentId])
+  @@index([courseId])
+  @@index([status])
 }

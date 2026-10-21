@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -28,7 +29,8 @@ import {
   Sparkles, 
   CheckCircle2, 
   PhoneCall, 
-  Clock 
+  Clock,
+  TrendingUp 
 } from "lucide-react";
 
 export function LeadsClient({ leads, courses, facilities }: { leads: any[], courses: any[], facilities: any[] }) {
@@ -201,6 +203,16 @@ export function LeadsClient({ leads, courses, facilities }: { leads: any[], cour
         </div>
         
         <div className="flex items-center gap-2.5 shrink-0">
+          <Link href="/sales-hub">
+            <Button
+              variant="outline"
+              className="gap-2 text-amber-700 dark:text-amber-300 border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-xs font-bold rounded-2xl h-10"
+            >
+              <TrendingUp className="h-4 w-4" />
+              Deals & KPI CEO
+            </Button>
+          </Link>
+
           <RefreshButton 
             variant="outline" 
             size="icon" 
