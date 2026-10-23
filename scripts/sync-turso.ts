@@ -249,7 +249,27 @@ async function syncTurso() {
       "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY ("campaignId") REFERENCES "Campaign" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
       FOREIGN KEY ("courseId") REFERENCES "Course" ("id") ON DELETE SET NULL ON UPDATE CASCADE
-    );`
+    );`,
+    `CREATE TABLE IF NOT EXISTS "Entitlement" (
+      "id" TEXT PRIMARY KEY,
+      "studentId" TEXT NOT NULL,
+      "courseId" TEXT NOT NULL,
+      "orderId" TEXT,
+      "type" TEXT NOT NULL DEFAULT 'OFFICIAL',
+      "status" TEXT NOT NULL DEFAULT 'ACTIVE',
+      "startsAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "expiresAt" DATETIME NOT NULL,
+      "source" TEXT NOT NULL DEFAULT 'BILLING_MOCK',
+      "notes" TEXT,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY ("studentId") REFERENCES "Student" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+      FOREIGN KEY ("courseId") REFERENCES "Course" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+      FOREIGN KEY ("orderId") REFERENCES "Order" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+    );`,
+    `CREATE INDEX IF NOT EXISTS "Entitlement_studentId_idx" ON "Entitlement"("studentId");`,
+    `CREATE INDEX IF NOT EXISTS "Entitlement_courseId_idx" ON "Entitlement"("courseId");`,
+    `CREATE INDEX IF NOT EXISTS "Entitlement_status_idx" ON "Entitlement"("status");`
   ];
 
   for (const ddl of ddlStatements) {
